@@ -47,7 +47,7 @@ src/
     Button.tsx            botones grandes del diseño (acción, mostaza, claro) y su versión como enlace
     movimiento.tsx        piezas de las pantallas que mueven saldo: aviso de red caída, pantalla de éxito
     states.tsx            vacío, cargando, error y éxito
-  pages/                  una pantalla por archivo: Mostrador, CargarSaldo, Cobrar, Clientes, Ficha y Ajuste (reales), Placeholder.tsx (relleno)
+  pages/                  una pantalla por archivo: una por pantalla (Mostrador, CargarSaldo, Cobrar, Clientes, Ficha, Ajuste, Promos, PromoForm y Reactivar); Placeholder.tsx solo para rutas inexistentes
   test/setup.ts           configuración de los tests
 design/                   referencia visual (ver DISENO.md)
 ```

@@ -64,7 +64,7 @@ export const listTransactions = (customerId: string, params: PageParams & { type
 export const listBonusRules = (merchantId: string) =>
   api<{ data: BonusRule[] }>(`/merchants/${merchantId}/bonus-rules`);
 
-export const createBonusRule = (merchantId: string, input: { minTopUp: number; bonusAmount: number }) =>
+export const createBonusRule = (merchantId: string, input: { minTopUp: number; bonusAmount: number; active?: boolean }) =>
   api<BonusRule>(`/merchants/${merchantId}/bonus-rules`, { method: "POST", body: input });
 
 export const updateBonusRule = (

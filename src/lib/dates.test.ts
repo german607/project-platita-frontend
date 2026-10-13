@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysSince, formatWhen, visitLabel, visitShort } from "./dates";
+import { daysAgo, daysSince, formatWhen, visitLabel, visitShort } from "./dates";
 
 // "Ahora": 13 de octubre de 2026, mediodía (hora local).
 const now = new Date(2026, 9, 13, 12, 0, 0);
@@ -58,5 +58,19 @@ describe("visitShort", () => {
 
   it("avisa cuando nunca vino", () => {
     expect(visitShort(null, now)).toBe("Todavía no vino");
+  });
+});
+
+describe("daysAgo", () => {
+  const ago = (days: number) => new Date(2026, 9, 13 - days, 10).toISOString();
+
+  it("dice la cantidad exacta de días", () => {
+    expect(daysAgo(ago(74), now)).toBe("Hace 74 días");
+    expect(daysAgo(ago(2), now)).toBe("Hace 2 días");
+  });
+
+  it("dice hoy y ayer", () => {
+    expect(daysAgo(ago(0), now)).toBe("Hoy");
+    expect(daysAgo(ago(1), now)).toBe("Ayer");
   });
 });

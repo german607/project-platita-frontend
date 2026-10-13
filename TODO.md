@@ -44,8 +44,8 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 - [~] **P1** Ficha del cliente con historial paginado y filtro por tipo (`src/pages/Ficha.tsx`; 8 tests pasando; falta verla en el navegador)
 - [~] **P1** Ajuste manual (monto con signo, nota obligatoria) (`src/pages/Ajuste.tsx`; 11 tests pasando; falta verla en el navegador)
 - [~] **P1** Clientes: lista con búsqueda y saldo, paginada (`src/pages/Clientes.tsx`; 8 tests pasando; falta verla en el navegador)
-- [ ] **P1** Promos: listar, crear, editar y activar/desactivar
-- [ ] **P1** Reactivar: lista de inactivos con días configurables; botón de WhatsApp deshabilitado ("próximamente")
+- [~] **P1** Promos: listar, crear, editar y activar/desactivar (`src/pages/Promos.tsx` y `PromoForm.tsx`; 17 tests pasando; falta verlas en el navegador). Falta del diseño web: "Usada N veces" (ver pedidos al backend)
+- [~] **P1** Reactivar: lista de inactivos con días configurables; botón de WhatsApp deshabilitado ("próximamente") (`src/pages/Reactivar.tsx`; 8 tests pasando; falta verla en el navegador). Falta del diseño: el saldo de cada cliente (ver pedidos al backend)
 
 ## 4. Pedidos al backend
 
@@ -61,6 +61,9 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** Vista previa del bono en el servidor (hoy se calcula en pantalla con las reglas activas, duplicando la regla del backend: `src/lib/bonus.ts`)
 - [ ] **P1** Unificar unidades de la API (hoy entra pesos y sale centésimos)
 - [ ] **P2** Que un movimiento de bono diga de qué promo salió (hoy `BONUS` no lo guarda y la ficha solo puede decir "Bono"; el diseño muestra "Promo $1.000+")
+- [ ] **P1** Incluir el saldo de cada cliente en `GET /merchants/:m/inactive`: el diseño de Reactivar lo muestra y hoy no viene; no se arma con una consulta por cliente
+- [ ] **P2** Cuántas veces se usó cada promo (el diseño web de Promos dice "Usada 38 veces"); depende de que el bono guarde de qué promo salió
+- [ ] **P2** Total de clientes inactivos: el contador "N clientes" de Reactivar hoy cuenta lo cargado y agrega "+" si hay más páginas
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
 
 ## 5. Calidad

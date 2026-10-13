@@ -44,3 +44,11 @@ export function visitShort(iso: string | null, now: Date = new Date()): string {
   const months = Math.floor(days / 30);
   return months === 1 ? "Hace 1 mes" : `Hace ${months} meses`;
 }
+
+// "Hace 74 días" (o "Hoy" / "Ayer"). Para listas donde importa la cantidad exacta.
+export function daysAgo(iso: string, now: Date = new Date()): string {
+  const days = Math.max(0, daysSince(iso, now));
+  if (days === 0) return "Hoy";
+  if (days === 1) return "Ayer";
+  return `Hace ${days} días`;
+}

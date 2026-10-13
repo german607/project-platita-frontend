@@ -30,9 +30,9 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **94 tests pasando** en 11
-  archivos (dinero, teléfono, fechas, bono, cliente de la API y las seis
-  pantallas: Mostrador, Cargar saldo, Cobrar, Clientes, Ficha y Ajuste). El `typecheck` encontró un error real en su momento, ya
+  typecheck` sin errores y `npm run test:run` con **121 tests pasando** en 14
+  archivos (dinero, teléfono, fechas, bono, cliente de la API y las nueve
+  pantallas y formularios). El `typecheck` encontró un error real en su momento, ya
   corregido.
 - **Verificado en el navegador (2026-10-13, backend local en el 3001):**
   el proxy `/api` funciona (sin CORS), el chip con el nombre del comercio
@@ -43,12 +43,13 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   celular (ancho chico), el estado de error de red y el contraste final
   contra el diseño. `npm install` reportó 15 vulnerabilidades (2
   críticas) sin analizar: ver el TODO.
-- **Pantallas:** **Mostrador**, **Cargar saldo**, **Cobrar**, **Clientes**,
-  **Ficha del cliente** y **Ajuste** están construidas según el diseño y
-  con sus tests pasando. El Mostrador y Cargar saldo se probaron además en
-  el navegador contra el backend local; **las otras cuatro todavía no se
-  vieron en el navegador**. Promos y Reactivar son rutas de relleno. Ver
-  [`../TODO.md`](../TODO.md) §2 y §3.
+- **Pantallas:** las siete del diseño están construidas y con sus tests
+  pasando: **Mostrador**, **Cargar saldo**, **Cobrar**, **Clientes**,
+  **Ficha del cliente**, **Ajuste**, **Promos** (con su formulario de crear
+  y editar) y **Reactivar**. Solo el Mostrador y Cargar saldo se vieron en
+  el navegador contra el backend local; **las demás todavía no**. Faltan
+  piezas del diseño que dependen del backend (ver "Pedidos al backend" en
+  el [`TODO`](../TODO.md)). Ver [`../TODO.md`](../TODO.md) §2 y §3.
 
 ## El backend con el que se va a conectar
 

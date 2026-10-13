@@ -133,3 +133,22 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   pasando** en 11 archivos (8 de Clientes, 8 de la Ficha, 11 de Ajuste y los
   helpers nuevos). Clientes, Ficha y Ajuste todavía no se vieron en el
   navegador.
+- Commit `0646550` (Clientes, Ficha y Ajuste). Se construyeron **Promos**,
+  su formulario de crear y editar (`PromoForm`) y **Reactivar**, con las
+  rutas `/promos`, `/promos/nueva`, `/promos/:ruleId/editar` y `/reactivar`;
+  con esto están las pantallas del diseño.
+  - Promos: lista con interruptor Activa/Apagada (no se borran), "Editar" y
+    "+ Crear promo". El formulario muestra "Así lo ve tu cliente" y avisa si
+    ya hay otra promo activa con el mismo mínimo.
+  - Reactivar: días de 10 en 10, lista paginada, WhatsApp deshabilitado
+    ("próximamente"); si el cliente nunca vino se cuenta desde que se anotó.
+  - Helper `daysAgo`; `createBonusRule` acepta `active`.
+  - Siguiendo la regla de no hacer rodeos ineficientes, no se arman el saldo
+    de cada inactivo ni "Usada N veces": son tres pedidos nuevos al backend
+    (saldo en `/inactive`, uso de cada promo y total de inactivos).
+  - **Sin ejecutar**: 7 tests de Promos, 10 del formulario y 8 de Reactivar
+    (y 2 de `daysAgo`), revisados a mano.
+- El usuario corrió `typecheck` y los tests: sin errores y **121 tests
+  pasando** en 14 archivos (7 de Promos, 10 del formulario, 8 de Reactivar y
+  los de `daysAgo`). Con esto quedan hechas las pantallas del diseño; falta
+  verlas en el navegador y los pedidos al backend.

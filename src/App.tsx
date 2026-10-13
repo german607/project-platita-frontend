@@ -8,6 +8,9 @@ import { Cobrar } from "./pages/Cobrar";
 import { Ficha } from "./pages/Ficha";
 import { Mostrador } from "./pages/Mostrador";
 import { Placeholder } from "./pages/Placeholder";
+import { PromoForm } from "./pages/PromoForm";
+import { Promos } from "./pages/Promos";
+import { Reactivar } from "./pages/Reactivar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,8 +33,10 @@ export function App() {
             <Route path="clientes" element={<Clientes />} />
             <Route path="clientes/:customerId" element={<Ficha />} />
             <Route path="ajustar/:customerId" element={<Ajuste />} />
-            <Route path="promos" element={<Placeholder title="Promos" />} />
-            <Route path="reactivar" element={<Placeholder title="Reactivar clientes" />} />
+            <Route path="promos" element={<Promos />} />
+            <Route path="promos/nueva" element={<PromoForm />} />
+            <Route path="promos/:ruleId/editar" element={<PromoForm />} />
+            <Route path="reactivar" element={<Reactivar />} />
             <Route path="*" element={<Placeholder title="No encontrada" />} />
           </Route>
         </Routes>
