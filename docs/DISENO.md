@@ -1,0 +1,81 @@
+# Diseño — tokens, pantallas y mapa a la API
+
+La referencia visual es **la dirección B, "Cálida y de barrio" (versión
+afinada)**, elegida el 2026-10-13 entre tres direcciones generadas en
+Claude Design. Si este documento y los archivos de `design/` se
+contradicen, hay que resolverlo y dejar uno solo: ver la regla en
+[`AGENTS.md`](AGENTS.md).
+
+## Archivos en `design/`
+
+| Archivo | Qué es |
+|---|---|
+| `platita-diseno-b.codigo.html` | **La referencia principal.** HTML estático (sin scripts, estilos inline) con todas las pantallas y estados, en versión celular y web. Tiene un comentario inicial con los tokens. Se abre directo en el navegador. |
+| `platita-diseno-b.export.html` | Export original de Claude Design ("bundled"): arma la página con un runtime propio y trae las tipografías incrustadas. Respaldo. |
+| `platita-diseno-b.legible.html` | El mismo diseño extraído del bundle anterior. Respaldo; es redundante con el `.codigo.html`. |
+| `direcciones-seleccion-*.png` | Capturas de las tres direcciones comparadas. |
+
+Los dos respaldos se pueden borrar cuando haya código real que los
+reemplace.
+
+## Tokens
+
+| Token | Valor | Uso |
+|---|---|---|
+| fondo | `#F6ECD9` | Fondo de la app |
+| tarjeta | `#FFFAF0` | Tarjetas y paneles |
+| tinta | `#33201A` | Texto principal |
+| texto secundario | `#6E5240` | Texto de apoyo |
+| borde | `#DCC7A0` | Bordes y divisores |
+| acción | `#B8412B` (sombra `#7D2616`) | Botones principales, enlaces |
+| mostaza | `#E0A93B` (sombra `#A77A1C`) | Acento, avisos |
+| saldo / éxito | `#2F6B4A` | Saldo, confirmaciones |
+| crema | `#E8D9BB` | Texto sobre el menú lateral oscuro |
+| rosa | `#F0A794` | Logo "platita" sobre el menú oscuro |
+| línea | `#EADCBC` | Divisores dentro de tarjetas |
+
+Sombras "de color" (efecto de botón que se hunde al apretar): tarjeta `0 5px 0 #DCC7A0`, botón de acción `0 5px 0 #7D2616`, botón mostaza `0 5px 0 #A77A1C`. Radios: tarjeta 18, campo 22, botón 24, panel 28.
+
+**Tipografías** (Google Fonts: Bricolage Grotesque 500/700/800 y Nunito
+600/700/800): títulos y números en *Bricolage Grotesque* 800; texto en
+*Nunito* 700/800.
+
+**Reglas visuales:** montos con formato `$1.200` (punto de miles);
+objetivos táctiles de 48px o más; botones principales de 64–72px de alto;
+radios de 18 a 28px. El diseño web es de 1100px de ancho con menú lateral
+de 200px; el celular, marcos de 340×690.
+
+## Pantallas y endpoint que usa cada una
+
+Los endpoints están definidos en el backend
+(`../project-platita-backend/docs/BACKEND.md`). En esta tabla, `:m` es el
+`merchantId` y `:c` el `customerId`.
+
+| Pantalla | Qué hace | Endpoints | Notas |
+|---|---|---|---|
+| **Mostrador** | Buscar cliente por teléfono; ver nombre y saldo; ir a Cargar o Cobrar. Estado "cliente nuevo". | `GET /merchants/:m/customers?search=` para buscar sin crear; `POST /merchants/:m/customers` para crear | Implementado en `src/pages/Mostrador.tsx`. Como la búsqueda del backend no normaliza, se busca por los dígitos del número ya normalizado y se filtra por teléfono exacto. `POST` hace *buscar o crear*, por eso solo se usa al apretar "Crear cliente". El diseño web incluye un panel "Hoy en el mostrador" con los movimientos del día: la API no tiene ese listado (pedido en el TODO). |
+| **Cargar saldo** | Monto, forma de pago y vista previa del bono ("$1.000 + bono $200 = $1.200"). | `POST /customers/:c/topups`; `GET /merchants/:m/bonus-rules` para la vista previa | No hay endpoint de vista previa: el bono se calcula en pantalla con las reglas activas (la de mayor mínimo alcanzado) y la respuesta del `POST` confirma el real. |
+| **Cobrar** | Monto, nota opcional, saldo antes y después. Estados "éxito" y "saldo insuficiente". | `POST /customers/:c/charges` | `422 INSUFFICIENT_BALANCE` trae `details.balance` y `details.needed` para mostrar "Le faltan $X". |
+| **Ficha del cliente** | Saldo, última visita, historial con filtro por tipo. | `GET /customers/:c`, `GET /customers/:c/transactions?type=` | Paginado por cursor (`nextCursor`). |
+| **Ajuste** | Corrección con signo y nota obligatoria. | `POST /customers/:c/adjustments` | Es el único modo de corregir: no se editan ni borran movimientos. |
+| **Clientes** | Lista con búsqueda por nombre o teléfono y saldo de cada uno. | `GET /merchants/:m/customers?search=&limit=&cursor=` | Paginado. |
+| **Promos** | Listar, crear, editar, activar/desactivar reglas. | `GET` y `POST /merchants/:m/bonus-rules`, `PATCH /bonus-rules/:id` | Las reglas no se borran, se desactivan. |
+| **Reactivar** | Clientes sin visita en N días (60 por defecto). Botón de WhatsApp "próximamente". | `GET /merchants/:m/inactive?days=` | El envío de WhatsApp no existe en el backend todavía. |
+
+**Estados por pantalla:** vacío, cargando, error y éxito. En el diseño
+están dibujados entre otros "Mostrador · cliente nuevo", "Cobrar · éxito",
+"Cobrar · saldo insuficiente", "Clientes · vacío", "Promos · vacío",
+"Promos · crear / editar" y "Reactivar · vacío".
+
+## Convenciones de datos que la interfaz debe respetar
+
+- Los montos que entran a la API van en **pesos**; los que salen vienen en
+  **centésimos de peso**: 120000 se muestra `$1.200`.
+- Los teléfonos se guardan como `+598XXXXXXXX`; el usuario escribe
+  `099 123 456` o `99123456`.
+- Los errores llegan como `{ error, code, details? }`. La interfaz se
+  apoya en `code` (`INSUFFICIENT_BALANCE`, `NOT_FOUND`,
+  `VALIDATION_ERROR`…), no en el texto del mensaje.
+- Los listados llegan como `{ data, nextCursor }`.
+- Todavía no hay login: el comercio se fija por configuración mientras no
+  exista autenticación.
