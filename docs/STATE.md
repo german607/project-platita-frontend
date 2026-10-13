@@ -30,7 +30,7 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **121 tests pasando** en 14
+  typecheck` sin errores y `npm run test:run` con **122 tests pasando** en 14
   archivos (dinero, teléfono, fechas, bono, cliente de la API y las nueve
   pantallas y formularios). El `typecheck` encontró un error real en su momento, ya
   corregido.
@@ -43,13 +43,16 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   celular (ancho chico), el estado de error de red y el contraste final
   contra el diseño. `npm install` reportó 15 vulnerabilidades (2
   críticas) sin analizar: ver el TODO.
-- **Pantallas:** las siete del diseño están construidas y con sus tests
+- **Pantallas:** las siete del diseño están construidas, con sus tests
   pasando: **Mostrador**, **Cargar saldo**, **Cobrar**, **Clientes**,
   **Ficha del cliente**, **Ajuste**, **Promos** (con su formulario de crear
-  y editar) y **Reactivar**. Solo el Mostrador y Cargar saldo se vieron en
-  el navegador contra el backend local; **las demás todavía no**. Faltan
-  piezas del diseño que dependen del backend (ver "Pedidos al backend" en
-  el [`TODO`](../TODO.md)). Ver [`../TODO.md`](../TODO.md) §2 y §3.
+  y editar) y **Reactivar**. El usuario las probó en el navegador contra el
+  backend local el 2026-10-13 y funcionan, **salvo Reactivar**, que no se
+  pudo probar: hace falta un cliente que lleve días sin venir (se puede
+  simular cambiando `lastVisitAt` en la base con Prisma Studio, sin tocar el
+  reloj). Faltan piezas del diseño que dependen del backend (ver "Pedidos al
+  backend" en el [`TODO`](../TODO.md)). Ver [`../TODO.md`](../TODO.md) §2 y
+  §3.
 
 ## El backend con el que se va a conectar
 

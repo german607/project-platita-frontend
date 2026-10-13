@@ -37,6 +37,7 @@ src/
     bonus.ts              vista previa del bono (misma regla que el backend)
     payment.ts            formas de pago (efectivo, Mercado Pago, otro) y su nombre
     useDebounced.ts       espera a que termine de escribir (buscadores)
+    useMediaQuery.ts      si la pantalla cumple una condición (ej. ancho de escritorio), y se actualiza sola
     api/
       client.ts           ÚNICA puerta a la API: fetch, ApiError, errores de red
       errors.ts           mensaje para personas según el code del backend

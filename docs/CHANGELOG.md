@@ -152,3 +152,25 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   pasando** en 14 archivos (7 de Promos, 10 del formulario, 8 de Reactivar y
   los de `daysAgo`). Con esto quedan hechas las pantallas del diseño; falta
   verlas en el navegador y los pedidos al backend.
+- Commit `5eaecba` (Promos y Reactivar). El usuario probó las pantallas en el
+  navegador y funcionan, salvo **Reactivar**, que no se pudo probar porque
+  hace falta que pasen días (no se toca el reloj de la máquina; se puede
+  simular cambiando `lastVisitAt` en la base). Se marcaron como verificadas
+  en el TODO y se registró un pedido nuevo al backend: un nombre o una
+  descripción para las promos.
+- Observación del usuario sobre los movimientos de la ficha: tienen que
+  paginar para no armar una lista enorme. La paginación ya existe (de a 20 con
+  "Ver más movimientos"); ver la conversación del día para lo que se decida.
+- Decisión del usuario sobre la paginación de movimientos de la Ficha: se
+  mantiene "Ver más movimientos" (cursor) y la primera página baja a **15 en
+  pantalla grande y 8 en el celular** (antes 20). Se agregó
+  `lib/useMediaQuery.ts` (la pantalla se considera grande desde 1024px, el
+  mismo corte que usa el diseño) y el tamaño entra en la clave de la
+  consulta. Clientes y Reactivar siguen de a 20. Páginas numeradas quedaron
+  descartadas (el backend no da total ni página anterior). Se actualizaron 3
+  tests de la Ficha y se agregó uno que cubre las dos medidas.
+- Prisma Studio rechazó una fecha escrita como `2026-6-13T…`: el mes debe
+  llevar dos dígitos (`2026-06-13T…`). Sin consecuencias en la base.
+- **Sin ejecutar**: los tests de la Ficha tras este cambio.
+- El usuario corrió `typecheck` y los tests tras el cambio de página de la
+  Ficha: sin errores y **122 tests pasando** en 14 archivos (9 de la Ficha).

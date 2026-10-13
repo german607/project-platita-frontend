@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../lib/api/client";
 import { getCustomer, listTransactions } from "../lib/api/endpoints";
 import type { CustomerWithBalance, Transaction } from "../lib/api/types";
@@ -68,6 +68,18 @@ beforeEach(() => {
   mockTransactions.mockResolvedValue(page(movements));
 });
 
+// jsdom no trae matchMedia: se agrega por test y se saca al terminar.
+afterEach(() => {
+  Reflect.deleteProperty(window, "matchMedia");
+});
+
+const fakeMatchMedia = (matches: boolean) =>
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: () => ({ matches, addEventListener: () => {}, removeEventListener: () => {} }),
+  });
+
 describe("Ficha del cliente", () => {
   it("muestra nombre, teléfono, última visita y saldo", async () => {
     renderPage();
@@ -97,7 +109,19 @@ describe("Ficha del cliente", () => {
     expect(screen.getByText("Corte")).toBeInTheDocument();
     expect(screen.getByText("+$50")).toBeInTheDocument();
     expect(screen.getByText("Error de la semana")).toBeInTheDocument();
-    expect(mockTransactions).toHaveBeenCalledWith("c1", { type: undefined, limit: 20, cursor: undefined });
+    expect(mockTransactions).toHaveBeenCalledWith("c1", { type: undefined, limit: 8, cursor: undefined });
+  });
+
+  it("en el celular trae de a 8 movimientos y en pantalla grande de a 15", async () => {
+    renderPage();
+    await screen.findByText("+$1.000");
+    expect(mockTransactions).toHaveBeenLastCalledWith("c1", { type: undefined, limit: 8, cursor: undefined });
+    cleanup();
+
+    fakeMatchMedia(true);
+    renderPage();
+    await screen.findByText("+$1.000");
+    expect(mockTransactions).toHaveBeenLastCalledWith("c1", { type: undefined, limit: 15, cursor: undefined });
   });
 
   it("filtra por tipo y marca el filtro activo", async () => {
@@ -109,7 +133,7 @@ describe("Ficha del cliente", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cobros" }));
 
     expect(await screen.findByRole("button", { name: "Cobros" })).toHaveAttribute("aria-pressed", "true");
-    expect(mockTransactions).toHaveBeenLastCalledWith("c1", { type: "CHARGE", limit: 20, cursor: undefined });
+    expect(mockTransactions).toHaveBeenLastCalledWith("c1", { type: "CHARGE", limit: 8, cursor: undefined });
     expect(await screen.findByText("-$800")).toBeInTheDocument();
     expect(screen.queryByText("+$1.000")).not.toBeInTheDocument();
   });
@@ -132,7 +156,7 @@ describe("Ficha del cliente", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Ver más movimientos" }));
 
     expect(await screen.findByText("-$800")).toBeInTheDocument();
-    expect(mockTransactions).toHaveBeenLastCalledWith("c1", { type: undefined, limit: 20, cursor: "t4" });
+    expect(mockTransactions).toHaveBeenLastCalledWith("c1", { type: undefined, limit: 8, cursor: "t4" });
     expect(screen.getByText("+$1.000")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ver más movimientos" })).not.toBeInTheDocument();
   });

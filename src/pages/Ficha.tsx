@@ -8,12 +8,15 @@ import type { Transaction, TransactionType } from "../lib/api/types";
 import { formatWhen, visitLabel } from "../lib/dates";
 import { formatPesos, formatSigned } from "../lib/money";
 import { paymentLabel } from "../lib/payment";
+import { useMediaQuery } from "../lib/useMediaQuery";
 import { formatUyPhone } from "../lib/phone";
 
 // Ficha del cliente: su saldo, sus movimientos (con filtro por tipo) y desde
 // acá se cobra, se carga o se corrige con un ajuste. Diseño: docs/DISENO.md.
 
-const PAGE_SIZE = 20;
+// Movimientos por página: pocos en el celular, para que la lista no se alargue.
+const PAGE_SIZE_DESKTOP = 15;
+const PAGE_SIZE_MOBILE = 8;
 
 const FILTERS: { label: string; type: TransactionType | undefined }[] = [
   { label: "Todos", type: undefined },
@@ -26,6 +29,7 @@ const FILTERS: { label: string; type: TransactionType | undefined }[] = [
 export function Ficha() {
   const { customerId = "" } = useParams();
   const [type, setType] = useState<TransactionType | undefined>(undefined);
+  const pageSize = useMediaQuery("(min-width: 1024px)") ? PAGE_SIZE_DESKTOP : PAGE_SIZE_MOBILE;
 
   const customer = useQuery({
     queryKey: ["customer", customerId],
@@ -34,9 +38,9 @@ export function Ficha() {
   });
 
   const movements = useInfiniteQuery({
-    queryKey: ["transactions", customerId, type],
+    queryKey: ["transactions", customerId, type, pageSize],
     initialPageParam: undefined as string | undefined,
-    queryFn: ({ pageParam }) => listTransactions(customerId, { type, limit: PAGE_SIZE, cursor: pageParam }),
+    queryFn: ({ pageParam }) => listTransactions(customerId, { type, limit: pageSize, cursor: pageParam }),
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled: customerId !== "",
   });

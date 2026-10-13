@@ -36,16 +36,16 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 - [~] **P0** Mostrador: buscar cliente por teléfono, ver saldo, estado "cliente nuevo" y crear (`src/pages/Mostrador.tsx`; 7 tests pasando y verificado en el navegador contra el backend local: busca, avisa "Seguí escribiendo…" y muestra "Este número es nuevo"). Sin probar todavía: **crear** un cliente, ver un cliente existente con saldo, el celular y el error de red
 - [ ] **P1** Panel "Hoy en el mostrador" (columna derecha del diseño web); depende del pedido al backend de movimientos del comercio
 - [~] **P0** Cargar saldo con vista previa del bono (`src/pages/CargarSaldo.tsx`, `src/lib/bonus.ts`; 11 tests de la pantalla + 5 del bono pasando; falta verla en el navegador). Decisiones: no se preselecciona ningún monto y, si se corta la red al confirmar, no hay "reintentar" (ver el pedido de idempotencia)
-- [~] **P0** Cobrar, con los estados "éxito" y "saldo insuficiente (le faltan $X)" (`src/pages/Cobrar.tsx`, 11 tests pasando; falta verla en el navegador)
+- [x] **P0** Cobrar, con los estados "éxito" y "saldo insuficiente (le faltan $X)" (`src/pages/Cobrar.tsx`, 11 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
 - [~] **P0** Navegación celular (menú inferior) y web (menú lateral oscuro de 200px) con el chip del comercio (`src/components/Layout.tsx`, según el diseño; sin ver en el navegador). Las rutas `/cobrar/:id` y `/cargar/:id` son de relleno
 
 ## 3. Gestión
 
-- [~] **P1** Ficha del cliente con historial paginado y filtro por tipo (`src/pages/Ficha.tsx`; 8 tests pasando; falta verla en el navegador)
-- [~] **P1** Ajuste manual (monto con signo, nota obligatoria) (`src/pages/Ajuste.tsx`; 11 tests pasando; falta verla en el navegador)
-- [~] **P1** Clientes: lista con búsqueda y saldo, paginada (`src/pages/Clientes.tsx`; 8 tests pasando; falta verla en el navegador)
-- [~] **P1** Promos: listar, crear, editar y activar/desactivar (`src/pages/Promos.tsx` y `PromoForm.tsx`; 17 tests pasando; falta verlas en el navegador). Falta del diseño web: "Usada N veces" (ver pedidos al backend)
-- [~] **P1** Reactivar: lista de inactivos con días configurables; botón de WhatsApp deshabilitado ("próximamente") (`src/pages/Reactivar.tsx`; 8 tests pasando; falta verla en el navegador). Falta del diseño: el saldo de cada cliente (ver pedidos al backend)
+- [x] **P1** Ficha del cliente con historial paginado y filtro por tipo (`src/pages/Ficha.tsx`; de a 8 movimientos en el celular y 15 en pantalla grande con "Ver más"; 9 tests; verificada en el navegador por el usuario el 2026-10-13)
+- [x] **P1** Ajuste manual (monto con signo, nota obligatoria) (`src/pages/Ajuste.tsx`; 11 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
+- [x] **P1** Clientes: lista con búsqueda y saldo, paginada (`src/pages/Clientes.tsx`; 8 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
+- [x] **P1** Promos: listar, crear, editar y activar/desactivar (`src/pages/Promos.tsx` y `PromoForm.tsx`; 17 tests pasando; verificadas en el navegador por el usuario el 2026-10-13). Falta del diseño web: "Usada N veces" (ver pedidos al backend)
+- [~] **P1** Reactivar: lista de inactivos con días configurables; botón de WhatsApp deshabilitado ("próximamente") (`src/pages/Reactivar.tsx`; 8 tests pasando; **sin probar en el navegador**: hace falta un cliente que lleve días sin venir, y se puede simular cambiando `lastVisitAt` en la base con `npm run db:studio` del backend, sin tocar el reloj). Falta del diseño: el saldo de cada cliente (ver pedidos al backend)
 
 ## 4. Pedidos al backend
 
@@ -64,11 +64,12 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** Incluir el saldo de cada cliente en `GET /merchants/:m/inactive`: el diseño de Reactivar lo muestra y hoy no viene; no se arma con una consulta por cliente
 - [ ] **P2** Cuántas veces se usó cada promo (el diseño web de Promos dice "Usada 38 veces"); depende de que el bono guarde de qué promo salió
 - [ ] **P2** Total de clientes inactivos: el contador "N clientes" de Reactivar hoy cuenta lo cargado y agrega "+" si hay más páginas
+- [ ] **P2** Un nombre o una descripción para las promos (hoy solo tienen mínimo y bono): el listado, el formulario, el aviso de promos repetidas y, junto con el pedido de "de qué promo salió", la ficha del cliente ("Bono · <nombre>") se leerían mucho mejor
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
 
 ## 5. Calidad
 
-- [ ] **P0** Probar a mano el flujo completo contra el backend real: buscar → cargar con bono → cobrar → saldo (el caso narrado está en `../project-platita-backend/docs/EJEMPLO.md`)
+- [x] Probar a mano el flujo completo contra el backend real: buscar → cargar con bono → cobrar → saldo (lo recorrió el usuario el 2026-10-13, salvo Reactivar; el caso narrado está en `../project-platita-backend/docs/EJEMPLO.md`)
 - [x] Tests de los helpers de dinero y teléfono y del cliente de la API (20 tests pasando, 2026-10-13)
 - [ ] **P1** Tests de pantalla para los casos de plata: saldo exacto, saldo insuficiente, monto con decimales
 - [ ] **P1** Checklist de prueba manual en un celular real, en el mostrador
