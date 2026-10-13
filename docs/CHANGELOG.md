@@ -174,3 +174,45 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - **Sin ejecutar**: los tests de la Ficha tras este cambio.
 - El usuario corrió `typecheck` y los tests tras el cambio de página de la
   Ficha: sin errores y **122 tests pasando** en 14 archivos (9 de la Ficha).
+- Commit `7373e20`. El usuario probó Reactivar editando `lastVisitAt` de un
+  cliente a junio con Prisma Studio: lo muestra y lo saca al cambiar los días.
+  Con esto quedan todas las pantallas verificadas en el navegador.
+- Se analizaron las 15 vulnerabilidades de `npm audit` (con una caché temporal de
+  npm, porque la de `~/.npm` no es escribible desde la sesión de la IA). Solo 2
+  moderadas llegan a producción (`react-router-dom`); las otras 13 son de
+  herramientas de desarrollo (`vitest`, `vite`, `tailwindcss` y sus dependencias).
+  Hay un camino que funciona con Node 20.12: `react-router-dom` 7.18, `vite`
+  6.4.4 y `vitest` 4.1.11; `tailwindcss` 4 se deja para después. Las versiones
+  más nuevas de `vite` (8) y `vitest` (5) piden Node 22: no se usan. Quedó en el
+  TODO; no se cambió ninguna dependencia todavía.
+- El backend (otra sesión de IA, sin commitear y sin verificar corriendo)
+  resolvió los pedidos del front: idempotencia (`Idempotency-Key`), CORS por
+  `CORS_ORIGINS`, búsqueda por teléfono (`?search=` normaliza y `?phone=`
+  exacto), `GET /merchants/:m/transactions`, saldo y `total` en `/inactive`,
+  `GET /merchants/:m/bonus-preview`, `bonusRuleId` en los bonos y `name`,
+  `description` y `timesUsed` en las promos. Se leyó su código (no solo el
+  reporte) antes de adoptarlo; sigue pendiente su autenticación y la
+  unificación de unidades.
+- Primera tanda de adopción en el front (se hizo antes que las funciones
+  nuevas porque reemplaza rodeos y da seguridad):
+  - **Reintentar sin duplicar**: Cargar saldo, Cobrar y Ajuste mandan una
+    `Idempotency-Key` por operación (`lib/idempotency.ts`, UUID v4 con
+    alternativa para http en la red local). Ante una red caída o un error del
+    servidor ofrecen "Reintentar" con la misma clave; si se cambian los datos
+    es una operación nueva. Reemplaza el "no reintentar" anterior.
+  - **Vista previa del bono del servidor** en Cargar saldo (muestra también el
+    nombre de la promo); se eliminó `src/lib/bonus.ts`.
+  - **Búsqueda sin rodeos**: el Mostrador usa `?phone=` y Clientes manda el
+    texto tal cual; se eliminó `customerSearchTerm`.
+  - **Reactivar** muestra el saldo de cada cliente y usa el `total` del backend.
+  - La capa de la API acepta encabezados propios y los tipos incorporan los
+    campos nuevos (`bonusRuleId`, `name`, `description`, `timesUsed`,
+    `BonusPreview`, `InactivePage`).
+  - Falta, en una segunda tanda: el panel "Hoy en el mostrador", los campos y
+    el uso de las promos en su pantalla y formulario, y la promo de cada bono
+    en la ficha.
+  - **Sin ejecutar**: los tests nuevos y modificados de esta tanda.
+- Verificación de la primera tanda (la corrió la propia IA con las
+  herramientas instaladas en el proyecto, `node_modules/.bin`): `tsc --noEmit`
+  sin errores y **126 tests pasando** en 14 archivos. No se probó en el
+  navegador contra el backend nuevo, que a su vez está sin commitear.

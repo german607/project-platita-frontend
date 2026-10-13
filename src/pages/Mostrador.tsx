@@ -29,10 +29,9 @@ export function Mostrador() {
     enabled: phone !== null,
     queryFn: async (): Promise<CustomerWithBalance | null> => {
       if (phone === null) return null;
-      // El backend busca "contiene estos dígitos": se pide por el número
-      // completo normalizado y se filtra por teléfono exacto.
-      const page = await listCustomers(merchantId, { search: phone.slice(1), limit: 5 });
-      return page.data.find((c) => c.phone === phone) ?? null;
+      // Teléfono exacto, sin crear nada: el backend normaliza y filtra.
+      const page = await listCustomers(merchantId, { phone, limit: 1 });
+      return page.data[0] ?? null;
     },
   });
 

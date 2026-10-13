@@ -19,6 +19,9 @@ const rule = (id: string, minPesos: number, bonusPesos: number, active: boolean)
   minTopUp: minPesos * 100,
   bonusAmount: bonusPesos * 100,
   active,
+  name: null,
+  description: null,
+  timesUsed: 0,
 });
 
 const r1 = rule("r1", 1000, 200, true);

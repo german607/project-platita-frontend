@@ -20,6 +20,7 @@ interface RequestOptions {
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
   query?: Query;
+  headers?: Record<string, string>;
   signal?: AbortSignal;
 }
 
@@ -34,15 +35,17 @@ function buildUrl(path: string, query?: Query): string {
 
 // Única puerta de entrada a la API. Todas las llamadas pasan por acá.
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, signal } = options;
+  const { method = "GET", body, query, headers: extraHeaders, signal } = options;
+
+  // El backend rechaza un content-type JSON sin cuerpo: solo se manda con body.
+  const headers = { ...(body !== undefined ? { "content-type": "application/json" } : {}), ...extraHeaders };
 
   let res: Response;
   try {
     res = await fetch(buildUrl(path, query), {
       method,
       signal,
-      // El backend rechaza un content-type JSON sin cuerpo: solo se manda con body.
-      headers: body !== undefined ? { "content-type": "application/json" } : undefined,
+      headers: Object.keys(headers).length > 0 ? headers : undefined,
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch (err) {

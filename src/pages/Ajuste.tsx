@@ -7,6 +7,7 @@ import { ErrorState, LoadingState } from "../components/states";
 import { ApiError } from "../lib/api/client";
 import { adjust, getCustomer } from "../lib/api/endpoints";
 import type { MovementResult } from "../lib/api/types";
+import { useIdempotencyKey } from "../lib/idempotency";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos, formatSigned, parsePesos, pesosToCents } from "../lib/money";
 
@@ -40,9 +41,13 @@ export function Ajuste() {
     enabled: customerId !== "",
   });
 
+  const idempotency = useIdempotencyKey();
+
   const guardar = useMutation({
-    mutationFn: (input: { amount: number; note: string }) => adjust(customerId, input),
+    mutationFn: (op: { input: { amount: number; note: string }; key: string }) =>
+      adjust(customerId, op.input, { idempotencyKey: op.key }),
     onSuccess: () => {
+      idempotency.reset();
       void queryClient.invalidateQueries({ queryKey: ["customer", customerId] });
       void queryClient.invalidateQueries({ queryKey: ["transactions", customerId] });
       void queryClient.invalidateQueries({ queryKey: ["customers", merchantId] });
@@ -55,6 +60,14 @@ export function Ajuste() {
   const signed = absolute === null || sign === null ? null : sign === "menos" ? -absolute : absolute;
   const cents = signed === null ? null : pesosToCents(signed);
   const trimmedNote = note.trim();
+
+  // Una clave por operación: si hay que reintentar, se reenvía la misma y el
+  // backend no registra el ajuste dos veces.
+  const confirmar = () => {
+    if (signed === null) return;
+    const input = { amount: signed, note: trimmedNote };
+    guardar.mutate({ input, key: idempotency.keyFor(JSON.stringify(input)) });
+  };
 
   if (guardar.isSuccess) {
     return (
@@ -154,11 +167,11 @@ export function Ajuste() {
       )}
       {quedaNegativo && <p className="px-1 text-sm text-accion">El saldo no puede quedar en negativo.</p>}
 
-      {guardar.isError && <ErrorDeAjuste error={guardar.error} />}
+      {guardar.isError && <ErrorDeAjuste error={guardar.error} onRetry={confirmar} />}
 
       <Button
         disabled={!puedeGuardar}
-        onClick={() => signed !== null && guardar.mutate({ amount: signed, note: trimmedNote })}
+        onClick={confirmar}
       >
         {guardar.isPending ? "Guardando…" : "Guardar ajuste"}
       </Button>
@@ -168,7 +181,7 @@ export function Ajuste() {
 
 // Si el backend rechaza porque el saldo cambió y ahora quedaría en negativo,
 // se dice con las palabras de esta pantalla; el resto de los errores, como siempre.
-function ErrorDeAjuste({ error }: { error: unknown }) {
+function ErrorDeAjuste({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   if (error instanceof ApiError && error.code === "INSUFFICIENT_BALANCE") {
     return (
       <div role="alert" className="rounded-panel border border-accion bg-tarjeta p-5">
@@ -177,7 +190,7 @@ function ErrorDeAjuste({ error }: { error: unknown }) {
       </div>
     );
   }
-  return <ErrorDeMovimiento error={error} sustantivo="el ajuste" />;
+  return <ErrorDeMovimiento error={error} sustantivo="el ajuste" onRetry={onRetry} />;
 }
 
 function ExitoDeAjuste({

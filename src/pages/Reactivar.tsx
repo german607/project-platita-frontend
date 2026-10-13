@@ -3,18 +3,15 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState, ErrorState, LoadingState } from "../components/states";
 import { listInactiveCustomers } from "../lib/api/endpoints";
-import type { Customer } from "../lib/api/types";
+import type { CustomerWithBalance } from "../lib/api/types";
 import { daysAgo } from "../lib/dates";
 import { useMerchantId } from "../lib/merchant";
+import { formatPesos } from "../lib/money";
 import { formatUyPhone } from "../lib/phone";
 
 // Reactivar: los clientes que hace tiempo no vienen, para mandarles una promo.
 // El envío por WhatsApp todavía no existe en el backend: el botón queda
 // deshabilitado y dice "próximamente". Diseño: docs/DISENO.md.
-//
-// El diseño muestra también el saldo de cada cliente, pero la lista de
-// inactivos del backend no lo trae (pedido en el TODO): no se arma con una
-// consulta por cliente.
 
 const PAGE_SIZE = 20;
 const DEFAULT_DAYS = 60;
@@ -37,6 +34,8 @@ export function Reactivar() {
   });
 
   const customers = query.data?.pages.flatMap((page) => page.data) ?? [];
+  // El backend cuenta a todos los inactivos, no solo a los de las páginas cargadas.
+  const total = query.data?.pages[query.data.pages.length - 1]?.total ?? 0;
 
   return (
     <section className="flex flex-col gap-4">
@@ -69,9 +68,9 @@ export function Reactivar() {
         </button>
         <span className="hidden lg:inline">días</span>
 
-        {query.isSuccess && customers.length > 0 && (
+        {query.isSuccess && total > 0 && (
           <span className="rounded-full bg-mostaza px-3.5 py-1.5 text-sm lg:ml-auto">
-            {`${customers.length}${query.hasNextPage ? "+" : ""} ${customers.length === 1 && !query.hasNextPage ? "cliente" : "clientes"}`}
+            {`${total} ${total === 1 ? "cliente" : "clientes"}`}
           </span>
         )}
       </div>
@@ -117,22 +116,27 @@ export function Reactivar() {
   );
 }
 
-function Fila({ customer }: { customer: Customer }) {
+function Fila({ customer }: { customer: CustomerWithBalance }) {
   // Si nunca vino, el backend lo cuenta desde que se anotó: se dice así.
   const cuando = customer.lastVisitAt
     ? daysAgo(customer.lastVisitAt)
     : `Nunca vino · se anotó ${daysAgo(customer.createdAt).toLowerCase()}`;
+  const saldo = formatPesos(customer.balance);
 
   return (
-    <li className="flex items-center gap-4 border-b border-arena py-3 lg:h-[72px] lg:border-linea lg:py-0">
-      <Link to={`/clientes/${customer.id}`} className="flex-[2]">
-        <b className="block text-base lg:text-[17px]">{customer.name ?? "Sin nombre"}</b>
+    <li className="border-b border-arena py-3 lg:flex lg:h-[72px] lg:items-center lg:gap-4 lg:border-linea lg:py-0">
+      <Link to={`/clientes/${customer.id}`} className="block lg:flex-[2]">
+        <span className="flex justify-between gap-3 lg:block">
+          <b className="text-base lg:text-[17px]">{customer.name ?? "Sin nombre"}</b>
+          <b className="font-titulo text-xl lg:hidden">{saldo}</b>
+        </span>
         <span className="block text-[13px] font-bold text-suave lg:text-sm">
           <span className="lg:hidden">{`${cuando} · `}</span>
           {formatUyPhone(customer.phone)}
         </span>
       </Link>
-      <span className="hidden flex-[1.2] font-bold text-suave lg:block">{cuando}</span>
+      <span className="hidden font-bold text-suave lg:block lg:flex-[1.2]">{cuando}</span>
+      <b className="hidden font-titulo text-2xl lg:block lg:flex-1">{saldo}</b>
       <button
         type="button"
         disabled

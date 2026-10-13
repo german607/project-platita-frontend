@@ -35,6 +35,7 @@ const tx = (id: string, type: Transaction["type"], amount: number, extra: Partia
   amount,
   paidWith: null,
   note: null,
+  bonusRuleId: null,
   createdAt: new Date().toISOString(),
   ...extra,
 });

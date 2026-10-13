@@ -31,6 +31,7 @@ const tx = (amount: number): Transaction => ({
   amount,
   paidWith: null,
   note: null,
+  bonusRuleId: null,
   createdAt: "2026-10-13T12:00:00.000Z",
 });
 
@@ -51,6 +52,7 @@ function renderPage() {
 const monto = () => screen.getByLabelText("Monto a cobrar");
 const typeAmount = (value: string) => fireEvent.change(monto(), { target: { value } });
 const confirmButton = () => screen.getByRole("button", { name: /^Cobrar|Cobrando/ });
+const keyOf = (call: number) => (mockCharge.mock.calls[call][2] as { idempotencyKey: string }).idempotencyKey;
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -94,7 +96,7 @@ describe("Cobrar", () => {
     fireEvent.click(confirmButton());
 
     expect(await screen.findByText("¡Cobrado!")).toBeInTheDocument();
-    expect(mockCharge).toHaveBeenCalledWith("c1", { amount: 800, note: "Corte" });
+    expect(mockCharge).toHaveBeenCalledWith("c1", { amount: 800, note: "Corte" }, { idempotencyKey: expect.any(String) });
     expect(screen.getByText("$800")).toBeInTheDocument();
     expect(screen.getByText("Corte · a Marta")).toBeInTheDocument();
     expect(screen.getByText("Le quedan $400")).toBeInTheDocument();
@@ -108,7 +110,9 @@ describe("Cobrar", () => {
     typeAmount("400");
     fireEvent.click(confirmButton());
 
-    await waitFor(() => expect(mockCharge).toHaveBeenCalledWith("c1", { amount: 400, note: undefined }));
+    await waitFor(() =>
+      expect(mockCharge).toHaveBeenCalledWith("c1", { amount: 400, note: undefined }, { idempotencyKey: expect.any(String) }),
+    );
     expect(await screen.findByText("a Marta")).toBeInTheDocument();
   });
 
@@ -150,8 +154,10 @@ describe("Cobrar", () => {
     expect(screen.getByRole("button", { name: "Cobrar $400" })).toBeEnabled();
   });
 
-  it("si se corta la conexión al cobrar, no ofrece reintentar: avisa que revise el saldo", async () => {
-    mockCharge.mockRejectedValue(new ApiError(0, "NETWORK_ERROR", "No se pudo conectar con el servidor"));
+  it("si se corta la conexión al cobrar, ofrece reintentar y reenvía la MISMA clave: no se cobra dos veces", async () => {
+    mockCharge
+      .mockRejectedValueOnce(new ApiError(0, "NETWORK_ERROR", "No se pudo conectar con el servidor"))
+      .mockResolvedValueOnce({ transaction: tx(-40000), balance: 80000 });
     renderPage();
     await screen.findByText("$1.200");
     typeAmount("400");
@@ -159,9 +165,48 @@ describe("Cobrar", () => {
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("No pudimos confirmar si el cobro se registró.");
-    expect(alert).toHaveTextContent("Antes de repetirlo");
-    expect(screen.queryByRole("button", { name: "Probar de nuevo" })).not.toBeInTheDocument();
+    expect(alert).toHaveTextContent("no se va a registrar dos veces");
     expect(screen.queryByText("¡Cobrado!")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByText("¡Cobrado!")).toBeInTheDocument();
+    expect(mockCharge).toHaveBeenCalledTimes(2);
+    expect(keyOf(1)).toBe(keyOf(0));
+  });
+
+  it("si cambia el monto después del error, el aviso desaparece y el cobro nuevo lleva otra clave", async () => {
+    mockCharge
+      .mockRejectedValueOnce(new ApiError(0, "NETWORK_ERROR", "No se pudo conectar con el servidor"))
+      .mockResolvedValueOnce({ transaction: tx(-20000), balance: 100000 });
+    renderPage();
+    await screen.findByText("$1.200");
+    typeAmount("400");
+    fireEvent.click(confirmButton());
+    await screen.findByRole("alert");
+
+    typeAmount("200");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    fireEvent.click(confirmButton());
+
+    await waitFor(() => expect(mockCharge).toHaveBeenCalledTimes(2));
+    expect(keyOf(1)).not.toBe(keyOf(0));
+  });
+
+  it("si falla el servidor, también deja reintentar con la misma clave", async () => {
+    mockCharge
+      .mockRejectedValueOnce(new ApiError(500, "INTERNAL_ERROR", "Error interno"))
+      .mockResolvedValueOnce({ transaction: tx(-40000), balance: 80000 });
+    renderPage();
+    await screen.findByText("$1.200");
+    typeAmount("400");
+    fireEvent.click(confirmButton());
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Algo salió mal en el servidor.");
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByText("¡Cobrado!")).toBeInTheDocument();
+    expect(keyOf(1)).toBe(keyOf(0));
   });
 
   it("no deja cobrar un monto inválido y lo explica", async () => {

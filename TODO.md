@@ -34,8 +34,8 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 ## 2. Pantallas del mostrador (P0: lo que se usa con el cliente delante)
 
 - [~] **P0** Mostrador: buscar cliente por teléfono, ver saldo, estado "cliente nuevo" y crear (`src/pages/Mostrador.tsx`; 7 tests pasando y verificado en el navegador contra el backend local: busca, avisa "Seguí escribiendo…" y muestra "Este número es nuevo"). Sin probar todavía: **crear** un cliente, ver un cliente existente con saldo, el celular y el error de red
-- [ ] **P1** Panel "Hoy en el mostrador" (columna derecha del diseño web); depende del pedido al backend de movimientos del comercio
-- [~] **P0** Cargar saldo con vista previa del bono (`src/pages/CargarSaldo.tsx`, `src/lib/bonus.ts`; 11 tests de la pantalla + 5 del bono pasando; falta verla en el navegador). Decisiones: no se preselecciona ningún monto y, si se corta la red al confirmar, no hay "reintentar" (ver el pedido de idempotencia)
+- [ ] **P1** Panel "Hoy en el mostrador" (columna derecha del diseño web): el backend ya ofrece `GET /merchants/:m/transactions`; falta construirlo
+- [~] **P0** Cargar saldo con vista previa del bono (`src/pages/CargarSaldo.tsx`; verificada en el navegador por el usuario con la versión anterior; el 2026-10-13 pasó a usar el bono del backend y la clave de idempotencia con "Reintentar": 14 tests pasando; falta verla en el navegador con el backend nuevo). Decisión: no se preselecciona ningún monto
 - [x] **P0** Cobrar, con los estados "éxito" y "saldo insuficiente (le faltan $X)" (`src/pages/Cobrar.tsx`, 11 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
 - [~] **P0** Navegación celular (menú inferior) y web (menú lateral oscuro de 200px) con el chip del comercio (`src/components/Layout.tsx`, según el diseño; sin ver en el navegador). Las rutas `/cobrar/:id` y `/cargar/:id` son de relleno
 
@@ -45,26 +45,26 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 - [x] **P1** Ajuste manual (monto con signo, nota obligatoria) (`src/pages/Ajuste.tsx`; 11 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
 - [x] **P1** Clientes: lista con búsqueda y saldo, paginada (`src/pages/Clientes.tsx`; 8 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
 - [x] **P1** Promos: listar, crear, editar y activar/desactivar (`src/pages/Promos.tsx` y `PromoForm.tsx`; 17 tests pasando; verificadas en el navegador por el usuario el 2026-10-13). Falta del diseño web: "Usada N veces" (ver pedidos al backend)
-- [~] **P1** Reactivar: lista de inactivos con días configurables; botón de WhatsApp deshabilitado ("próximamente") (`src/pages/Reactivar.tsx`; 8 tests pasando; **sin probar en el navegador**: hace falta un cliente que lleve días sin venir, y se puede simular cambiando `lastVisitAt` en la base con `npm run db:studio` del backend, sin tocar el reloj). Falta del diseño: el saldo de cada cliente (ver pedidos al backend)
+- [x] **P1** Reactivar: lista de inactivos (`src/pages/Reactivar.tsx`; 8 tests pasando; verificada en el navegador por el usuario el 2026-10-13, simulando un cliente que no venía desde junio al editar `lastVisitAt` en la base, sin tocar el reloj; lo muestra y lo saca al subir los días). Falta del diseño: el saldo de cada cliente (ver pedidos al backend)
 
 ## 4. Pedidos al backend
 
 Cosas que la interfaz necesita y la API de hoy no resuelve. No se simulan
 en el frontend: se piden y se registran acá hasta que existan.
 
-- [ ] **P0** CORS: el backend no lo configura, así que el navegador va a bloquear las llamadas desde otro origen (por ejemplo `localhost:5173` hacia `localhost:3001`). Solución en desarrollo: proxy del servidor de desarrollo o `@fastify/cors` en el backend
-- [ ] **P1** Búsqueda por teléfono: `GET /merchants/:m/customers?search=` no normaliza, así que `099123456` **no encuentra** a `+59899123456`. El frontend lo rodea buscando por los dígitos del número ya normalizado (`59899123456`) y filtrando por teléfono exacto; sigue siendo mejor que el backend normalice el término o ofrezca búsqueda exacta por teléfono
-- [ ] **P1** Movimientos del comercio del día, para el panel "Hoy en el mostrador" del diseño web (por ejemplo `GET /merchants/:m/transactions?from=`): hoy solo hay movimientos por cliente
+- [~] **P0** CORS: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) con la variable `CORS_ORIGINS` (lista de orígenes, nunca `*`). En desarrollo el front sigue usando el proxy de Vite; en producción hay que poner la URL absoluta del backend en `VITE_API_URL` y la del front en `CORS_ORIGINS`
+- [~] **P1** Búsqueda por teléfono: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo): `?search=` ahora normaliza (también parcial) y `?phone=` es exacto. El frontend ya dejó el rodeo (Mostrador usa `?phone=`; Clientes manda el texto tal cual)
+- [~] **P1** Movimientos del comercio, para el panel "Hoy en el mostrador": el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`GET /merchants/:m/transactions?from=&to=&type=`, con `customer {id, name, phone}` en cada fila; `from` inclusivo y `to` exclusivo, ISO con offset). **Falta construir el panel en el front**
 - [ ] **P0** Autenticación de comercios (hoy cualquiera con un id opera): hasta que exista, el frontend usa un comercio fijo por configuración
-- [ ] **P1** Buscar un cliente por teléfono **sin crearlo** de forma explícita (hoy `POST …/customers` es "buscar o crear")
-- [ ] **P0** Idempotencia en cargas, cobros y ajustes (por ejemplo un header `Idempotency-Key`): sin ella, si se corta la conexión al confirmar no se sabe si el movimiento se registró y reintentar podría duplicarlo; hoy el frontend avisa que se revise el saldo y no ofrece reintentar
-- [ ] **P1** Vista previa del bono en el servidor (hoy se calcula en pantalla con las reglas activas, duplicando la regla del backend: `src/lib/bonus.ts`)
+- [~] **P1** Buscar un cliente por teléfono sin crearlo: cubierto con `?phone=` (el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo)); el Mostrador ya lo usa
+- [~] **P0** Idempotencia en cargas, cobros y ajustes: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (header `Idempotency-Key`, opcional; mismo cuerpo → misma respuesta con `Idempotent-Replayed: true`; otro cuerpo → 422 `IDEMPOTENCY_KEY_REUSED`; claves de 48 horas). **El frontend ya lo usa**: Cargar saldo, Cobrar y Ajuste mandan una clave por operación y ofrecen "Reintentar" con la misma clave
+- [~] **P1** Vista previa del bono en el servidor: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`GET /merchants/:m/bonus-preview?amount=`). El frontend ya la usa en Cargar saldo y se borró `src/lib/bonus.ts`
 - [ ] **P1** Unificar unidades de la API (hoy entra pesos y sale centésimos)
-- [ ] **P2** Que un movimiento de bono diga de qué promo salió (hoy `BONUS` no lo guarda y la ficha solo puede decir "Bono"; el diseño muestra "Promo $1.000+")
-- [ ] **P1** Incluir el saldo de cada cliente en `GET /merchants/:m/inactive`: el diseño de Reactivar lo muestra y hoy no viene; no se arma con una consulta por cliente
-- [ ] **P2** Cuántas veces se usó cada promo (el diseño web de Promos dice "Usada 38 veces"); depende de que el bono guarde de qué promo salió
-- [ ] **P2** Total de clientes inactivos: el contador "N clientes" de Reactivar hoy cuenta lo cargado y agrega "+" si hay más páginas
-- [ ] **P2** Un nombre o una descripción para las promos (hoy solo tienen mínimo y bono): el listado, el formulario, el aviso de promos repetidas y, junto con el pedido de "de qué promo salió", la ficha del cliente ("Bono · <nombre>") se leerían mucho mejor
+- [~] **P2** Que un movimiento de bono diga de qué promo salió: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`bonusRuleId`; null en los bonos viejos). **Falta mostrarlo en la ficha del cliente** ("Bono · <nombre de la promo>")
+- [~] **P1** Saldo de cada cliente en `GET /merchants/:m/inactive`: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo). El frontend ya lo muestra en Reactivar
+- [~] **P2** Cuántas veces se usó cada promo: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`timesUsed`, que no cuenta los bonos anteriores). **Falta mostrarlo en Promos** ("Usada N veces")
+- [~] **P2** Total de clientes inactivos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`total` en `/inactive`). El frontend ya lo usa en el contador de Reactivar
+- [~] **P2** Un nombre y una descripción para las promos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`name` y `description`, opcionales; el PATCH acepta `null` para borrarlos). **Faltan los campos en el formulario de promos y mostrarlos en el listado**
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
 
 ## 5. Calidad
@@ -78,7 +78,11 @@ en el frontend: se piden y se registran acá hasta que existan.
 
 ## 6. Despliegue
 
-- [ ] **P1** Revisar `npm audit`: al instalar (2026-10-13) reportó 15 vulnerabilidades (2 críticas, 6 altas). No se analizaron; no usar `npm audit fix --force` sin mirar qué cambia
+- [ ] **P1** Vulnerabilidades de `npm audit` (analizadas el 2026-10-13: 15 en total, 2 críticas y 6 altas, pero **solo 2 moderadas llegan a producción**). Plan, en este orden:
+  - [ ] **P1** `react-router-dom` 6.30 → 7.18.x: es lo único que viaja en la app. Las 2 moderadas (redirección abierta con `\` en `<Link>`/`navigate` y deserialización en SSR) casi no aplican acá (SPA sin SSR, enlaces con ids que genera el backend), pero es barato y además apaga los avisos de los future flags. Pide Node >= 20: sirve con el actual
+  - [ ] **P1** `vite` 5 → 6.4.4 y `vitest` 2 → 4.1.11 (con `@vitejs/plugin-react` compatible): arregla las 2 críticas (`vitest` con su UI y `tinypool`), la alta de `vite` y las moderadas de `esbuild` y `@vitest/mocker`. Corren con Node 20 (vite 7/8 y vitest 5 piden Node >= 20.19 o 22: no usar con el Node actual). Son solo herramientas de desarrollo: no están en lo que se publica
+  - [ ] **P2** `tailwindcss` 3 → 4: las 5 restantes (`braces`, `micromatch`, `chokidar`, `postcss-selector-parser`, `postcss-nested`/`fast-glob`) vienen de su cadena y solo afectan al *build* sobre nuestro propio código. Migración grande (configuración y plugin distintos): se deja para cuando haya tiempo
+  - No usar `npm audit fix --force`: mezcla los tres cambios mayores de golpe
 - [ ] **P1** CI: lint, typecheck y tests
 - [ ] **P1** Hosting estático barato
 - [ ] **P2** Instalable en el celular (PWA)

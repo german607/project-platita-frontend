@@ -30,7 +30,7 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **122 tests pasando** en 14
+  typecheck` sin errores y `npm run test:run` con **126 tests pasando** en 14
   archivos (dinero, teléfono, fechas, bono, cliente de la API y las nueve
   pantallas y formularios). El `typecheck` encontró un error real en su momento, ya
   corregido.
@@ -47,28 +47,38 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   pasando: **Mostrador**, **Cargar saldo**, **Cobrar**, **Clientes**,
   **Ficha del cliente**, **Ajuste**, **Promos** (con su formulario de crear
   y editar) y **Reactivar**. El usuario las probó en el navegador contra el
-  backend local el 2026-10-13 y funcionan, **salvo Reactivar**, que no se
-  pudo probar: hace falta un cliente que lleve días sin venir (se puede
-  simular cambiando `lastVisitAt` en la base con Prisma Studio, sin tocar el
-  reloj). Faltan piezas del diseño que dependen del backend (ver "Pedidos al
+  backend local el 2026-10-13 y funcionan todas. Reactivar se probó
+  simulando un cliente que no venía desde junio (editando `lastVisitAt` en la
+  base con Prisma Studio, sin tocar el reloj): aparece y desaparece según los
+  días. Faltan piezas del diseño que dependen del backend (ver "Pedidos al
   backend" en el [`TODO`](../TODO.md)). Ver [`../TODO.md`](../TODO.md) §2 y
   §3.
 
 ## El backend con el que se va a conectar
 
-Según su documentación (`../project-platita-backend/docs/STATE.md`): API
-con 18 endpoints (comercios, reglas de bonificación, clientes y libro
-mayor), arquitectura modular, consola de pruebas local en `/dev`. Está
-escrito y compila, pero el flujo completo no se recorrió después de su
-reorganización. No tiene autenticación ni CORS configurado.
+Según su documentación (`../project-platita-backend/docs/STATE.md`) y su
+código al 2026-10-13: API modular con comercios, promos, clientes y libro
+mayor, consola de pruebas local en `/dev` y, **nuevo hoy**, todo lo que el
+front había pedido: idempotencia en cargas, cobros y ajustes
+(`Idempotency-Key`), CORS por `CORS_ORIGINS`, búsqueda por teléfono
+(`?search=` normaliza, `?phone=` exacto), movimientos del comercio, saldo y
+total en `/inactive`, vista previa del bono, y nombre, descripción y uso de
+las promos. Esos cambios del backend están **sin commitear y sin
+verificar corriendo** (así los marca su propio TODO).
 
-Consecuencias para este repo, ya registradas en el TODO (§4):
+Qué sigue pendiente de su lado: autenticación, unificar las unidades
+(entra pesos, sale centésimos) y el envío por WhatsApp.
+
+Consecuencias para este repo, registradas en el TODO (§4):
 - Hasta que haya login, el comercio se fija por configuración.
-- El navegador bloqueará las llamadas entre orígenes distintos hasta que
-  haya CORS o proxy de desarrollo.
-- La búsqueda por teléfono del backend no normaliza el término buscado: el
-  Mostrador lo rodea buscando por el número normalizado y filtrando por
-  teléfono exacto.
+- En desarrollo se sigue usando el proxy de Vite; en producción hacen falta
+  la URL absoluta del backend en `VITE_API_URL` y la del front en
+  `CORS_ORIGINS`.
+- **Ya adoptado por el front** (2026-10-13): reintentar con la misma clave de
+  idempotencia, búsqueda por `?phone=` y texto tal cual, saldo y total de
+  los inactivos, y la vista previa del bono del servidor.
+- **Todavía no adoptado**: el panel "Hoy en el mostrador", y mostrar el
+  nombre, la descripción y el uso de las promos y la promo de cada bono.
 
 ## No existe todavía
 

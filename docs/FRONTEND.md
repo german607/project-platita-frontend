@@ -34,7 +34,7 @@ src/
     phone.ts              normalizar y formatear teléfonos uruguayos
     dates.ts              "Vino hace 12 días" (días de calendario locales)
     merchant.ts           useMerchantId(): el comercio configurado
-    bonus.ts              vista previa del bono (misma regla que el backend)
+    idempotency.ts        clave de idempotencia por operación (reintentar sin duplicar)
     payment.ts            formas de pago (efectivo, Mercado Pago, otro) y su nombre
     useDebounced.ts       espera a que termine de escribir (buscadores)
     useMediaQuery.ts      si la pantalla cumple una condición (ej. ancho de escritorio), y se actualiza sola

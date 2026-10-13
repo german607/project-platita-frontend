@@ -33,6 +33,16 @@ describe("api", () => {
     expect(fetchMock.mock.calls[1][1].headers).toEqual({ "content-type": "application/json" });
   });
 
+  it("manda los encabezados propios, como Idempotency-Key", async () => {
+    const fetchMock = mockFetch(201, {});
+    await api("/customers/c1/charges", {
+      method: "POST",
+      body: { amount: 400 },
+      headers: { "Idempotency-Key": "k1" },
+    });
+    expect(fetchMock.mock.calls[0][1].headers).toEqual({ "content-type": "application/json", "Idempotency-Key": "k1" });
+  });
+
   it("convierte el error del backend en ApiError con su code y details", async () => {
     mockFetch(422, {
       error: "Saldo insuficiente",
@@ -57,6 +67,7 @@ describe("friendlyMessage", () => {
       "El cliente no tiene saldo suficiente.",
     );
     expect(friendlyMessage(new ApiError(500, "INTERNAL_ERROR", "stack…"))).toBe("Algo salió mal. Probá de nuevo.");
+    expect(friendlyMessage(new ApiError(422, "IDEMPOTENCY_KEY_REUSED", "x"))).toContain("Revisá el saldo");
     expect(friendlyMessage(new Error("boom"))).toBe("Algo salió mal. Probá de nuevo.");
   });
 });

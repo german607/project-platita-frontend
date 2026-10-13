@@ -65,18 +65,9 @@ describe("Mostrador", () => {
     expect(await screen.findByText("Marta Rodríguez")).toBeInTheDocument();
     expect(screen.getByText("$1.200")).toBeInTheDocument();
     expect(screen.getByText("Todavía no vino")).toBeInTheDocument();
-    expect(mockList).toHaveBeenCalledWith("m1", { search: "59899123456", limit: 5 });
+    expect(mockList).toHaveBeenCalledWith("m1", { phone: "+59899123456", limit: 1 });
     expect(screen.getByRole("link", { name: "Cobrar" })).toHaveAttribute("href", "/cobrar/c1");
     expect(screen.getByRole("link", { name: "Cargar saldo" })).toHaveAttribute("href", "/cargar/c1");
-  });
-
-  it("ignora coincidencias parciales del backend: solo vale el teléfono exacto", async () => {
-    mockList.mockResolvedValue(page([{ ...marta, phone: "+59899123457" }]));
-    renderMostrador();
-    typePhone("099123456");
-
-    expect(await screen.findByText("Este número es nuevo")).toBeInTheDocument();
-    expect(screen.queryByText("Marta Rodríguez")).not.toBeInTheDocument();
   });
 
   it("crea un cliente nuevo con el teléfono normalizado y su nombre", async () => {

@@ -4,12 +4,13 @@ import { Link, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { ErrorDeMovimiento, MontoGrande, PantallaExito } from "../components/movimiento";
 import { ErrorState, LoadingState } from "../components/states";
-import { getCustomer, listBonusRules, topUp } from "../lib/api/endpoints";
-import type { BonusRule, TopUpResult } from "../lib/api/types";
-import { bonusFor } from "../lib/bonus";
+import { getBonusPreview, getCustomer, topUp } from "../lib/api/endpoints";
+import type { BonusPreview, TopUpResult } from "../lib/api/types";
+import { useIdempotencyKey } from "../lib/idempotency";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos, parsePesos, pesosToCents } from "../lib/money";
 import { PAYMENT_METHODS as METHODS, paymentLabel, type PaymentMethod as Method } from "../lib/payment";
+import { useDebounced } from "../lib/useDebounced";
 
 // Cargar saldo: el cliente entrega plata (efectivo o Mercado Pago, que cobra
 // el comercio por su cuenta) y acá se registra su saldo, con el bono que
@@ -39,11 +40,13 @@ export function CargarSaldo() {
     queryFn: () => getCustomer(customerId),
     enabled: customerId !== "",
   });
-  const rules = useQuery({ queryKey: ["bonus-rules", merchantId], queryFn: () => listBonusRules(merchantId) });
+  const idempotency = useIdempotencyKey();
 
   const confirm = useMutation({
-    mutationFn: (input: { amount: number; paidWith: string }) => topUp(customerId, input),
+    mutationFn: (op: { input: { amount: number; paidWith: string }; key: string }) =>
+      topUp(customerId, op.input, { idempotencyKey: op.key }),
     onSuccess: () => {
+      idempotency.reset();
       void queryClient.invalidateQueries({ queryKey: ["customer", customerId] });
       void queryClient.invalidateQueries({ queryKey: ["customer-by-phone", merchantId] });
     },
@@ -53,6 +56,18 @@ export function CargarSaldo() {
   const pesos = parsed !== null && parsed > 0 && parsed <= MAX_PESOS ? parsed : null;
   const cents = pesos === null ? null : pesosToCents(pesos);
 
+  // La vista previa del bono la calcula el backend, con la misma función que
+  // la carga real. Con un monto libre se espera a que termine de escribir.
+  const previewPesos = useDebounced(pesos, 250);
+  const preview = useQuery({
+    queryKey: ["bonus-preview", merchantId, previewPesos],
+    queryFn: () => {
+      if (previewPesos === null) throw new Error("Falta el monto");
+      return getBonusPreview(merchantId, previewPesos);
+    },
+    enabled: previewPesos !== null,
+  });
+
   if (confirm.isSuccess) {
     return <ExitoDeCarga result={confirm.data} name={customer.data?.name ?? "El cliente"} method={method} />;
   }
@@ -61,6 +76,14 @@ export function CargarSaldo() {
 
   const before = customer.data.balance;
   const name = customer.data.name ?? "Cliente sin nombre";
+
+  // Una clave por operación: si hay que reintentar, se reenvía la misma y el
+  // backend no registra la carga dos veces.
+  const confirmar = () => {
+    if (pesos === null) return;
+    const input = { amount: pesos, paidWith: method };
+    confirm.mutate({ input, key: idempotency.keyFor(JSON.stringify(input)) });
+  };
 
   return (
     <section className="flex flex-col gap-4">
@@ -146,14 +169,14 @@ export function CargarSaldo() {
 
         <div className="flex flex-col gap-4">
           {cents !== null && (
-            <Vista cents={cents} before={before} rules={rules} />
+            <Vista cents={cents} before={before} preview={preview} esperando={previewPesos !== pesos} />
           )}
 
-          {confirm.isError && <ErrorDeMovimiento error={confirm.error} sustantivo="la carga" />}
+          {confirm.isError && <ErrorDeMovimiento error={confirm.error} sustantivo="la carga" onRetry={confirmar} />}
 
           <Button
             disabled={pesos === null || confirm.isPending}
-            onClick={() => pesos !== null && confirm.mutate({ amount: pesos, paidWith: method })}
+            onClick={confirmar}
             className="lg:h-[72px]"
           >
             {confirm.isPending ? "Registrando…" : "Listo, confirmar"}
@@ -164,21 +187,23 @@ export function CargarSaldo() {
   );
 }
 
-// Lo que va a pasar si se confirma. Es una vista previa calculada con las
-// promos activas; el bono definitivo lo decide el backend (ver lib/bonus.ts).
+// Lo que va a pasar si se confirma, según el backend. El bono definitivo es
+// el que devuelve la carga al confirmar.
 function Vista({
   cents,
   before,
-  rules,
+  preview,
+  esperando,
 }: {
   cents: number;
   before: number;
-  rules: UseQueryResult<{ data: BonusRule[] }>;
+  preview: UseQueryResult<BonusPreview>;
+  esperando: boolean;
 }) {
-  if (rules.isPending) {
+  if (esperando || preview.isPending) {
     return <div className={`${card} text-suave`}>Calculando el bono…</div>;
   }
-  if (rules.isError) {
+  if (preview.isError) {
     return (
       <div className={`${card} text-suave`}>
         No pudimos calcular el bono. Al confirmar se aplica el que corresponda.
@@ -186,8 +211,7 @@ function Vista({
     );
   }
 
-  const rule = bonusFor(cents, rules.data.data);
-  const bonus = rule?.bonusAmount ?? 0;
+  const { rule, bonus, total } = preview.data;
 
   return (
     <div className="rounded-panel bg-saldo p-5 text-tarjeta lg:p-6">
@@ -195,13 +219,14 @@ function Vista({
         <>
           <p className="text-sm">{`¡Le regalás ${formatPesos(bonus)} de bono!`}</p>
           <p className="mt-1">{`${formatPesos(cents)} + ${formatPesos(bonus)} de bono`}</p>
+          {rule.name && <p className="mt-1 text-sm">{`Promo: ${rule.name}`}</p>}
         </>
       ) : (
         <p className="text-sm">Sin bono para este monto</p>
       )}
       <p className="mt-3 text-sm">Saldo nuevo</p>
       <p className="font-titulo text-[56px] font-extrabold leading-none tracking-[-2px] lg:text-[72px]">
-        {formatPesos(before + cents + bonus)}
+        {formatPesos(before + total)}
       </p>
       <p className="mt-2 text-sm">{`Antes tenía ${formatPesos(before)}`}</p>
     </div>

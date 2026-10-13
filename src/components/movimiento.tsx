@@ -1,24 +1,40 @@
 import type { ReactNode } from "react";
 import { ApiError } from "../lib/api/client";
-import { ButtonLink } from "./Button";
+import { Button, ButtonLink } from "./Button";
 import { ErrorState } from "./states";
 
 // Piezas que comparten las pantallas que mueven saldo (Cargar saldo, Cobrar y,
 // más adelante, Ajuste).
 
-// El backend todavía no tiene idempotencia: si se corta la conexión no se
-// sabe si el movimiento llegó a registrarse, y repetirlo podría duplicarlo.
-// Por eso para ese caso no hay "Probar de nuevo": se manda a revisar el saldo
-// primero. Cualquier otro error se muestra como siempre.
-export function ErrorDeMovimiento({ error, sustantivo }: { error: unknown; sustantivo: "la carga" | "el cobro" | "el ajuste" }) {
-  if (error instanceof ApiError && error.code === "NETWORK_ERROR") {
-    const repetir = sustantivo === "la carga" ? "repetirla" : "repetirlo";
+// Si se corta la conexión (o el servidor falla) no se sabe si el movimiento
+// llegó a registrarse. Como las pantallas mandan una clave de idempotencia,
+// reintentar es seguro: el backend devuelve la respuesta original en vez de
+// registrarlo otra vez. Cualquier otro error se muestra como siempre.
+export function ErrorDeMovimiento({
+  error,
+  sustantivo,
+  onRetry,
+}: {
+  error: unknown;
+  sustantivo: "la carga" | "el cobro" | "el ajuste";
+  onRetry: () => void;
+}) {
+  if (error instanceof ApiError && (error.code === "NETWORK_ERROR" || error.status >= 500)) {
+    const titulo =
+      error.code === "NETWORK_ERROR"
+        ? `No pudimos confirmar si ${sustantivo} se registró.`
+        : "Algo salió mal en el servidor.";
     return (
       <div role="alert" className="rounded-panel border border-accion bg-tarjeta p-5">
-        <p className="font-titulo text-xl font-extrabold text-accion">{`No pudimos confirmar si ${sustantivo} se registró.`}</p>
-        <p className="mt-1 text-suave">{`Antes de ${repetir}, revisá el saldo del cliente en el Mostrador.`}</p>
-        <ButtonLink to="/" variant="mostaza" className="mt-3">
-          Ir al Mostrador
+        <p className="font-titulo text-xl font-extrabold text-accion">{titulo}</p>
+        <p className="mt-1 text-suave">
+          Podés reintentar: no se va a registrar dos veces. Si cambiás los datos antes, se toma como una operación nueva.
+        </p>
+        <Button variant="mostaza" onClick={onRetry} className="mt-3">
+          Reintentar
+        </Button>
+        <ButtonLink to="/" variant="borde" className="mt-2">
+          Revisar el saldo en el Mostrador
         </ButtonLink>
       </div>
     );

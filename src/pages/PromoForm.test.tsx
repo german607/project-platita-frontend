@@ -18,8 +18,26 @@ const mockList = vi.mocked(listBonusRules);
 const mockCreate = vi.mocked(createBonusRule);
 const mockUpdate = vi.mocked(updateBonusRule);
 
-const r1: BonusRule = { id: "r1", merchantId: "m1", minTopUp: 100000, bonusAmount: 20000, active: true };
-const r2: BonusRule = { id: "r2", merchantId: "m1", minTopUp: 200000, bonusAmount: 50000, active: true };
+const r1: BonusRule = {
+  id: "r1",
+  merchantId: "m1",
+  name: null,
+  description: null,
+  minTopUp: 100000,
+  bonusAmount: 20000,
+  active: true,
+  timesUsed: 0,
+};
+const r2: BonusRule = {
+  id: "r2",
+  merchantId: "m1",
+  name: null,
+  description: null,
+  minTopUp: 200000,
+  bonusAmount: 50000,
+  active: true,
+  timesUsed: 0,
+};
 
 function renderAt(path: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });

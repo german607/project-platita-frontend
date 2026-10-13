@@ -7,6 +7,7 @@ import { ErrorState, LoadingState } from "../components/states";
 import { ApiError } from "../lib/api/client";
 import { charge, getCustomer } from "../lib/api/endpoints";
 import type { MovementResult } from "../lib/api/types";
+import { useIdempotencyKey } from "../lib/idempotency";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos, parsePesos, pesosToCents } from "../lib/money";
 
@@ -33,9 +34,13 @@ export function Cobrar() {
     enabled: customerId !== "",
   });
 
+  const idempotency = useIdempotencyKey();
+
   const cobrar = useMutation({
-    mutationFn: (input: { amount: number; note?: string }) => charge(customerId, input),
+    mutationFn: (op: { input: { amount: number; note?: string }; key: string }) =>
+      charge(customerId, op.input, { idempotencyKey: op.key }),
     onSuccess: () => {
+      idempotency.reset();
       void queryClient.invalidateQueries({ queryKey: ["customer", customerId] });
       void queryClient.invalidateQueries({ queryKey: ["customer-by-phone", merchantId] });
     },
@@ -45,6 +50,14 @@ export function Cobrar() {
   const pesos = parsed !== null && parsed > 0 && parsed <= MAX_PESOS ? parsed : null;
   const cents = pesos === null ? null : pesosToCents(pesos);
   const trimmedNote = note.trim();
+
+  // Una clave por operación: si hay que reintentar, se reenvía la misma y el
+  // backend no registra el cobro dos veces.
+  const confirmar = () => {
+    if (pesos === null) return;
+    const input = { amount: pesos, note: trimmedNote || undefined };
+    cobrar.mutate({ input, key: idempotency.keyFor(JSON.stringify(input)) });
+  };
 
   if (cobrar.isSuccess) {
     return <ExitoDeCobro result={cobrar.data} note={trimmedNote} name={customer.data?.name ?? "el cliente"} />;
@@ -139,10 +152,10 @@ export function Cobrar() {
             </>
           ) : (
             <>
-              {cobrar.isError && <ErrorDeMovimiento error={cobrar.error} sustantivo="el cobro" />}
+              {cobrar.isError && <ErrorDeMovimiento error={cobrar.error} sustantivo="el cobro" onRetry={confirmar} />}
               <Button
                 disabled={!alcanza || cobrar.isPending}
-                onClick={() => pesos !== null && cobrar.mutate({ amount: pesos, note: trimmedNote || undefined })}
+                onClick={confirmar}
                 className="lg:h-[72px]"
               >
                 {cobrar.isPending ? "Cobrando…" : cents === null ? "Cobrar" : `Cobrar ${formatPesos(cents)}`}

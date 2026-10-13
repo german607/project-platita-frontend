@@ -7,7 +7,7 @@ import { listCustomers } from "../lib/api/endpoints";
 import { visitShort } from "../lib/dates";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos } from "../lib/money";
-import { customerSearchTerm, formatUyPhone } from "../lib/phone";
+import { formatUyPhone } from "../lib/phone";
 import { useDebounced } from "../lib/useDebounced";
 
 // Clientes: lista del comercio con su saldo y buscador por nombre o teléfono.
@@ -21,7 +21,8 @@ const grid = "lg:grid lg:grid-cols-[2fr_1.5fr_1.5fr_1fr] lg:items-center";
 export function Clientes() {
   const merchantId = useMerchantId();
   const [raw, setRaw] = useState("");
-  const search = useDebounced(customerSearchTerm(raw));
+  // Nombre o teléfono en cualquier formato: el backend entiende el texto tal cual.
+  const search = useDebounced(raw.trim() || undefined);
 
   const query = useInfiniteQuery({
     queryKey: ["customers", merchantId, search],

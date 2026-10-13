@@ -1,8 +1,9 @@
 import { api } from "./client";
 import type {
+  BonusPreview,
   BonusRule,
-  Customer,
   CustomerWithBalance,
+  InactivePage,
   Merchant,
   MovementResult,
   Page,
@@ -23,6 +24,15 @@ type PageParams = {
   cursor?: string;
 };
 
+// Una clave de idempotencia por operación: si se corta la conexión, reenviar la
+// MISMA clave con el MISMO cuerpo devuelve la respuesta original sin registrar
+// otra vez. Es opcional en el backend, pero las pantallas que mueven saldo la
+// mandan siempre (ver lib/idempotency.ts).
+type MovementOptions = { idempotencyKey?: string };
+
+const idempotencyHeaders = ({ idempotencyKey }: MovementOptions) =>
+  idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined;
+
 // ---------- Comercio ----------
 
 export const getMerchant = (merchantId: string) => api<Merchant>(`/merchants/${merchantId}`);
@@ -33,7 +43,9 @@ export const getMerchant = (merchantId: string) => api<Merchant>(`/merchants/${m
 export const upsertCustomer = (merchantId: string, input: { phone: string; name?: string }) =>
   api<CustomerWithBalance>(`/merchants/${merchantId}/customers`, { method: "POST", body: input });
 
-export const listCustomers = (merchantId: string, params: PageParams & { search?: string } = {}) =>
+// `search`: nombre o teléfono en cualquier formato (también parcial). `phone`:
+// teléfono exacto, sin crear nada.
+export const listCustomers = (merchantId: string, params: PageParams & { search?: string; phone?: string } = {}) =>
   api<Page<CustomerWithBalance>>(`/merchants/${merchantId}/customers`, { query: params });
 
 export const getCustomer = (customerId: string) => api<CustomerWithBalance>(`/customers/${customerId}`);
@@ -42,19 +54,31 @@ export const updateCustomer = (customerId: string, input: { name: string | null 
   api<CustomerWithBalance>(`/customers/${customerId}`, { method: "PATCH", body: input });
 
 export const listInactiveCustomers = (merchantId: string, params: PageParams & { days?: number } = {}) =>
-  api<Page<Customer>>(`/merchants/${merchantId}/inactive`, { query: params });
+  api<InactivePage>(`/merchants/${merchantId}/inactive`, { query: params });
 
 // ---------- Saldo (libro mayor) ----------
 
-export const topUp = (customerId: string, input: { amount: number; paidWith?: string }) =>
-  api<TopUpResult>(`/customers/${customerId}/topups`, { method: "POST", body: input });
+export const topUp = (customerId: string, input: { amount: number; paidWith?: string }, options: MovementOptions = {}) =>
+  api<TopUpResult>(`/customers/${customerId}/topups`, {
+    method: "POST",
+    body: input,
+    headers: idempotencyHeaders(options),
+  });
 
-export const charge = (customerId: string, input: { amount: number; note?: string }) =>
-  api<MovementResult>(`/customers/${customerId}/charges`, { method: "POST", body: input });
+export const charge = (customerId: string, input: { amount: number; note?: string }, options: MovementOptions = {}) =>
+  api<MovementResult>(`/customers/${customerId}/charges`, {
+    method: "POST",
+    body: input,
+    headers: idempotencyHeaders(options),
+  });
 
 // amount con signo: positivo suma saldo, negativo resta. La nota es obligatoria.
-export const adjust = (customerId: string, input: { amount: number; note: string }) =>
-  api<MovementResult>(`/customers/${customerId}/adjustments`, { method: "POST", body: input });
+export const adjust = (customerId: string, input: { amount: number; note: string }, options: MovementOptions = {}) =>
+  api<MovementResult>(`/customers/${customerId}/adjustments`, {
+    method: "POST",
+    body: input,
+    headers: idempotencyHeaders(options),
+  });
 
 export const listTransactions = (customerId: string, params: PageParams & { type?: TransactionType } = {}) =>
   api<Page<Transaction>>(`/customers/${customerId}/transactions`, { query: params });
@@ -63,6 +87,11 @@ export const listTransactions = (customerId: string, params: PageParams & { type
 
 export const listBonusRules = (merchantId: string) =>
   api<{ data: BonusRule[] }>(`/merchants/${merchantId}/bonus-rules`);
+
+// Qué bono daría una carga de `amount` pesos (no registra nada). Lo calcula el
+// backend con la misma función que la carga real.
+export const getBonusPreview = (merchantId: string, amount: number) =>
+  api<BonusPreview>(`/merchants/${merchantId}/bonus-preview`, { query: { amount } });
 
 export const createBonusRule = (merchantId: string, input: { minTopUp: number; bonusAmount: number; active?: boolean }) =>
   api<BonusRule>(`/merchants/${merchantId}/bonus-rules`, { method: "POST", body: input });

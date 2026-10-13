@@ -79,7 +79,7 @@ describe("Clientes", () => {
     expect(screen.getByRole("link", { name: "Ir al mostrador" })).toHaveAttribute("href", "/");
   });
 
-  it("busca por teléfono sin ceros ni prefijo, esperando a que termine de escribir", async () => {
+  it("manda lo que se escribe tal cual (el backend entiende los teléfonos), esperando a que termine", async () => {
     mockList.mockResolvedValue(page([marta]));
     renderPage();
     await screen.findByText("$1.200");
@@ -88,7 +88,7 @@ describe("Clientes", () => {
     fireEvent.change(screen.getByLabelText("Buscar por nombre o teléfono"), { target: { value: "099 123" } });
 
     await waitFor(
-      () => expect(mockList).toHaveBeenLastCalledWith("m1", { search: "99123", limit: 20, cursor: undefined }),
+      () => expect(mockList).toHaveBeenLastCalledWith("m1", { search: "099 123", limit: 20, cursor: undefined }),
       { timeout: 2000 },
     );
     expect(await screen.findByText("No encontramos a nadie con eso")).toBeInTheDocument();

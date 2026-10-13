@@ -15,6 +15,8 @@ export function friendlyMessage(error: unknown): string {
         return "Revisá los datos ingresados.";
       case "CONFLICT":
         return "Eso ya existe.";
+      case "IDEMPOTENCY_KEY_REUSED":
+        return "Esta operación ya se había enviado con otros datos. Revisá el saldo del cliente antes de volver a intentar.";
     }
   }
   return "Algo salió mal. Probá de nuevo.";

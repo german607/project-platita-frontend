@@ -31,6 +31,7 @@ const tx = (amount: number): Transaction => ({
   amount,
   paidWith: null,
   note: null,
+  bonusRuleId: null,
   createdAt: "2026-10-13T12:00:00.000Z",
 });
 
@@ -53,6 +54,7 @@ function renderPage() {
 const sumar = () => screen.getByRole("button", { name: "+ Sumar" });
 const restar = () => screen.getByRole("button", { name: "− Restar" });
 const guardar = () => screen.getByRole("button", { name: /Guardar ajuste|Guardando/ });
+const keyOf = (call: number) => (mockAdjust.mock.calls[call][2] as { idempotencyKey: string }).idempotencyKey;
 const typeAmount = (value: string) => fireEvent.change(screen.getByLabelText("Monto del ajuste"), { target: { value } });
 const typeNote = (value: string) => fireEvent.change(screen.getByLabelText("Motivo (obligatorio)"), { target: { value } });
 
@@ -94,7 +96,7 @@ describe("Ajuste", () => {
     fireEvent.click(guardar());
 
     expect(await screen.findByText("¡Ajuste guardado!")).toBeInTheDocument();
-    expect(mockAdjust).toHaveBeenCalledWith("c1", { amount: -100, note: MOTIVO });
+    expect(mockAdjust).toHaveBeenCalledWith("c1", { amount: -100, note: MOTIVO }, { idempotencyKey: expect.any(String) });
     expect(screen.getByText("Marta ahora tiene")).toBeInTheDocument();
     expect(screen.getByText("$1.100")).toBeInTheDocument();
     expect(screen.getByText(`-$100 · ${MOTIVO}`)).toBeInTheDocument();
@@ -110,7 +112,13 @@ describe("Ajuste", () => {
     typeNote("Error de la semana");
     fireEvent.click(guardar());
 
-    await waitFor(() => expect(mockAdjust).toHaveBeenCalledWith("c1", { amount: 50, note: "Error de la semana" }));
+    await waitFor(() =>
+      expect(mockAdjust).toHaveBeenCalledWith(
+        "c1",
+        { amount: 50, note: "Error de la semana" },
+        { idempotencyKey: expect.any(String) },
+      ),
+    );
   });
 
   it("no deja restar más que el saldo: el saldo no puede quedar en negativo", async () => {
@@ -161,8 +169,10 @@ describe("Ajuste", () => {
     expect(guardar()).toBeDisabled();
   });
 
-  it("si se corta la conexión, no ofrece reintentar: avisa que revise el saldo", async () => {
-    mockAdjust.mockRejectedValue(new ApiError(0, "NETWORK_ERROR", "No se pudo conectar con el servidor"));
+  it("si se corta la conexión, ofrece reintentar y reenvía la MISMA clave: no se ajusta dos veces", async () => {
+    mockAdjust
+      .mockRejectedValueOnce(new ApiError(0, "NETWORK_ERROR", "No se pudo conectar con el servidor"))
+      .mockResolvedValueOnce({ transaction: tx(5000), balance: 125000 });
     renderPage();
     await screen.findByText(/Marta/);
     fireEvent.click(sumar());
@@ -172,8 +182,33 @@ describe("Ajuste", () => {
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("No pudimos confirmar si el ajuste se registró.");
-    expect(alert).toHaveTextContent("Antes de repetirlo");
-    expect(screen.queryByRole("button", { name: "Probar de nuevo" })).not.toBeInTheDocument();
+    expect(alert).toHaveTextContent("no se va a registrar dos veces");
+
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByText("¡Ajuste guardado!")).toBeInTheDocument();
+    expect(mockAdjust).toHaveBeenCalledTimes(2);
+    expect(keyOf(1)).toBe(keyOf(0));
+  });
+
+  it("si cambia el monto después del error, es un ajuste nuevo con otra clave", async () => {
+    mockAdjust
+      .mockRejectedValueOnce(new ApiError(0, "NETWORK_ERROR", "No se pudo conectar con el servidor"))
+      .mockResolvedValueOnce({ transaction: tx(3000), balance: 123000 });
+    renderPage();
+    await screen.findByText(/Marta/);
+    fireEvent.click(sumar());
+    typeAmount("50");
+    typeNote(MOTIVO);
+    fireEvent.click(guardar());
+    await screen.findByRole("alert");
+
+    typeAmount("30");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    fireEvent.click(guardar());
+
+    await waitFor(() => expect(mockAdjust).toHaveBeenCalledTimes(2));
+    expect(keyOf(1)).not.toBe(keyOf(0));
   });
 
   it("si el backend rechaza porque el saldo quedaría negativo, lo explica con palabras de esta pantalla", async () => {

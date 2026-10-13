@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../lib/api/client";
 import { listInactiveCustomers } from "../lib/api/endpoints";
-import type { Customer } from "../lib/api/types";
+import type { CustomerWithBalance } from "../lib/api/types";
 import { Reactivar } from "./Reactivar";
 
 vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
@@ -20,20 +20,32 @@ const ago = (days: number) => {
   return d.toISOString();
 };
 
-const customer = (id: string, name: string | null, phone: string, lastVisitDays: number | null): Customer => ({
+const customer = (
+  id: string,
+  name: string | null,
+  phone: string,
+  lastVisitDays: number | null,
+  balance = 0,
+): CustomerWithBalance => ({
   id,
   merchantId: "m1",
   phone,
   name,
   createdAt: ago(100),
   lastVisitAt: lastVisitDays === null ? null : ago(lastVisitDays),
+  balance,
 });
 
-const nicolas = customer("c1", "Nicolás Acosta", "+59891234987", 74);
-const ana = customer("c2", "Ana Silveira", "+59892410663", 91);
+const nicolas = customer("c1", "Nicolás Acosta", "+59891234987", 74, 32000);
+const ana = customer("c2", "Ana Silveira", "+59892410663", 91, 150000);
 const ricardo = customer("c3", "Ricardo Viera", "+59899802145", 128);
 
-const page = (data: Customer[], nextCursor: string | null = null) => ({ data, nextCursor });
+// `total` es el de todos los inactivos, no solo el de esta página.
+const page = (data: CustomerWithBalance[], nextCursor: string | null = null, total = data.length) => ({
+  data,
+  nextCursor,
+  total,
+});
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -66,6 +78,9 @@ describe("Reactivar", () => {
     expect(screen.getByText("Hace 128 días")).toBeInTheDocument();
     expect(screen.getAllByText("091 234 987").length).toBeGreaterThan(0);
     expect(screen.getByText("3 clientes")).toBeInTheDocument();
+    expect(screen.getAllByText("$320").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("$1.500").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("$0").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: /Nicolás Acosta/ })).toHaveAttribute("href", "/clientes/c1");
   });
 
@@ -122,11 +137,11 @@ describe("Reactivar", () => {
     for (const boton of botones) expect(boton).toBeDisabled();
   });
 
-  it("pagina con 'Ver más clientes' y marca que hay más", async () => {
-    mockList.mockResolvedValueOnce(page([nicolas], "c1")).mockResolvedValueOnce(page([ana], null));
+  it("pagina con 'Ver más clientes' y el contador es el total, no lo cargado", async () => {
+    mockList.mockResolvedValueOnce(page([nicolas], "c1", 2)).mockResolvedValueOnce(page([ana], null, 2));
     renderPage();
 
-    expect(await screen.findByText("1+ clientes")).toBeInTheDocument();
+    expect(await screen.findByText("2 clientes")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Ver más clientes" }));
 
     expect(await screen.findByText("Ana Silveira")).toBeInTheDocument();
