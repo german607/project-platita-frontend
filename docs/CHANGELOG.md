@@ -216,3 +216,8 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   herramientas instaladas en el proyecto, `node_modules/.bin`): `tsc --noEmit`
   sin errores y **126 tests pasando** en 14 archivos. No se probó en el
   navegador contra el backend nuevo, que a su vez está sin commitear.
+- Verificación defensiva en el Mostrador: tras buscar con `?phone=` se
+  comprueba que el cliente devuelto tenga ese teléfono. Sin eso, un backend sin
+  el código nuevo ignoraría el filtro y el Mostrador mostraría a otra persona
+  (y se le podría cobrar). Un test lo cubre. `tsc` sin errores y **127 tests
+  pasando** en 14 archivos.

@@ -70,6 +70,15 @@ describe("Mostrador", () => {
     expect(screen.getByRole("link", { name: "Cargar saldo" })).toHaveAttribute("href", "/cargar/c1");
   });
 
+  it("si el backend ignorara el filtro y devolviera a otra persona, no se la muestra", async () => {
+    mockList.mockResolvedValue(page([{ ...marta, phone: "+59899123457", name: "Otra Persona" }]));
+    renderMostrador();
+    typePhone("099 123 456");
+
+    expect(await screen.findByText("Este número es nuevo")).toBeInTheDocument();
+    expect(screen.queryByText("Otra Persona")).not.toBeInTheDocument();
+  });
+
   it("crea un cliente nuevo con el teléfono normalizado y su nombre", async () => {
     mockList.mockResolvedValue(page([]));
     mockUpsert.mockResolvedValue(marta);

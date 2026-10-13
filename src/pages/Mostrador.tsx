@@ -29,9 +29,12 @@ export function Mostrador() {
     enabled: phone !== null,
     queryFn: async (): Promise<CustomerWithBalance | null> => {
       if (phone === null) return null;
-      // Teléfono exacto, sin crear nada: el backend normaliza y filtra.
+      // Teléfono exacto, sin crear nada: el backend normaliza y filtra. Igual
+      // se verifica que el cliente sea ese teléfono: si el backend no
+      // entendiera el filtro (versión vieja) devolvería otro cliente, y acá
+      // se estaría cobrando a la persona equivocada.
       const page = await listCustomers(merchantId, { phone, limit: 1 });
-      return page.data[0] ?? null;
+      return page.data.find((c) => c.phone === phone) ?? null;
     },
   });
 
