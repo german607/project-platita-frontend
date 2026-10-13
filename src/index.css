@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-fondo font-texto font-bold text-tinta antialiased;
+    /* Que el celular no agrande la pantalla al tocar un campo. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  button {
+    @apply font-texto;
+  }
+}
