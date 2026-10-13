@@ -34,3 +34,9 @@ export function parsePesos(input: string): number | null {
   if (!/^\d+(\.\d{1,2})?$/.test(s)) return null;
   return Number(s);
 }
+
+// Movimientos: 100000 → "+$1.000", -80000 → "-$800", 0 → "$0".
+export function formatSigned(cents: number): string {
+  if (cents === 0) return formatPesos(0);
+  return `${cents > 0 ? "+" : "-"}${formatPesos(Math.abs(cents))}`;
+}

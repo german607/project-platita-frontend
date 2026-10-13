@@ -9,6 +9,8 @@ const base =
 const variants = {
   accion: "h-[68px] bg-accion text-[22px] text-tarjeta shadow-accion",
   mostaza: "h-16 bg-mostaza text-xl text-tinta shadow-mostaza",
+  // Botón con borde, para acciones secundarias que no deben llamar la atención.
+  borde: "h-[52px] border-2 border-tinta text-[17px] text-tinta",
   // Botón claro, para usar sobre fondos verdes (pantallas de éxito).
   claro: "h-[68px] bg-fondo text-[22px] text-tinta",
 } as const;

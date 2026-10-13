@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { centsToPesos, formatPesos, parsePesos, pesosToCents } from "./money";
+import { centsToPesos, formatPesos, formatSigned, parsePesos, pesosToCents } from "./money";
 
 describe("formatPesos", () => {
   it("no muestra decimales si el monto es entero", () => {
@@ -56,5 +56,14 @@ describe("conversión pesos ↔ centésimos", () => {
     expect(pesosToCents(19.99)).toBe(1999);
     expect(pesosToCents(0.07)).toBe(7);
     expect(centsToPesos(120000)).toBe(1200);
+  });
+});
+
+describe("formatSigned", () => {
+  it("pone el signo y el formato de pesos", () => {
+    expect(formatSigned(100000)).toBe("+$1.000");
+    expect(formatSigned(-80000)).toBe("-$800");
+    expect(formatSigned(5)).toBe("+$0,05");
+    expect(formatSigned(0)).toBe("$0");
   });
 });

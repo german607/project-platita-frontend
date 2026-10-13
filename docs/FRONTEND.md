@@ -35,6 +35,8 @@ src/
     dates.ts              "Vino hace 12 días" (días de calendario locales)
     merchant.ts           useMerchantId(): el comercio configurado
     bonus.ts              vista previa del bono (misma regla que el backend)
+    payment.ts            formas de pago (efectivo, Mercado Pago, otro) y su nombre
+    useDebounced.ts       espera a que termine de escribir (buscadores)
     api/
       client.ts           ÚNICA puerta a la API: fetch, ApiError, errores de red
       errors.ts           mensaje para personas según el code del backend
@@ -45,7 +47,7 @@ src/
     Button.tsx            botones grandes del diseño (acción, mostaza, claro) y su versión como enlace
     movimiento.tsx        piezas de las pantallas que mueven saldo: aviso de red caída, pantalla de éxito
     states.tsx            vacío, cargando, error y éxito
-  pages/                  una pantalla por archivo: Mostrador, CargarSaldo y Cobrar (reales), Placeholder.tsx (relleno)
+  pages/                  una pantalla por archivo: Mostrador, CargarSaldo, Cobrar, Clientes, Ficha y Ajuste (reales), Placeholder.tsx (relleno)
   test/setup.ts           configuración de los tests
 design/                   referencia visual (ver DISENO.md)
 ```

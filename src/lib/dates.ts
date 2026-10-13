@@ -18,3 +18,29 @@ export function visitLabel(iso: string | null, now: Date = new Date()): string {
   if (days === 1) return "Vino ayer";
   return `Vino hace ${days} días`;
 }
+
+const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+
+// Cuándo pasó algo: "Hoy 11:40", "Ayer 09:05", "2 oct" o "2 oct 2025" si es de otro año.
+export function formatWhen(iso: string, now: Date = new Date()): string {
+  const date = new Date(iso);
+  const days = daysSince(iso, now);
+  const time = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  if (days <= 0) return `Hoy ${time}`;
+  if (days === 1) return `Ayer ${time}`;
+  const base = `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+  return date.getFullYear() === now.getFullYear() ? base : `${base} ${date.getFullYear()}`;
+}
+
+// Última visita para una tabla: "Hoy", "Hace 3 días", "Hace 1 semana", "Hace 2 meses".
+export function visitShort(iso: string | null, now: Date = new Date()): string {
+  if (!iso) return "Todavía no vino";
+  const days = Math.max(0, daysSince(iso, now));
+  if (days === 0) return "Hoy";
+  if (days === 1) return "Ayer";
+  if (days < 7) return `Hace ${days} días`;
+  if (days < 14) return "Hace 1 semana";
+  if (days < 30) return `Hace ${Math.floor(days / 7)} semanas`;
+  const months = Math.floor(days / 30);
+  return months === 1 ? "Hace 1 mes" : `Hace ${months} meses`;
+}

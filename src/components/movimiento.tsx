@@ -10,7 +10,7 @@ import { ErrorState } from "./states";
 // sabe si el movimiento llegó a registrarse, y repetirlo podría duplicarlo.
 // Por eso para ese caso no hay "Probar de nuevo": se manda a revisar el saldo
 // primero. Cualquier otro error se muestra como siempre.
-export function ErrorDeMovimiento({ error, sustantivo }: { error: unknown; sustantivo: "la carga" | "el cobro" }) {
+export function ErrorDeMovimiento({ error, sustantivo }: { error: unknown; sustantivo: "la carga" | "el cobro" | "el ajuste" }) {
   if (error instanceof ApiError && error.code === "NETWORK_ERROR") {
     const repetir = sustantivo === "la carga" ? "repetirla" : "repetirlo";
     return (
@@ -28,7 +28,15 @@ export function ErrorDeMovimiento({ error, sustantivo }: { error: unknown; susta
 
 // Pantalla verde de "listo": tilde, título, lo que quiera mostrar cada
 // pantalla, y la vuelta al Mostrador.
-export function PantallaExito({ titulo, children }: { titulo: string; children: ReactNode }) {
+export function PantallaExito({
+  titulo,
+  children,
+  volverA = { to: "/", label: "Volver al mostrador" },
+}: {
+  titulo: string;
+  children: ReactNode;
+  volverA?: { to: string; label: string };
+}) {
   return (
     <section
       role="status"
@@ -43,8 +51,8 @@ export function PantallaExito({ titulo, children }: { titulo: string; children: 
       <p className="mt-6 font-titulo text-3xl font-extrabold">{titulo}</p>
       {children}
       <div className="mt-8 w-full max-w-[300px]">
-        <ButtonLink to="/" variant="claro">
-          Volver al mostrador
+        <ButtonLink to={volverA.to} variant="claro">
+          {volverA.label}
         </ButtonLink>
       </div>
     </section>

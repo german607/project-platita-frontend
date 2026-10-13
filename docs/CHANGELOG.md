@@ -112,3 +112,24 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   pasando** en 8 archivos (11 nuevos de Cobrar; los 11 de Cargar saldo
   siguen pasando tras extraer `movimiento.tsx`). Cobrar todavía no se vio en
   el navegador.
+- Commit `8d0065e` (Cobrar). Se construyeron **Clientes**, **Ficha del
+  cliente** y **Ajuste** (`src/pages/`), con las rutas `/clientes`,
+  `/clientes/:customerId` y `/ajustar/:customerId`:
+  - Clientes: lista con saldo, buscador con espera (`useDebounced`) que
+    normaliza los números como se guardan (`customerSearchTerm`), tabla en
+    pantalla grande y "Ver más clientes" (`useInfiniteQuery`).
+  - Ficha: saldo, accesos a cobrar/cargar/ajustar y movimientos con cinco
+    filtros (uno por tipo del backend) y paginación.
+  - Ajuste: sumar o restar con motivo obligatorio; no se preselecciona el
+    signo y el saldo no puede quedar en negativo.
+  - Helpers nuevos: `formatSigned`, `formatWhen`, `visitShort`,
+    `customerSearchTerm`, `lib/payment.ts` (formas de pago compartidas con
+    Cargar saldo) y `useDebounced`; variante de botón `borde`, colores de
+    las insignias y `ErrorDeMovimiento` admite "el ajuste".
+  - Nuevo pedido al backend (P2): que el bono diga de qué promo salió.
+  - **Sin ejecutar**: tests de las tres pantallas y de los helpers nuevos,
+    revisados a mano.
+- El usuario corrió `typecheck` y los tests: sin errores y **94 tests
+  pasando** en 11 archivos (8 de Clientes, 8 de la Ficha, 11 de Ajuste y los
+  helpers nuevos). Clientes, Ficha y Ajuste todavía no se vieron en el
+  navegador.

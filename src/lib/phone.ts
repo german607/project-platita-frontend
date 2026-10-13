@@ -22,3 +22,19 @@ export function formatUyPhone(e164: string): string {
     ? `0${local.slice(0, 2)} ${local.slice(2, 5)} ${local.slice(5)}`
     : `${local.slice(0, 4)} ${local.slice(4)}`;
 }
+
+// Lo que se escribe en un buscador de "nombre o teléfono" → lo que se manda al
+// backend. Con letras es un nombre y se manda tal cual. Si son números se manda
+// sin ceros ni prefijo de país, porque el teléfono se guarda como +598…: así
+// "099 123" encuentra a +59899123456. Devuelve undefined si no hay nada que buscar.
+export function customerSearchTerm(raw: string): string | undefined {
+  const text = raw.trim();
+  if (!text) return undefined;
+  if (/[^\d\s+()-]/.test(text)) return text;
+
+  let digits = text.replace(/\D/g, "");
+  if (digits.startsWith("00598")) digits = digits.slice(5);
+  else if (digits.startsWith("598")) digits = digits.slice(3);
+  else if (digits.startsWith("0")) digits = digits.slice(1);
+  return digits || undefined;
+}

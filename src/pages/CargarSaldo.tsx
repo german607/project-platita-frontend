@@ -9,6 +9,7 @@ import type { BonusRule, TopUpResult } from "../lib/api/types";
 import { bonusFor } from "../lib/bonus";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos, parsePesos, pesosToCents } from "../lib/money";
+import { PAYMENT_METHODS as METHODS, paymentLabel, type PaymentMethod as Method } from "../lib/payment";
 
 // Cargar saldo: el cliente entrega plata (efectivo o Mercado Pago, que cobra
 // el comercio por su cuenta) y acá se registra su saldo, con el bono que
@@ -17,13 +18,6 @@ import { formatPesos, parsePesos, pesosToCents } from "../lib/money";
 const QUICK_AMOUNTS = [500, 1000, 2000]; // pesos
 const MAX_PESOS = 1_000_000; // mismo tope que el backend
 
-const METHODS = [
-  { value: "efectivo", label: "Efectivo" },
-  { value: "mercadopago", label: "Mercado Pago" },
-  { value: "otro", label: "Otro" },
-] as const;
-
-type Method = (typeof METHODS)[number]["value"];
 type Choice = number | "otro" | null;
 
 const card = "rounded-panel bg-tarjeta p-5 shadow-tarjeta";
@@ -215,7 +209,7 @@ function Vista({
 }
 
 function ExitoDeCarga({ result, name, method }: { result: TopUpResult; name: string; method: Method }) {
-  const methodLabel = METHODS.find((m) => m.value === method)?.label ?? "";
+  const methodLabel = paymentLabel(method);
   const bonus = result.bonus ? ` + ${formatPesos(result.bonus.amount)} de bono` : "";
 
   return (

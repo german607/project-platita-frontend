@@ -41,9 +41,9 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 
 ## 3. Gestión
 
-- [ ] **P1** Ficha del cliente con historial paginado y filtro por tipo
-- [ ] **P1** Ajuste manual (monto con signo, nota obligatoria)
-- [ ] **P1** Clientes: lista con búsqueda y saldo, paginada
+- [~] **P1** Ficha del cliente con historial paginado y filtro por tipo (`src/pages/Ficha.tsx`; 8 tests pasando; falta verla en el navegador)
+- [~] **P1** Ajuste manual (monto con signo, nota obligatoria) (`src/pages/Ajuste.tsx`; 11 tests pasando; falta verla en el navegador)
+- [~] **P1** Clientes: lista con búsqueda y saldo, paginada (`src/pages/Clientes.tsx`; 8 tests pasando; falta verla en el navegador)
 - [ ] **P1** Promos: listar, crear, editar y activar/desactivar
 - [ ] **P1** Reactivar: lista de inactivos con días configurables; botón de WhatsApp deshabilitado ("próximamente")
 
@@ -60,6 +60,7 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P0** Idempotencia en cargas, cobros y ajustes (por ejemplo un header `Idempotency-Key`): sin ella, si se corta la conexión al confirmar no se sabe si el movimiento se registró y reintentar podría duplicarlo; hoy el frontend avisa que se revise el saldo y no ofrece reintentar
 - [ ] **P1** Vista previa del bono en el servidor (hoy se calcula en pantalla con las reglas activas, duplicando la regla del backend: `src/lib/bonus.ts`)
 - [ ] **P1** Unificar unidades de la API (hoy entra pesos y sale centésimos)
+- [ ] **P2** Que un movimiento de bono diga de qué promo salió (hoy `BONUS` no lo guarda y la ficha solo puede decir "Bono"; el diseño muestra "Promo $1.000+")
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
 
 ## 5. Calidad

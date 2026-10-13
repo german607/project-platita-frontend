@@ -18,7 +18,10 @@ export default {
         crema: "#E8D9BB", // texto sobre el menú oscuro
         rosa: "#F0A794", // logo sobre el menú oscuro
         linea: "#EADCBC", // divisores dentro de tarjetas
-        arena: "#E3D3B2", // botón deshabilitado
+        arena: "#E3D3B2", // botón deshabilitado, insignia de ajuste
+        "carga-suave": "#D8E8DC", // insignia de carga
+        "bono-suave": "#F3DFA6", // insignia de bono
+        "cobro-suave": "#F1CFC6", // insignia de cobro
       },
       fontFamily: {
         titulo: ["'Bricolage Grotesque'", "system-ui", "sans-serif"],

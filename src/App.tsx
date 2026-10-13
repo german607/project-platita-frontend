@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { Ajuste } from "./pages/Ajuste";
 import { CargarSaldo } from "./pages/CargarSaldo";
+import { Clientes } from "./pages/Clientes";
 import { Cobrar } from "./pages/Cobrar";
+import { Ficha } from "./pages/Ficha";
 import { Mostrador } from "./pages/Mostrador";
 import { Placeholder } from "./pages/Placeholder";
 
@@ -24,7 +27,9 @@ export function App() {
             <Route index element={<Mostrador />} />
             <Route path="cobrar/:customerId" element={<Cobrar />} />
             <Route path="cargar/:customerId" element={<CargarSaldo />} />
-            <Route path="clientes" element={<Placeholder title="Clientes" />} />
+            <Route path="clientes" element={<Clientes />} />
+            <Route path="clientes/:customerId" element={<Ficha />} />
+            <Route path="ajustar/:customerId" element={<Ajuste />} />
             <Route path="promos" element={<Placeholder title="Promos" />} />
             <Route path="reactivar" element={<Placeholder title="Reactivar clientes" />} />
             <Route path="*" element={<Placeholder title="No encontrada" />} />
