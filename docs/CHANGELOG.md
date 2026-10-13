@@ -74,3 +74,21 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   Mostrador: `GET …/customers?search=59899123456&limit=5` → 200 y
   "Este número es nuevo". No se probó crear un cliente (escribe en la base
   del usuario).
+- Se hicieron los dos primeros commits del repo en la rama
+  `jeronimo/base-frontend` (documentación y diseño; proyecto base con
+  Mostrador). El `.env.example` quedó afuera: el usuario lo creó pero está
+  vacío.
+- Se construyó **Cargar saldo** (`src/pages/CargarSaldo.tsx`) y
+  `src/lib/bonus.ts` (vista previa del bono con la misma regla que el
+  backend), más el botón `claro` y la ruta `/cargar/:customerId`. Dos
+  decisiones sobre dinero: no se preselecciona ningún monto, y si falla la
+  red al confirmar no se ofrece reintentar (podría duplicar la carga: el
+  backend no tiene idempotencia, ahora pedido P0 en el TODO). Se escribieron
+  tests de la pantalla y de `bonusFor`. **Sin ejecutar.**
+- El usuario corrió `typecheck` y los tests: sin errores y **47 tests
+  pasando** (11 de Cargar saldo, 7 del Mostrador, 5 del bono). Cargar
+  saldo sigue sin verse en el navegador. Los tests muestran avisos de
+  React Router v7, anotados en el TODO como P2.
+- El usuario completó el `.env.example` (las tres variables, sin valores) y
+  se commiteó aparte. El usuario probó Cargar saldo en el navegador y
+  funciona.

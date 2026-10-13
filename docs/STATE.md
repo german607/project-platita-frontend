@@ -30,9 +30,10 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con 20 tests pasando
-  (dinero, teléfono y cliente de la API). El `typecheck` encontró un error
-  real, ya corregido.
+  typecheck` sin errores y `npm run test:run` con **47 tests pasando** en 7
+  archivos (dinero, teléfono, fechas, bono, cliente de la API, Mostrador y
+  Cargar saldo). El `typecheck` encontró un error real en su momento, ya
+  corregido.
 - **Verificado en el navegador (2026-10-13, backend local en el 3001):**
   el proxy `/api` funciona (sin CORS), el chip con el nombre del comercio
   aparece, el menú lateral oscuro coincide con el diseño y el Mostrador
@@ -42,11 +43,13 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   celular (ancho chico), el estado de error de red y el contraste final
   contra el diseño. `npm install` reportó 15 vulnerabilidades (2
   críticas) sin analizar: ver el TODO.
-- **Pantallas:** el **Mostrador** está construido (buscar por teléfono, ver
-  saldo, crear cliente nuevo), junto con el `Layout` y los botones según el
-  diseño; los tests pasan (según el usuario; sin el recuento). Cobrar y Cargar saldo son rutas de relleno,
-  igual que Clientes, Promos y Reactivar. Ver [`../TODO.md`](../TODO.md) §2
-  y §3.
+- **Pantallas:** el **Mostrador** (buscar por teléfono, ver saldo, crear
+  cliente) y **Cargar saldo** (monto, forma de pago, vista previa del bono
+  y confirmación) están construidos según el diseño. El Mostrador está
+  probado en el navegador (parte de lectura); Cargar saldo tiene sus tests
+  pasando pero **todavía no se vio en el navegador**. Cobrar,
+  Clientes, Promos y Reactivar son rutas de relleno. Ver
+  [`../TODO.md`](../TODO.md) §2 y §3.
 
 ## El backend con el que se va a conectar
 
@@ -69,8 +72,6 @@ Consecuencias para este repo, ya registradas en el TODO (§4):
 - Las pantallas Cargar saldo, Cobrar, Ficha, Clientes, Promos y Reactivar,
   y el panel "Hoy en el mostrador" (falta un listado de movimientos del
   comercio en el backend).
-- Un `.env.example` commiteado (el entorno de la IA no puede escribir
-  archivos `.env*`; las variables están en `FRONTEND.md`).
 - Lint, CI y despliegue.
 
 ## Decisiones abiertas

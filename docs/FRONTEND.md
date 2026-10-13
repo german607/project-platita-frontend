@@ -34,6 +34,7 @@ src/
     phone.ts              normalizar y formatear teléfonos uruguayos
     dates.ts              "Vino hace 12 días" (días de calendario locales)
     merchant.ts           useMerchantId(): el comercio configurado
+    bonus.ts              vista previa del bono (misma regla que el backend)
     api/
       client.ts           ÚNICA puerta a la API: fetch, ApiError, errores de red
       errors.ts           mensaje para personas según el code del backend
@@ -43,7 +44,7 @@ src/
     Layout.tsx            menú inferior (celular) y lateral oscuro (web), chip del comercio
     Button.tsx            botones grandes del diseño (acción y mostaza) y su versión como enlace
     states.tsx            vacío, cargando, error y éxito
-  pages/                  una pantalla por archivo: Mostrador.tsx (real) y Placeholder.tsx (relleno)
+  pages/                  una pantalla por archivo: Mostrador.tsx y CargarSaldo.tsx (reales), Placeholder.tsx (relleno)
   test/setup.ts           configuración de los tests
 design/                   referencia visual (ver DISENO.md)
 ```
@@ -62,8 +63,9 @@ VITE_API_PROXY_TARGET=http://localhost:3001
 VITE_MERCHANT_ID=
 ```
 
-(No hay `.env.example` commiteado porque el entorno de la IA no puede
-escribir archivos `.env*`: si se quiere, crearlo a mano con ese contenido.)
+El `.env.example` commiteado lista las tres variables sin valores; los
+valores por defecto y su explicación son los de este bloque. (El entorno de
+la IA no puede escribir archivos `.env*`: los edita una persona.)
 
 ## Comandos
 

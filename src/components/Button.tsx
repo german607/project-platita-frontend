@@ -9,6 +9,8 @@ const base =
 const variants = {
   accion: "h-[68px] bg-accion text-[22px] text-tarjeta shadow-accion",
   mostaza: "h-16 bg-mostaza text-xl text-tinta shadow-mostaza",
+  // Botón claro, para usar sobre fondos verdes (pantallas de éxito).
+  claro: "h-[68px] bg-fondo text-[22px] text-tinta",
 } as const;
 
 type Variant = keyof typeof variants;
