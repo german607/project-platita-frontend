@@ -69,7 +69,9 @@ VITE_MERCHANT_ID=
 ```
 
 El `.env.example` commiteado lista las tres variables sin valores; los
-valores por defecto y su explicación son los de este bloque. (El entorno de
+valores por defecto y su explicación son los de este bloque. Una variable
+vacía vale lo mismo que no estar (usa el valor por defecto): solo
+`VITE_MERCHANT_ID` hace falta de verdad. (El entorno de
 la IA no puede escribir archivos `.env*`: los edita una persona.)
 
 ## Comandos

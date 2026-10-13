@@ -30,7 +30,7 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **147 tests pasando** en 15
+  typecheck` sin errores y `npm run test:run` con **152 tests pasando** en 16
   archivos (dinero, teléfono, fechas, bono, cliente de la API y las nueve
   pantallas y formularios). El `typecheck` encontró un error real en su momento, ya
   corregido.

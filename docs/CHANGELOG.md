@@ -241,3 +241,11 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   - Verificado por la IA con `node_modules/.bin`: `tsc` sin errores y **147
     tests pasando** en 15 archivos. Sin probar en el navegador contra el
     backend nuevo.
+- Se reescribió el `README.md` como guía de arranque paso a paso (backend,
+  crear un comercio y una promo, frontend, probarlo), con las variables, los
+  comandos, cómo probar desde el celular y los problemas más comunes.
+- Corrección al preparar el README: copiar `.env.example` deja
+  `VITE_API_URL` **vacía** y la configuración la tomaba como "sin proxy" (las
+  llamadas no llegaban al backend). Ahora una variable vacía vale lo mismo que
+  no estar y usa el valor por defecto (`parseConfig` en `src/config.ts`, con
+  tests).
