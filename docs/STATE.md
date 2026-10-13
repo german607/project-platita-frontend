@@ -30,9 +30,9 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **47 tests pasando** en 7
-  archivos (dinero, teléfono, fechas, bono, cliente de la API, Mostrador y
-  Cargar saldo). El `typecheck` encontró un error real en su momento, ya
+  typecheck` sin errores y `npm run test:run` con **58 tests pasando** en 8
+  archivos (dinero, teléfono, fechas, bono, cliente de la API, Mostrador,
+  Cargar saldo y Cobrar). El `typecheck` encontró un error real en su momento, ya
   corregido.
 - **Verificado en el navegador (2026-10-13, backend local en el 3001):**
   el proxy `/api` funciona (sin CORS), el chip con el nombre del comercio
@@ -43,13 +43,12 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   celular (ancho chico), el estado de error de red y el contraste final
   contra el diseño. `npm install` reportó 15 vulnerabilidades (2
   críticas) sin analizar: ver el TODO.
-- **Pantallas:** el **Mostrador** (buscar por teléfono, ver saldo, crear
-  cliente) y **Cargar saldo** (monto, forma de pago, vista previa del bono
-  y confirmación) están construidos según el diseño. El Mostrador está
-  probado en el navegador (parte de lectura); Cargar saldo tiene sus tests
-  pasando pero **todavía no se vio en el navegador**. Cobrar,
-  Clientes, Promos y Reactivar son rutas de relleno. Ver
-  [`../TODO.md`](../TODO.md) §2 y §3.
+- **Pantallas:** **Mostrador**, **Cargar saldo** y **Cobrar** están
+  construidas según el diseño. El Mostrador y Cargar saldo se probaron en
+  el navegador contra el backend local; **Cobrar tiene sus 11 tests
+  pasando pero todavía no se vio en el navegador**. Clientes,
+  Promos y Reactivar (y las pantallas de Ficha y Ajuste) son rutas de
+  relleno o no existen todavía. Ver [`../TODO.md`](../TODO.md) §2 y §3.
 
 ## El backend con el que se va a conectar
 

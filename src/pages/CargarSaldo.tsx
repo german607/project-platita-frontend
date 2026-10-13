@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Button, ButtonLink } from "../components/Button";
+import { Button } from "../components/Button";
+import { ErrorDeMovimiento, MontoGrande, PantallaExito } from "../components/movimiento";
 import { ErrorState, LoadingState } from "../components/states";
-import { ApiError } from "../lib/api/client";
 import { getCustomer, listBonusRules, topUp } from "../lib/api/endpoints";
 import type { BonusRule, TopUpResult } from "../lib/api/types";
 import { bonusFor } from "../lib/bonus";
@@ -60,9 +60,7 @@ export function CargarSaldo() {
   const cents = pesos === null ? null : pesosToCents(pesos);
 
   if (confirm.isSuccess) {
-    return (
-      <Exito result={confirm.data} name={customer.data?.name ?? "El cliente"} method={method} />
-    );
+    return <ExitoDeCarga result={confirm.data} name={customer.data?.name ?? "El cliente"} method={method} />;
   }
   if (customer.isPending) return <LoadingState label="Cargando al cliente…" />;
   if (customer.isError) return <ErrorState error={customer.error} onRetry={() => void customer.refetch()} />;
@@ -157,7 +155,7 @@ export function CargarSaldo() {
             <Vista cents={cents} before={before} rules={rules} />
           )}
 
-          {confirm.isError && <ErrorDeCarga error={confirm.error} />}
+          {confirm.isError && <ErrorDeMovimiento error={confirm.error} sustantivo="la carga" />}
 
           <Button
             disabled={pesos === null || confirm.isPending}
@@ -216,50 +214,15 @@ function Vista({
   );
 }
 
-// El backend todavía no tiene idempotencia: si se corta la conexión no se
-// sabe si la carga llegó a registrarse, y repetirla podría duplicarla. Por
-// eso acá no hay "Probar de nuevo": se manda a revisar el saldo primero.
-function ErrorDeCarga({ error }: { error: unknown }) {
-  if (error instanceof ApiError && error.code === "NETWORK_ERROR") {
-    return (
-      <div role="alert" className="rounded-panel border border-accion bg-tarjeta p-5">
-        <p className="font-titulo text-xl font-extrabold text-accion">No pudimos confirmar si la carga se registró.</p>
-        <p className="mt-1 text-suave">Antes de repetirla, revisá el saldo del cliente en el Mostrador.</p>
-        <ButtonLink to="/" variant="mostaza" className="mt-3">
-          Ir al Mostrador
-        </ButtonLink>
-      </div>
-    );
-  }
-  return <ErrorState error={error} />;
-}
-
-function Exito({ result, name, method }: { result: TopUpResult; name: string; method: Method }) {
+function ExitoDeCarga({ result, name, method }: { result: TopUpResult; name: string; method: Method }) {
   const methodLabel = METHODS.find((m) => m.value === method)?.label ?? "";
   const bonus = result.bonus ? ` + ${formatPesos(result.bonus.amount)} de bono` : "";
 
   return (
-    <section
-      role="status"
-      className="flex flex-col items-center rounded-panel bg-saldo px-6 py-10 text-center text-tarjeta"
-    >
-      <div
-        aria-hidden="true"
-        className="flex h-24 w-24 items-center justify-center rounded-full bg-fondo font-titulo text-[56px] font-extrabold text-saldo"
-      >
-        ✓
-      </div>
-      <p className="mt-6 font-titulo text-3xl font-extrabold">¡Carga lista!</p>
+    <PantallaExito titulo="¡Carga lista!">
       <p className="mt-1.5">{`${name} ahora tiene`}</p>
-      <p className="font-titulo text-[80px] font-extrabold leading-[1.1] tracking-[-3px]">
-        {formatPesos(result.balance)}
-      </p>
+      <MontoGrande>{formatPesos(result.balance)}</MontoGrande>
       <p>{`${formatPesos(result.topup.amount)}${bonus} · ${methodLabel}`}</p>
-      <div className="mt-8 w-full max-w-[300px]">
-        <ButtonLink to="/" variant="claro">
-          Volver al mostrador
-        </ButtonLink>
-      </div>
-    </section>
+    </PantallaExito>
   );
 }

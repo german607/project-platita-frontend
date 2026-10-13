@@ -42,9 +42,10 @@ src/
       endpoints.ts        una función por endpoint
   components/
     Layout.tsx            menú inferior (celular) y lateral oscuro (web), chip del comercio
-    Button.tsx            botones grandes del diseño (acción y mostaza) y su versión como enlace
+    Button.tsx            botones grandes del diseño (acción, mostaza, claro) y su versión como enlace
+    movimiento.tsx        piezas de las pantallas que mueven saldo: aviso de red caída, pantalla de éxito
     states.tsx            vacío, cargando, error y éxito
-  pages/                  una pantalla por archivo: Mostrador.tsx y CargarSaldo.tsx (reales), Placeholder.tsx (relleno)
+  pages/                  una pantalla por archivo: Mostrador, CargarSaldo y Cobrar (reales), Placeholder.tsx (relleno)
   test/setup.ts           configuración de los tests
 design/                   referencia visual (ver DISENO.md)
 ```

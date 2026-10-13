@@ -18,6 +18,7 @@ export default {
         crema: "#E8D9BB", // texto sobre el menú oscuro
         rosa: "#F0A794", // logo sobre el menú oscuro
         linea: "#EADCBC", // divisores dentro de tarjetas
+        arena: "#E3D3B2", // botón deshabilitado
       },
       fontFamily: {
         titulo: ["'Bricolage Grotesque'", "system-ui", "sans-serif"],

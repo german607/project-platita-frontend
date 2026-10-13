@@ -92,3 +92,23 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - El usuario completó el `.env.example` (las tres variables, sin valores) y
   se commiteó aparte. El usuario probó Cargar saldo en el navegador y
   funciona.
+- Commits `18cd3a0` (`.env.example`) y `d9c7c9d` (Cargar saldo). El usuario
+  confirmó que Cargar saldo funciona en el navegador.
+- Se construyó **Cobrar** (`src/pages/Cobrar.tsx`): monto escrito en el
+  número grande, nota opcional, "Saldo ahora" y "Quedaría", y si no alcanza
+  "Le faltan $X" con botón a Cargar saldo y el cobro deshabilitado. Si el
+  saldo cambió y el backend responde 422, el faltante sale de su respuesta;
+  al cambiar el monto se borra el aviso. Sin "reintentar" ante una red
+  caída, por la falta de idempotencia. Se agregó el color `arena` (botón
+  deshabilitado) y la ruta ya no es de relleno.
+- Se extrajo `src/components/movimiento.tsx` (aviso de red caída, pantalla
+  de éxito y monto grande) y `CargarSaldo` pasó a usarlo; Ajuste lo va a
+  reutilizar.
+- Se había perdido por error la fila de Cobrar de la tabla de pantallas de
+  `docs/DISENO.md` (una expresión regular mal acotada, en el commit de Cargar
+  saldo); se restauró con las notas nuevas. **Sin ejecutar**: 11 tests nuevos
+  de Cobrar y la refactorización de Cargar saldo se revisaron a mano.
+- El usuario corrió `typecheck` y los tests: sin errores y **58 tests
+  pasando** en 8 archivos (11 nuevos de Cobrar; los 11 de Cargar saldo
+  siguen pasando tras extraer `movimiento.tsx`). Cobrar todavía no se vio en
+  el navegador.

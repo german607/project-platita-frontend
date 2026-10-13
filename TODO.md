@@ -36,7 +36,7 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 - [~] **P0** Mostrador: buscar cliente por teléfono, ver saldo, estado "cliente nuevo" y crear (`src/pages/Mostrador.tsx`; 7 tests pasando y verificado en el navegador contra el backend local: busca, avisa "Seguí escribiendo…" y muestra "Este número es nuevo"). Sin probar todavía: **crear** un cliente, ver un cliente existente con saldo, el celular y el error de red
 - [ ] **P1** Panel "Hoy en el mostrador" (columna derecha del diseño web); depende del pedido al backend de movimientos del comercio
 - [~] **P0** Cargar saldo con vista previa del bono (`src/pages/CargarSaldo.tsx`, `src/lib/bonus.ts`; 11 tests de la pantalla + 5 del bono pasando; falta verla en el navegador). Decisiones: no se preselecciona ningún monto y, si se corta la red al confirmar, no hay "reintentar" (ver el pedido de idempotencia)
-- [ ] **P0** Cobrar, con los estados "éxito" y "saldo insuficiente (le faltan $X)"
+- [~] **P0** Cobrar, con los estados "éxito" y "saldo insuficiente (le faltan $X)" (`src/pages/Cobrar.tsx`, 11 tests pasando; falta verla en el navegador)
 - [~] **P0** Navegación celular (menú inferior) y web (menú lateral oscuro de 200px) con el chip del comercio (`src/components/Layout.tsx`, según el diseño; sin ver en el navegador). Las rutas `/cobrar/:id` y `/cargar/:id` son de relleno
 
 ## 3. Gestión
