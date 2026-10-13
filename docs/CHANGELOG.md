@@ -221,3 +221,23 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   el código nuevo ignoraría el filtro y el Mostrador mostraría a otra persona
   (y se le podría cobrar). Un test lo cubre. `tsc` sin errores y **127 tests
   pasando** en 14 archivos.
+- El usuario probó el reintento seguro (con el backend caído aparece
+  "Reintentar" y al volver se registra un solo cobro) y pidió dejar para
+  después la prueba de la repetición real desde la consola del backend (anotada
+  en el TODO).
+- Segunda tanda de adopción del backend nuevo:
+  - **Panel "Hoy en el mostrador"** (`components/HoyEnElMostrador.tsx`) en el
+    Mostrador de pantalla grande: últimos 10 movimientos del comercio desde
+    las 00:00 (`GET /merchants/:m/transactions`), con `todayRange` (fechas ISO
+    con zona horaria) y `formatTime`. En el celular no se pide.
+  - **Promos**: nombre y descripción opcionales en el formulario (vacíos no se
+    mandan al crear y se borran con `null` al editar), título por nombre en el
+    listado y "Usada N veces" (`timesUsed`).
+  - **Ficha**: cada bono dice de qué promo salió, resolviendo `bonusRuleId`
+    con las promos (nombre, o "Promo $1.000+" si no tiene); los bonos viejos
+    siguen diciendo solo "Bono".
+  - Tipos y funciones: `MerchantTransaction`, `listMerchantTransactions` y los
+    campos de promos en `createBonusRule` / `updateBonusRule`.
+  - Verificado por la IA con `node_modules/.bin`: `tsc` sin errores y **147
+    tests pasando** en 15 archivos. Sin probar en el navegador contra el
+    backend nuevo.

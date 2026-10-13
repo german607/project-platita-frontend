@@ -89,6 +89,41 @@ describe("Promo · crear", () => {
     expect(await screen.findByText("LISTA")).toBeInTheDocument();
   });
 
+  it("guarda el nombre y la descripción cuando se escriben", async () => {
+    mockCreate.mockResolvedValue({ ...r1, id: "r9" });
+    renderAt("/promos/nueva");
+    await screen.findByText("Nueva promo");
+    type(desde(), "1500");
+    type(regalo(), "250");
+    type(screen.getByLabelText("Nombre (opcional)"), "  Promo de verano ");
+    type(screen.getByLabelText("Descripción (opcional)"), "Válida hasta fin de mes");
+    fireEvent.click(guardar());
+
+    await waitFor(() =>
+      expect(mockCreate).toHaveBeenCalledWith("m1", {
+        minTopUp: 1500,
+        bonusAmount: 250,
+        active: true,
+        name: "Promo de verano",
+        description: "Válida hasta fin de mes",
+      }),
+    );
+  });
+
+  it("sin nombre ni descripción, no los manda", async () => {
+    mockCreate.mockResolvedValue({ ...r1, id: "r9" });
+    renderAt("/promos/nueva");
+    await screen.findByText("Nueva promo");
+    type(desde(), "1500");
+    type(regalo(), "250");
+    fireEvent.click(guardar());
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled());
+    const body = mockCreate.mock.calls[0][1];
+    expect(body.name).toBeUndefined();
+    expect(body.description).toBeUndefined();
+  });
+
   it("puede guardarse apagada", async () => {
     mockCreate.mockResolvedValue({ ...r1, id: "r9", active: false });
     renderAt("/promos/nueva");
@@ -157,10 +192,41 @@ describe("Promo · editar", () => {
     fireEvent.click(guardar());
 
     await waitFor(() =>
-      expect(mockUpdate).toHaveBeenCalledWith("r1", { minTopUp: 1000, bonusAmount: 300, active: true }),
+      expect(mockUpdate).toHaveBeenCalledWith("r1", {
+        minTopUp: 1000,
+        bonusAmount: 300,
+        active: true,
+        name: null,
+        description: null,
+      }),
     );
     expect(mockCreate).not.toHaveBeenCalled();
     expect(await screen.findByText("LISTA")).toBeInTheDocument();
+  });
+
+  it("parte con el nombre y la descripción de la promo, y al borrarlos los manda como null", async () => {
+    mockList.mockResolvedValue({
+      data: [{ ...r1, name: "Promo de verano", description: "Válida hasta fin de mes" }, r2],
+    });
+    mockUpdate.mockResolvedValue(r1);
+    renderAt("/promos/r1/editar");
+    await screen.findByText("Editar promo");
+
+    expect(screen.getByLabelText("Nombre (opcional)")).toHaveValue("Promo de verano");
+    expect(screen.getByLabelText("Descripción (opcional)")).toHaveValue("Válida hasta fin de mes");
+
+    type(screen.getByLabelText("Nombre (opcional)"), "");
+    fireEvent.click(guardar());
+
+    await waitFor(() =>
+      expect(mockUpdate).toHaveBeenCalledWith("r1", {
+        minTopUp: 1000,
+        bonusAmount: 200,
+        active: true,
+        name: null,
+        description: "Válida hasta fin de mes",
+      }),
+    );
   });
 
   it("no avisa de mínimo repetido contra sí misma", async () => {

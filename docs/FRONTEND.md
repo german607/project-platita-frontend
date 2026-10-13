@@ -46,7 +46,8 @@ src/
   components/
     Layout.tsx            menú inferior (celular) y lateral oscuro (web), chip del comercio
     Button.tsx            botones grandes del diseño (acción, mostaza, claro) y su versión como enlace
-    movimiento.tsx        piezas de las pantallas que mueven saldo: aviso de red caída, pantalla de éxito
+    movimiento.tsx        piezas de las pantallas que mueven saldo: reintento seguro, pantalla de éxito
+    HoyEnElMostrador.tsx  panel de los movimientos de hoy (Mostrador en pantalla grande)
     states.tsx            vacío, cargando, error y éxito
   pages/                  una pantalla por archivo: una por pantalla (Mostrador, CargarSaldo, Cobrar, Clientes, Ficha, Ajuste, Promos, PromoForm y Reactivar); Placeholder.tsx solo para rutas inexistentes
   test/setup.ts           configuración de los tests

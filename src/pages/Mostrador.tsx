@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button, ButtonLink } from "../components/Button";
+import { HoyEnElMostrador } from "../components/HoyEnElMostrador";
 import { ErrorState, LoadingState } from "../components/states";
 import { listCustomers, upsertCustomer } from "../lib/api/endpoints";
 import type { CustomerWithBalance } from "../lib/api/types";
@@ -8,6 +9,7 @@ import { visitLabel } from "../lib/dates";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos } from "../lib/money";
 import { normalizeUyPhone } from "../lib/phone";
+import { useMediaQuery } from "../lib/useMediaQuery";
 
 // Mostrador: la pantalla que se usa con el cliente delante. Se escribe el
 // teléfono; si el cliente existe se ve su saldo y se pasa a Cobrar o Cargar,
@@ -47,60 +49,68 @@ export function Mostrador() {
   });
 
   const digits = raw.replace(/\D/g, "").length;
+  // El panel de los movimientos de hoy es de la pantalla grande: en el celular no se pide.
+  const desktop = useMediaQuery("(min-width: 1024px)");
 
   return (
     <section className="flex flex-col gap-[18px]">
       <h1 className="hidden font-titulo text-[28px] font-extrabold lg:block">Mostrador</h1>
 
-      <input
-        type="tel"
-        inputMode="tel"
-        autoComplete="off"
-        aria-label="Teléfono del cliente"
-        placeholder="099 123 456"
-        value={raw}
-        onChange={(e) => setRaw(e.target.value)}
-        className="h-[66px] w-full rounded-campo border-[3px] border-tinta bg-tarjeta px-[18px] font-texto text-[28px] font-bold placeholder:text-borde lg:h-[68px] lg:text-3xl"
-      />
+      <div className="flex flex-col gap-[18px] lg:grid lg:grid-cols-[1.4fr_1fr] lg:items-start lg:gap-7">
+        <div className="flex flex-col gap-[18px]">
+          <input
+            type="tel"
+            inputMode="tel"
+            autoComplete="off"
+            aria-label="Teléfono del cliente"
+            placeholder="099 123 456"
+            value={raw}
+            onChange={(e) => setRaw(e.target.value)}
+            className="h-[66px] w-full rounded-campo border-[3px] border-tinta bg-tarjeta px-[18px] font-texto text-[28px] font-bold placeholder:text-borde lg:h-[68px] lg:text-3xl"
+          />
 
-      {raw.trim() === "" && <p className="px-1 text-suave">Escribí el teléfono del cliente para empezar.</p>}
+          {raw.trim() === "" && <p className="px-1 text-suave">Escribí el teléfono del cliente para empezar.</p>}
 
-      {raw.trim() !== "" && phone === null && (
-        <p className="px-1 text-suave">
-          {digits < 8 ? "Seguí escribiendo…" : "Ese número no parece uruguayo. Revisalo."}
-        </p>
-      )}
+          {raw.trim() !== "" && phone === null && (
+            <p className="px-1 text-suave">
+              {digits < 8 ? "Seguí escribiendo…" : "Ese número no parece uruguayo. Revisalo."}
+            </p>
+          )}
 
-      {phone !== null && lookup.isPending && <LoadingState label="Buscando…" />}
+          {phone !== null && lookup.isPending && <LoadingState label="Buscando…" />}
 
-      {phone !== null && lookup.isError && <ErrorState error={lookup.error} onRetry={() => void lookup.refetch()} />}
+          {phone !== null && lookup.isError && <ErrorState error={lookup.error} onRetry={() => void lookup.refetch()} />}
 
-      {phone !== null && lookup.isSuccess && lookup.data && <ClienteEncontrado customer={lookup.data} />}
+          {phone !== null && lookup.isSuccess && lookup.data && <ClienteEncontrado customer={lookup.data} />}
 
-      {phone !== null && lookup.isSuccess && lookup.data === null && (
-        <>
-          <div className={card}>
-            <p className="font-titulo text-2xl font-extrabold lg:text-[28px]">Este número es nuevo</p>
-            <p className="mt-1 text-suave">Lo anotamos con solo el teléfono.</p>
-            <input
-              type="text"
-              autoComplete="off"
-              aria-label="Nombre (opcional)"
-              placeholder="Nombre (opcional)"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-3.5 h-14 w-full rounded-tarjeta border-2 border-borde bg-tarjeta px-4 font-texto text-[17px] font-bold placeholder:text-suave"
-            />
-          </div>
-          {create.isError && <ErrorState error={create.error} />}
-          <Button
-            disabled={create.isPending}
-            onClick={() => create.mutate({ phone, name: name.trim() || undefined })}
-          >
-            {create.isPending ? "Creando…" : "Crear cliente"}
-          </Button>
-        </>
-      )}
+          {phone !== null && lookup.isSuccess && lookup.data === null && (
+            <>
+              <div className={card}>
+                <p className="font-titulo text-2xl font-extrabold lg:text-[28px]">Este número es nuevo</p>
+                <p className="mt-1 text-suave">Lo anotamos con solo el teléfono.</p>
+                <input
+                  type="text"
+                  autoComplete="off"
+                  aria-label="Nombre (opcional)"
+                  placeholder="Nombre (opcional)"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-3.5 h-14 w-full rounded-tarjeta border-2 border-borde bg-tarjeta px-4 font-texto text-[17px] font-bold placeholder:text-suave"
+                />
+              </div>
+              {create.isError && <ErrorState error={create.error} />}
+              <Button
+                disabled={create.isPending}
+                onClick={() => create.mutate({ phone, name: name.trim() || undefined })}
+              >
+                {create.isPending ? "Creando…" : "Crear cliente"}
+              </Button>
+            </>
+          )}
+        </div>
+
+        {desktop && <HoyEnElMostrador merchantId={merchantId} />}
+      </div>
     </section>
   );
 }

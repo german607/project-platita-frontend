@@ -3,9 +3,10 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ButtonLink } from "../components/Button";
 import { EmptyState, ErrorState, LoadingState } from "../components/states";
-import { getCustomer, listTransactions } from "../lib/api/endpoints";
-import type { Transaction, TransactionType } from "../lib/api/types";
+import { getCustomer, listBonusRules, listTransactions } from "../lib/api/endpoints";
+import type { BonusRule, Transaction, TransactionType } from "../lib/api/types";
 import { formatWhen, visitLabel } from "../lib/dates";
+import { useMerchantId } from "../lib/merchant";
 import { formatPesos, formatSigned } from "../lib/money";
 import { paymentLabel } from "../lib/payment";
 import { useMediaQuery } from "../lib/useMediaQuery";
@@ -28,6 +29,7 @@ const FILTERS: { label: string; type: TransactionType | undefined }[] = [
 
 export function Ficha() {
   const { customerId = "" } = useParams();
+  const merchantId = useMerchantId();
   const [type, setType] = useState<TransactionType | undefined>(undefined);
   const pageSize = useMediaQuery("(min-width: 1024px)") ? PAGE_SIZE_DESKTOP : PAGE_SIZE_MOBILE;
 
@@ -44,6 +46,11 @@ export function Ficha() {
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled: customerId !== "",
   });
+
+  // Las promos, para ponerle nombre a cada bono. Si no cargan, el bono se ve
+  // igual, solo que sin decir de qué promo salió.
+  const rules = useQuery({ queryKey: ["bonus-rules", merchantId], queryFn: () => listBonusRules(merchantId) });
+  const rulesById = new Map((rules.data?.data ?? []).map((rule) => [rule.id, rule]));
 
   if (customer.isPending) return <LoadingState label="Cargando al cliente…" />;
   if (customer.isError) return <ErrorState error={customer.error} onRetry={() => void customer.refetch()} />;
@@ -110,7 +117,7 @@ export function Ficha() {
         {rows.length > 0 && (
           <ul>
             {rows.map((row) => (
-              <Movimiento key={row.id} row={row} />
+              <Movimiento key={row.id} row={row} promo={row.bonusRuleId ? rulesById.get(row.bonusRuleId) : undefined} />
             ))}
           </ul>
         )}
@@ -141,19 +148,27 @@ const BADGES: Record<TransactionType, { label: string; className: string }> = {
   ADJUSTMENT: { label: "Ajuste", className: "bg-arena" },
 };
 
-// Lo que aclara cada movimiento: la forma de pago de una carga, o la nota de
-// un cobro o un ajuste. El bono no guarda de qué promo vino.
-function detalle(row: Transaction): string {
-  return row.type === "TOPUP" ? paymentLabel(row.paidWith) : (row.note ?? "");
+// Lo que aclara cada movimiento: la forma de pago de una carga, la promo de un
+// bono ("Promo de verano" o, si no tiene nombre, "Promo $1.000+"), o la nota de
+// un cobro o un ajuste. Los bonos viejos no guardan de qué promo salieron.
+function detalle(row: Transaction, promo: BonusRule | undefined): string {
+  switch (row.type) {
+    case "TOPUP":
+      return paymentLabel(row.paidWith);
+    case "BONUS":
+      return promo ? (promo.name ?? `Promo ${formatPesos(promo.minTopUp)}+`) : "";
+    default:
+      return row.note ?? "";
+  }
 }
 
-function Movimiento({ row }: { row: Transaction }) {
+function Movimiento({ row, promo }: { row: Transaction; promo: BonusRule | undefined }) {
   const badge = BADGES[row.type];
   return (
     <li className="flex items-center justify-between gap-3 border-b border-arena py-2.5 text-sm font-bold lg:border-linea lg:py-3 lg:text-base">
       <span>
         <span className={`mr-2 inline-block rounded-full px-2.5 py-0.5 text-[13px] ${badge.className}`}>{badge.label}</span>
-        {detalle(row)}
+        {detalle(row, promo)}
         <span className="block text-xs text-suave lg:text-[13px]">{formatWhen(row.createdAt)}</span>
       </span>
       <span

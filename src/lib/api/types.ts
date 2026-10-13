@@ -50,6 +50,11 @@ export interface Transaction {
   createdAt: string;
 }
 
+// Un movimiento visto desde el comercio: trae a qué cliente pertenece.
+export type MerchantTransaction = Transaction & {
+  customer: { id: string; name: string | null; phone: string };
+};
+
 export interface Page<T> {
   data: T[];
   nextCursor: string | null;

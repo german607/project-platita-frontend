@@ -52,3 +52,30 @@ export function daysAgo(iso: string, now: Date = new Date()): string {
   if (days === 1) return "Ayer";
   return `Hace ${days} días`;
 }
+
+// "11:40", de una fecha ISO, en la hora de la máquina.
+export function formatTime(iso: string): string {
+  const date = new Date(iso);
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+// Fecha ISO con la zona horaria de la máquina (2026-10-13T00:00:00-03:00): el
+// backend necesita el desfase para saber cuándo empieza "hoy" para quien pregunta.
+function isoWithOffset(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const offset = -date.getTimezoneOffset();
+  const sign = offset >= 0 ? "+" : "-";
+  const hh = pad(Math.floor(Math.abs(offset) / 60));
+  const mm = pad(Math.abs(offset) % 60);
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${hh}:${mm}`
+  );
+}
+
+// Desde las 00:00 de hoy (inclusive) hasta las 00:00 de mañana (exclusive).
+export function todayRange(now: Date = new Date()): { from: string; to: string } {
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return { from: isoWithOffset(start), to: isoWithOffset(end) };
+}

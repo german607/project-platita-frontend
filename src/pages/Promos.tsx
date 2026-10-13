@@ -15,6 +15,13 @@ export function describeRule(rule: Pick<BonusRule, "minTopUp" | "bonusAmount">):
   return `Cargando ${formatPesos(rule.minTopUp)} o más, te regalo ${formatPesos(rule.bonusAmount)}`;
 }
 
+// El título de una promo: su nombre si lo tiene; si no, lo que da.
+export const ruleTitle = (rule: Pick<BonusRule, "name" | "minTopUp" | "bonusAmount">) =>
+  rule.name ?? describeRule(rule);
+
+// `timesUsed` no cuenta los bonos de antes de que el backend guardara de qué promo salía cada uno.
+const usada = (times: number) => (times === 1 ? "Usada 1 vez" : `Usada ${times} veces`);
+
 export function Promos() {
   const merchantId = useMerchantId();
   const queryClient = useQueryClient();
@@ -65,7 +72,12 @@ export function Promos() {
                 rule.active ? "" : "opacity-65"
               }`}
             >
-              <p className="font-titulo text-xl font-extrabold leading-[1.15] lg:flex-1 lg:text-2xl">{describeRule(rule)}</p>
+              <div className="lg:flex-1">
+                <p className="font-titulo text-xl font-extrabold leading-[1.15] lg:text-2xl">{ruleTitle(rule)}</p>
+                {rule.name && <p className="mt-0.5 text-sm font-bold text-suave">{describeRule(rule)}</p>}
+                {rule.description && <p className="mt-0.5 text-sm font-bold text-suave">{rule.description}</p>}
+                <p className="mt-0.5 text-sm font-bold text-suave">{usada(rule.timesUsed)}</p>
+              </div>
               <div className="flex items-center justify-between gap-3 lg:justify-end lg:gap-5">
                 <Link
                   to={`/promos/${rule.id}/editar`}
@@ -75,7 +87,7 @@ export function Promos() {
                 </Link>
                 <Interruptor
                   active={rule.active}
-                  label={describeRule(rule)}
+                  label={ruleTitle(rule)}
                   disabled={toggle.isPending && toggle.variables?.id === rule.id}
                   onChange={(active) => toggle.mutate({ id: rule.id, active })}
                 />

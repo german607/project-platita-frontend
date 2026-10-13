@@ -15,7 +15,12 @@ import { Interruptor } from "./Promos";
 
 const MAX_PESOS = 1_000_000; // mismo tope que el backend
 
+const MAX_NAME = 80; // mismos topes que el backend
+const MAX_DESCRIPTION = 280;
+
 const label = "mb-1.5 block text-sm font-extrabold text-suave";
+const textField =
+  "w-full rounded-[20px] border-2 border-borde bg-tarjeta px-[18px] font-texto text-base font-bold placeholder:text-suave";
 const field =
   "h-16 w-full rounded-[20px] border-[3px] border-tinta bg-tarjeta px-[18px] font-titulo text-[32px] font-extrabold placeholder:text-borde";
 
@@ -60,6 +65,8 @@ function Formulario({ rule, all, merchantId }: { rule: BonusRule | undefined; al
   const [min, setMin] = useState(rule ? String(rule.minTopUp / 100) : "");
   const [bonus, setBonus] = useState(rule ? String(rule.bonusAmount / 100) : "");
   const [active, setActive] = useState(rule?.active ?? true);
+  const [ruleName, setRuleName] = useState(rule?.name ?? "");
+  const [description, setDescription] = useState(rule?.description ?? "");
 
   const minPesos = valid(min);
   const bonusPesos = valid(bonus);
@@ -76,8 +83,15 @@ function Formulario({ rule, all, merchantId }: { rule: BonusRule | undefined; al
     all.some((r) => r.id !== rule?.id && r.active && r.minTopUp === pesosToCents(minPesos));
 
   const save = useMutation({
-    mutationFn: (input: { minTopUp: number; bonusAmount: number; active: boolean }) =>
-      rule ? updateBonusRule(rule.id, input) : createBonusRule(merchantId, input),
+    // Vacío, el nombre y la descripción no se mandan al crear y se borran (null) al editar.
+    mutationFn: (input: { minTopUp: number; bonusAmount: number; active: boolean; name: string; description: string }) =>
+      rule
+        ? updateBonusRule(rule.id, { ...input, name: input.name || null, description: input.description || null })
+        : createBonusRule(merchantId, {
+            ...input,
+            name: input.name || undefined,
+            description: input.description || undefined,
+          }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["bonus-rules", merchantId] });
       navigate("/promos");
@@ -127,6 +141,36 @@ function Formulario({ rule, all, merchantId }: { rule: BonusRule | undefined; al
         {bonus.trim() !== "" && bonusPesos === null && <Invalido />}
       </div>
 
+      <div>
+        <label htmlFor="nombre" className={label}>
+          Nombre (opcional)
+        </label>
+        <input
+          id="nombre"
+          type="text"
+          autoComplete="off"
+          maxLength={MAX_NAME}
+          placeholder="Ej: Promo de verano"
+          value={ruleName}
+          onChange={(e) => setRuleName(e.target.value)}
+          className={`${textField} h-14`}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="descripcion" className={label}>
+          Descripción (opcional)
+        </label>
+        <textarea
+          id="descripcion"
+          maxLength={MAX_DESCRIPTION}
+          placeholder="Ej: Válida hasta fin de mes"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className={`${textField} h-24 resize-none py-3`}
+        />
+      </div>
+
       <Interruptor active={active} label="Promo activa" onChange={setActive} />
 
       {repetida && (
@@ -152,7 +196,13 @@ function Formulario({ rule, all, merchantId }: { rule: BonusRule | undefined; al
           onClick={() =>
             minPesos !== null &&
             bonusPesos !== null &&
-            save.mutate({ minTopUp: minPesos, bonusAmount: bonusPesos, active })
+            save.mutate({
+              minTopUp: minPesos,
+              bonusAmount: bonusPesos,
+              active,
+              name: ruleName.trim(),
+              description: description.trim(),
+            })
           }
         >
           {save.isPending ? "Guardando…" : "Guardar promo"}

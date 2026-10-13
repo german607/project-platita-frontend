@@ -30,7 +30,7 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **127 tests pasando** en 14
+  typecheck` sin errores y `npm run test:run` con **147 tests pasando** en 15
   archivos (dinero, teléfono, fechas, bono, cliente de la API y las nueve
   pantallas y formularios). El `typecheck` encontró un error real en su momento, ya
   corregido.
@@ -77,8 +77,10 @@ Consecuencias para este repo, registradas en el TODO (§4):
 - **Ya adoptado por el front** (2026-10-13): reintentar con la misma clave de
   idempotencia, búsqueda por `?phone=` y texto tal cual, saldo y total de
   los inactivos, y la vista previa del bono del servidor.
-- **Todavía no adoptado**: el panel "Hoy en el mostrador", y mostrar el
-  nombre, la descripción y el uso de las promos y la promo de cada bono.
+- **Adoptado también** (segunda tanda, 2026-10-13): el panel "Hoy en el
+  mostrador", el nombre, la descripción y el uso de las promos, y la promo de
+  cada bono en la ficha. Todo con tests pasando; falta verlo en el navegador
+  contra el backend nuevo.
 
 ## No existe todavía
 

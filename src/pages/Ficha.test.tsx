@@ -3,15 +3,27 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../lib/api/client";
-import { getCustomer, listTransactions } from "../lib/api/endpoints";
-import type { CustomerWithBalance, Transaction } from "../lib/api/types";
+import { getCustomer, listBonusRules, listTransactions } from "../lib/api/endpoints";
+import type { BonusRule, CustomerWithBalance, Transaction } from "../lib/api/types";
 import { Ficha } from "./Ficha";
 
 vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
-vi.mock("../lib/api/endpoints", () => ({ getCustomer: vi.fn(), listTransactions: vi.fn() }));
+vi.mock("../lib/api/endpoints", () => ({ getCustomer: vi.fn(), listTransactions: vi.fn(), listBonusRules: vi.fn() }));
 
 const mockCustomer = vi.mocked(getCustomer);
 const mockTransactions = vi.mocked(listTransactions);
+const mockRules = vi.mocked(listBonusRules);
+
+const promo = (name: string | null): BonusRule => ({
+  id: "r1",
+  merchantId: "m1",
+  name,
+  description: null,
+  minTopUp: 100000,
+  bonusAmount: 20000,
+  active: true,
+  timesUsed: 1,
+});
 
 // Vino hace 12 días (al mediodía, para que el cambio de hora no mueva el día).
 const twelveDaysAgo = new Date();
@@ -67,6 +79,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   mockCustomer.mockResolvedValue(marta);
   mockTransactions.mockResolvedValue(page(movements));
+  mockRules.mockResolvedValue({ data: [] });
 });
 
 // jsdom no trae matchMedia: se agrega por test y se saca al terminar.
@@ -111,6 +124,42 @@ describe("Ficha del cliente", () => {
     expect(screen.getByText("+$50")).toBeInTheDocument();
     expect(screen.getByText("Error de la semana")).toBeInTheDocument();
     expect(mockTransactions).toHaveBeenCalledWith("c1", { type: undefined, limit: 8, cursor: undefined });
+  });
+
+  it("un bono dice de qué promo salió, por nombre", async () => {
+    mockRules.mockResolvedValue({ data: [promo("Promo de verano")] });
+    mockTransactions.mockResolvedValue(page([tx("t3", "BONUS", 20000, { bonusRuleId: "r1" })]));
+    renderPage();
+
+    expect(await screen.findByText("Promo de verano")).toBeInTheDocument();
+    expect(screen.getByText("+$200")).toBeInTheDocument();
+  });
+
+  it("si la promo no tiene nombre, la describe por su mínimo", async () => {
+    mockRules.mockResolvedValue({ data: [promo(null)] });
+    mockTransactions.mockResolvedValue(page([tx("t3", "BONUS", 20000, { bonusRuleId: "r1" })]));
+    renderPage();
+
+    expect(await screen.findByText("Promo $1.000+")).toBeInTheDocument();
+  });
+
+  it("un bono viejo, sin promo guardada, se ve igual, solo como Bono", async () => {
+    mockRules.mockResolvedValue({ data: [promo("Promo de verano")] });
+    mockTransactions.mockResolvedValue(page([tx("t3", "BONUS", 20000)]));
+    renderPage();
+
+    expect(await screen.findByText("+$200")).toBeInTheDocument();
+    expect(screen.getByText("Bono")).toBeInTheDocument();
+    expect(screen.queryByText("Promo de verano")).not.toBeInTheDocument();
+  });
+
+  it("si las promos no cargan, los bonos se ven igual", async () => {
+    mockRules.mockRejectedValue(new ApiError(500, "INTERNAL_ERROR", "Error interno"));
+    mockTransactions.mockResolvedValue(page([tx("t3", "BONUS", 20000, { bonusRuleId: "r1" })]));
+    renderPage();
+
+    expect(await screen.findByText("+$200")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("en el celular trae de a 8 movimientos y en pantalla grande de a 15", async () => {

@@ -1,17 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../lib/api/client";
-import { listCustomers, upsertCustomer } from "../lib/api/endpoints";
-import type { CustomerWithBalance } from "../lib/api/types";
+import { listCustomers, listMerchantTransactions, upsertCustomer } from "../lib/api/endpoints";
+import type { CustomerWithBalance, MerchantTransaction } from "../lib/api/types";
 import { Mostrador } from "./Mostrador";
 
 vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
-vi.mock("../lib/api/endpoints", () => ({ listCustomers: vi.fn(), upsertCustomer: vi.fn() }));
+vi.mock("../lib/api/endpoints", () => ({
+  listCustomers: vi.fn(),
+  upsertCustomer: vi.fn(),
+  listMerchantTransactions: vi.fn(),
+}));
 
 const mockList = vi.mocked(listCustomers);
 const mockUpsert = vi.mocked(upsertCustomer);
+const mockToday = vi.mocked(listMerchantTransactions);
 
 const marta: CustomerWithBalance = {
   id: "c1",
@@ -40,6 +45,30 @@ const typePhone = (value: string) =>
   fireEvent.change(screen.getByLabelText("Teléfono del cliente"), { target: { value } });
 
 beforeEach(() => vi.resetAllMocks());
+
+// jsdom no trae matchMedia: se agrega por test y se saca al terminar.
+afterEach(() => {
+  Reflect.deleteProperty(window, "matchMedia");
+});
+
+const fakeMatchMedia = (matches: boolean) =>
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: () => ({ matches, addEventListener: () => {}, removeEventListener: () => {} }),
+  });
+
+const todayRow: MerchantTransaction = {
+  id: "t1",
+  customerId: "c1",
+  type: "TOPUP",
+  amount: 100000,
+  paidWith: "efectivo",
+  note: null,
+  bonusRuleId: null,
+  createdAt: new Date(new Date().setHours(11, 40, 0, 0)).toISOString(),
+  customer: { id: "c1", name: "Marta Rodríguez", phone: "+59899123456" },
+};
 
 describe("Mostrador", () => {
   it("al empezar pide el teléfono y no consulta nada", () => {
@@ -77,6 +106,26 @@ describe("Mostrador", () => {
 
     expect(await screen.findByText("Este número es nuevo")).toBeInTheDocument();
     expect(screen.queryByText("Otra Persona")).not.toBeInTheDocument();
+  });
+
+  it("en el celular no pide ni muestra los movimientos de hoy", async () => {
+    mockList.mockResolvedValue(page([marta]));
+    renderMostrador();
+    typePhone("099 123 456");
+    await screen.findByText("$1.200");
+
+    expect(mockToday).not.toHaveBeenCalled();
+    expect(screen.queryByText("Hoy en el mostrador")).not.toBeInTheDocument();
+  });
+
+  it("en pantalla grande muestra el panel con los movimientos de hoy", async () => {
+    fakeMatchMedia(true);
+    mockToday.mockResolvedValue({ data: [todayRow], nextCursor: null });
+    renderMostrador();
+
+    expect(await screen.findByText("Hoy en el mostrador")).toBeInTheDocument();
+    expect(await screen.findByText("11:40 · Carga")).toBeInTheDocument();
+    expect(screen.getByText("+$1.000")).toBeInTheDocument();
   });
 
   it("crea un cliente nuevo con el teléfono normalizado y su nombre", async () => {

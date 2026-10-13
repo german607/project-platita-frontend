@@ -5,6 +5,7 @@ import type {
   CustomerWithBalance,
   InactivePage,
   Merchant,
+  MerchantTransaction,
   MovementResult,
   Page,
   TopUpResult,
@@ -83,6 +84,13 @@ export const adjust = (customerId: string, input: { amount: number; note: string
 export const listTransactions = (customerId: string, params: PageParams & { type?: TransactionType } = {}) =>
   api<Page<Transaction>>(`/customers/${customerId}/transactions`, { query: params });
 
+// Movimientos de todo el comercio, del más nuevo al más viejo. `from` es
+// inclusivo y `to` exclusivo: fechas ISO con zona horaria (ver `todayRange`).
+export const listMerchantTransactions = (
+  merchantId: string,
+  params: PageParams & { from?: string; to?: string; type?: TransactionType } = {},
+) => api<Page<MerchantTransaction>>(`/merchants/${merchantId}/transactions`, { query: params });
+
 // ---------- Promos (reglas de bonificación) ----------
 
 export const listBonusRules = (merchantId: string) =>
@@ -93,10 +101,20 @@ export const listBonusRules = (merchantId: string) =>
 export const getBonusPreview = (merchantId: string, amount: number) =>
   api<BonusPreview>(`/merchants/${merchantId}/bonus-preview`, { query: { amount } });
 
-export const createBonusRule = (merchantId: string, input: { minTopUp: number; bonusAmount: number; active?: boolean }) =>
+export const createBonusRule = (
+  merchantId: string,
+  input: { minTopUp: number; bonusAmount: number; active?: boolean; name?: string; description?: string },
+) =>
   api<BonusRule>(`/merchants/${merchantId}/bonus-rules`, { method: "POST", body: input });
 
 export const updateBonusRule = (
   ruleId: string,
-  input: { minTopUp?: number; bonusAmount?: number; active?: boolean },
+  // name y description aceptan null para borrarlos.
+  input: {
+    minTopUp?: number;
+    bonusAmount?: number;
+    active?: boolean;
+    name?: string | null;
+    description?: string | null;
+  },
 ) => api<BonusRule>(`/bonus-rules/${ruleId}`, { method: "PATCH", body: input });

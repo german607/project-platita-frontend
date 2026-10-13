@@ -55,6 +55,28 @@ describe("Promos", () => {
     expect(screen.getAllByText("Apagada")).toHaveLength(1);
   });
 
+  it("muestra el nombre, la descripción y cuántas veces se usó cada promo", async () => {
+    mockList.mockResolvedValue({
+      data: [
+        { ...r1, name: "Promo de verano", description: "Válida hasta fin de mes", timesUsed: 38 },
+        { ...r2, timesUsed: 1 },
+        r3,
+      ],
+    });
+    renderPage();
+
+    // Con nombre: el nombre es el título y lo que da pasa a ser el subtítulo.
+    expect(await screen.findByText("Promo de verano")).toBeInTheDocument();
+    expect(screen.getByText("Cargando $1.000 o más, te regalo $200")).toBeInTheDocument();
+    expect(screen.getByText("Válida hasta fin de mes")).toBeInTheDocument();
+    expect(screen.getByText("Usada 38 veces")).toBeInTheDocument();
+    expect(screen.getByRole("switch", { name: "Promo de verano" })).toBeInTheDocument();
+    // Sin nombre: el título es lo que da. Y se dice bien en singular y en cero.
+    expect(screen.getByText("Cargando $2.000 o más, te regalo $500")).toBeInTheDocument();
+    expect(screen.getByText("Usada 1 vez")).toBeInTheDocument();
+    expect(screen.getByText("Usada 0 veces")).toBeInTheDocument();
+  });
+
   it("cada promo tiene su interruptor, con el estado correcto, y un enlace para editarla", async () => {
     mockList.mockResolvedValue({ data: [r3, r1] });
     renderPage();

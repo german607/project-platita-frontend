@@ -34,7 +34,7 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 ## 2. Pantallas del mostrador (P0: lo que se usa con el cliente delante)
 
 - [~] **P0** Mostrador: buscar cliente por teléfono, ver saldo, estado "cliente nuevo" y crear (`src/pages/Mostrador.tsx`; 7 tests pasando y verificado en el navegador contra el backend local: busca, avisa "Seguí escribiendo…" y muestra "Este número es nuevo"). Sin probar todavía: **crear** un cliente, ver un cliente existente con saldo, el celular y el error de red
-- [ ] **P1** Panel "Hoy en el mostrador" (columna derecha del diseño web): el backend ya ofrece `GET /merchants/:m/transactions`; falta construirlo
+- [~] **P1** Panel "Hoy en el mostrador" (columna derecha del diseño web) (`src/components/HoyEnElMostrador.tsx`; con tests pasando; falta verlo en el navegador contra el backend nuevo)
 - [~] **P0** Cargar saldo con vista previa del bono (`src/pages/CargarSaldo.tsx`; verificada en el navegador por el usuario con la versión anterior; el 2026-10-13 pasó a usar el bono del backend y la clave de idempotencia con "Reintentar": 14 tests pasando; falta verla en el navegador con el backend nuevo). Decisión: no se preselecciona ningún monto
 - [x] **P0** Cobrar, con los estados "éxito" y "saldo insuficiente (le faltan $X)" (`src/pages/Cobrar.tsx`, 11 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
 - [~] **P0** Navegación celular (menú inferior) y web (menú lateral oscuro de 200px) con el chip del comercio (`src/components/Layout.tsx`, según el diseño; sin ver en el navegador). Las rutas `/cobrar/:id` y `/cargar/:id` son de relleno
@@ -44,8 +44,8 @@ Leyenda: `[x]` hecho y verificado · `[ ]` pendiente · `[~]` en curso, o implem
 - [x] **P1** Ficha del cliente con historial paginado y filtro por tipo (`src/pages/Ficha.tsx`; de a 8 movimientos en el celular y 15 en pantalla grande con "Ver más"; 9 tests; verificada en el navegador por el usuario el 2026-10-13)
 - [x] **P1** Ajuste manual (monto con signo, nota obligatoria) (`src/pages/Ajuste.tsx`; 11 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
 - [x] **P1** Clientes: lista con búsqueda y saldo, paginada (`src/pages/Clientes.tsx`; 8 tests pasando; verificada en el navegador por el usuario el 2026-10-13)
-- [x] **P1** Promos: listar, crear, editar y activar/desactivar (`src/pages/Promos.tsx` y `PromoForm.tsx`; 17 tests pasando; verificadas en el navegador por el usuario el 2026-10-13). Falta del diseño web: "Usada N veces" (ver pedidos al backend)
-- [x] **P1** Reactivar: lista de inactivos (`src/pages/Reactivar.tsx`; 8 tests pasando; verificada en el navegador por el usuario el 2026-10-13, simulando un cliente que no venía desde junio al editar `lastVisitAt` en la base, sin tocar el reloj; lo muestra y lo saca al subir los días). Falta del diseño: el saldo de cada cliente (ver pedidos al backend)
+- [x] **P1** Promos: listar, crear, editar y activar/desactivar (`src/pages/Promos.tsx` y `PromoForm.tsx`; 17 tests pasando; verificadas en el navegador por el usuario el 2026-10-13); con nombre, descripción y "Usada N veces" desde el 2026-10-13 (tests pasando; falta verlo contra el backend nuevo)
+- [x] **P1** Reactivar: lista de inactivos (`src/pages/Reactivar.tsx`; 8 tests pasando; verificada en el navegador por el usuario el 2026-10-13, simulando un cliente que no venía desde junio al editar `lastVisitAt` en la base, sin tocar el reloj; lo muestra y lo saca al subir los días); con el saldo de cada cliente y el total del backend desde el 2026-10-13 (falta verlo contra el backend nuevo)
 
 ## 4. Pedidos al backend
 
@@ -54,17 +54,17 @@ en el frontend: se piden y se registran acá hasta que existan.
 
 - [~] **P0** CORS: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) con la variable `CORS_ORIGINS` (lista de orígenes, nunca `*`). En desarrollo el front sigue usando el proxy de Vite; en producción hay que poner la URL absoluta del backend en `VITE_API_URL` y la del front en `CORS_ORIGINS`
 - [~] **P1** Búsqueda por teléfono: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo): `?search=` ahora normaliza (también parcial) y `?phone=` es exacto. El frontend ya dejó el rodeo (Mostrador usa `?phone=`; Clientes manda el texto tal cual)
-- [~] **P1** Movimientos del comercio, para el panel "Hoy en el mostrador": el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`GET /merchants/:m/transactions?from=&to=&type=`, con `customer {id, name, phone}` en cada fila; `from` inclusivo y `to` exclusivo, ISO con offset). **Falta construir el panel en el front**
+- [~] **P1** Movimientos del comercio, para el panel "Hoy en el mostrador": el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`GET /merchants/:m/transactions?from=&to=&type=`, con `customer {id, name, phone}` en cada fila; `from` inclusivo y `to` exclusivo, ISO con offset). El frontend ya lo usa en el panel "Hoy en el mostrador"
 - [ ] **P0** Autenticación de comercios (hoy cualquiera con un id opera): hasta que exista, el frontend usa un comercio fijo por configuración
 - [~] **P1** Buscar un cliente por teléfono sin crearlo: cubierto con `?phone=` (el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo)); el Mostrador ya lo usa
 - [~] **P0** Idempotencia en cargas, cobros y ajustes: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (header `Idempotency-Key`, opcional; mismo cuerpo → misma respuesta con `Idempotent-Replayed: true`; otro cuerpo → 422 `IDEMPOTENCY_KEY_REUSED`; claves de 48 horas). **El frontend ya lo usa**: Cargar saldo, Cobrar y Ajuste mandan una clave por operación y ofrecen "Reintentar" con la misma clave
 - [~] **P1** Vista previa del bono en el servidor: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`GET /merchants/:m/bonus-preview?amount=`). El frontend ya la usa en Cargar saldo y se borró `src/lib/bonus.ts`
 - [ ] **P1** Unificar unidades de la API (hoy entra pesos y sale centésimos)
-- [~] **P2** Que un movimiento de bono diga de qué promo salió: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`bonusRuleId`; null en los bonos viejos). **Falta mostrarlo en la ficha del cliente** ("Bono · <nombre de la promo>")
+- [~] **P2** Que un movimiento de bono diga de qué promo salió: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`bonusRuleId`; null en los bonos viejos). El frontend ya lo muestra en la ficha ("Promo de verano" o, sin nombre, "Promo $1.000+")
 - [~] **P1** Saldo de cada cliente en `GET /merchants/:m/inactive`: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo). El frontend ya lo muestra en Reactivar
-- [~] **P2** Cuántas veces se usó cada promo: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`timesUsed`, que no cuenta los bonos anteriores). **Falta mostrarlo en Promos** ("Usada N veces")
+- [~] **P2** Cuántas veces se usó cada promo: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`timesUsed`, que no cuenta los bonos anteriores). El frontend ya lo muestra en Promos ("Usada N veces")
 - [~] **P2** Total de clientes inactivos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`total` en `/inactive`). El frontend ya lo usa en el contador de Reactivar
-- [~] **P2** Un nombre y una descripción para las promos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`name` y `description`, opcionales; el PATCH acepta `null` para borrarlos). **Faltan los campos en el formulario de promos y mostrarlos en el listado**
+- [~] **P2** Un nombre y una descripción para las promos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`name` y `description`, opcionales; el PATCH acepta `null` para borrarlos). El frontend ya tiene los campos en el formulario y los muestra en el listado
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
 
 ## 5. Calidad
@@ -75,6 +75,8 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** Checklist de prueba manual en un celular real, en el mostrador
 - [ ] **P1** Accesibilidad: contraste, objetivos táctiles de 48px o más, uso con una mano
 - [ ] **P2** Pruebas de punta a punta automatizadas
+- [x] Reintento seguro probado a mano en el navegador (2026-10-13): con el backend caído aparece "Reintentar" y, al volver, se registra un solo cobro
+- [ ] **P1** Probar a mano la repetición real: que la carga **sí llegue** pero se pierda la respuesta. En el navegador no se simula bien; se hace desde la consola `/dev` del backend, mandando dos veces la misma carga con la misma `Idempotency-Key` (la segunda debe decir "REINTENTO" y no subir el saldo) y una tercera con otro monto (422 `IDEMPOTENCY_KEY_REUSED`). Pendiente, a pedido del usuario
 
 ## 6. Despliegue
 
