@@ -67,6 +67,17 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [~] **P2** Un nombre y una descripción para las promos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`name` y `description`, opcionales; el PATCH acepta `null` para borrarlos). El frontend ya tiene los campos en el formulario y los muestra en el listado
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
 
+**Para el lado del cliente** (borrador del 2026-10-15; faltan definir los puntos marcados "por definir", ver §7):
+
+- [ ] **P0** Ingreso del cliente por teléfono + código de un solo uso (WhatsApp o SMS) y sesión; endpoints "del cliente" (`/me/…`) que solo devuelven los datos de quien está logueado
+- [ ] **P1** Perfil público del comercio, que edita el propio comercio: descripción, foto, dirección y mapa (coordenadas), horarios, categoría y un interruptor `visible` ("Aparecer en la app", apagado por defecto)
+- [ ] **P1** Categoría: una de una lista fija (cafetería, peluquería, panadería, lavadero, pilates, otros…); el comercio la elige y **no la puede cambiar seguido** (por definir: cada cuánto)
+- [ ] **P1** Varios locales por comercio (sucursales, cada una con su dirección, mapa y horarios); por definir si hace falta ya y cómo se relaciona con el saldo (que sigue siendo del comercio)
+- [ ] **P1** Listado público de lugares: solo los visibles, con categoría, marca de promo activa y filtros; y el detalle de un lugar (promos activas, dirección, horarios, descripción, foto)
+- [ ] **P1** `GET /me/balances`: el saldo del cliente en cada comercio (se arma juntando sus filas de cliente por teléfono verificado)
+- [ ] **P2** Subida y almacenamiento de fotos
+- [ ] **P2** QR personal del cliente (ya está en el TODO del backend)
+
 ## 5. Calidad
 
 - [x] Probar a mano el flujo completo contra el backend real: buscar → cargar con bono → cobrar → saldo (lo recorrió el usuario el 2026-10-13, salvo Reactivar; el caso narrado está en `../project-platita-backend/docs/EJEMPLO.md`)
@@ -88,3 +99,24 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** CI: lint, typecheck y tests
 - [ ] **P1** Hosting estático barato
 - [ ] **P2** Instalable en el celular (PWA)
+
+## 7. Lado del cliente (web primero, mobile después)
+
+Decisiones del 2026-10-15 (resumen en `docs/STATE.md`). La web va a tener **dos áreas** que comparten la misma API, los helpers y el estilo: **comercio** (lo que ya existe) y **cliente**. Se arma primero en web para pulir flujos y estilo, y que la app mobile reutilice todo.
+
+- [ ] **P0** **RECORDATORIO — ingreso real del cliente.** El cliente entra con su teléfono y un código de un solo uso que se le manda (WhatsApp o SMS): recién ahí es un usuario verificado. Hoy se **simula** (se elige un teléfono). Sin la verificación real **no se puede publicar**: cualquiera vería los saldos de cualquier número. Hay que reemplazar la simulación antes de salir
+- [ ] **P0** Diseño del lado del cliente en Claude Design (mismo estilo "Cálida y de barrio"): Lugares, detalle de un lugar, Mis saldos y Perfil
+- [ ] **P0** Estructura de código: dos áreas en el mismo repo (comercio y cliente), cada una con su layout, su menú y su ingreso, compartiendo `src/lib` y `src/components`
+- [ ] **P0** Pantalla de entrada ("Soy un comercio" / "Soy cliente") e ingreso **simulado** del cliente
+- [ ] **P1** **Lugares**: lista de los comercios que eligieron aparecer, con categoría y marca de si tienen una promo activa
+- [ ] **P1** **Detalle de un lugar**: promos activas, dirección con mapa, horarios, categoría, descripción, foto y el saldo del cliente en ese comercio
+- [ ] **P1** **Mis saldos**: lo que tiene en cada comercio
+- [ ] **P1** **Perfil**: nombre, teléfono y cerrar sesión
+- [ ] **P1** Botón "Cargar saldo" deshabilitado con la etiqueta "Próximamente" (a futuro, el cliente podrá cargar transfiriéndole al comercio que elija; hoy solo mira)
+- [ ] **P1** **Del lado del comercio, una pestaña nueva** (nombre a definir: "Contacto" o "Mi comercio"): dirección y mapa, horarios, foto, descripción, categoría y el interruptor "Aparecer en la app". Es el perfil del comercio; lo editan el dueño o el personal
+- [ ] **P2** QR personal del cliente en su perfil, para mostrarle al cajero
+- [ ] **P2** Más ideas a medida que aparezcan
+
+Reglas ya decididas: el cliente **solo mira** (no carga por su cuenta); un comercio **solo aparece si lo activa**; la categoría la elige el comercio y **no se cambia seguido**; dirección, mapa, horarios, descripción y foto los edita el comercio (porque se puede mudar, abrir otro local o cambiar el horario).
+
+**Por definir** (se preguntaron el 2026-10-15): cada cuánto se puede cambiar la categoría; si un comercio puede tener varios locales con su propia dirección y horarios; y qué tan completo es el mapa (un pin que el comercio ubica, o solo la dirección con un enlace "Cómo llegar").

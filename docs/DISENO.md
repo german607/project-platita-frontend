@@ -81,3 +81,22 @@ están dibujados entre otros "Mostrador · cliente nuevo", "Cobrar · éxito",
 - Los listados llegan como `{ data, nextCursor }`.
 - Todavía no hay login: el comercio se fija por configuración mientras no
   exista autenticación.
+
+## Lado del cliente (pendiente de diseño)
+
+Todavía no hay diseño: se va a hacer en Claude Design, con el mismo estilo
+(tokens, tipografías y reglas de arriba), pensado primero para el celular.
+Las pantallas decididas el 2026-10-15, y lo que va a necesitar cada una del
+backend (a pedir, ver el TODO §4):
+
+| Pantalla | Qué muestra | Qué hace falta del backend |
+|---|---|---|
+| **Lugares** | Los comercios que eligieron aparecer, con categoría y una marca de si tienen una promo activa | Listado público de comercios visibles, con categoría y `promo activa` |
+| **Detalle de un lugar** | Promos activas, dirección con mapa, horarios, categoría, descripción, foto y el saldo del cliente ahí | Perfil público del comercio y sus promos activas |
+| **Mis saldos** | Lo que el cliente tiene en cada comercio | `GET /me/balances` (con el cliente verificado) |
+| **Perfil** | Nombre, teléfono, cerrar sesión; más adelante, QR personal | Sesión del cliente |
+| **Ingreso** | Teléfono y código de un solo uso | Verificación por código (hoy se simula) |
+
+El botón "Cargar saldo" del cliente va deshabilitado con "Próximamente".
+Del lado del comercio se suma una pestaña con su perfil público (dirección y
+mapa, horarios, foto, descripción, categoría e "Aparecer en la app").

@@ -54,6 +54,39 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   backend" en el [`TODO`](../TODO.md)). Ver [`../TODO.md`](../TODO.md) §2 y
   §3.
 
+## Próximo hito: el lado del cliente (decidido el 2026-10-15)
+
+La web va a tener **dos tipos de usuario**, en la misma app y con la misma
+API: el **comercio** (lo que ya está construido) y el **cliente**. El
+cliente ve *Lugares* (los comercios con el servicio y si tienen una promo
+activa), el detalle de cada lugar (promos, dirección con mapa, horarios,
+categoría), *Mis saldos* (lo que tiene en cada comercio) y su *Perfil*. Se
+hace primero en web para pulir flujos y estilo, y que después la app mobile
+reutilice todo. Detalle y pendientes: [`../TODO.md`](../TODO.md) §7.
+
+Decisiones tomadas:
+- **Ingreso del cliente:** con su teléfono y un código de un solo uso
+  (WhatsApp o SMS); recién ahí es un usuario verificado. **Por ahora se
+  simula.** **Recordatorio: reemplazar la simulación por la verificación real
+  antes de publicar** (sin eso, cualquiera vería los saldos de cualquier
+  teléfono).
+- **El cliente solo mira.** Más adelante podrá cargar por su cuenta,
+  transfiriéndole al comercio que elija: por ahora, un botón "Próximamente".
+- **Un comercio solo aparece si lo activa.** Se suma una pestaña nueva del
+  lado del comercio (nombre a definir) con su perfil público: dirección y
+  mapa, horarios, foto, descripción, categoría y el interruptor "Aparecer en
+  la app". Lo edita el dueño o el personal.
+- **La categoría** la elige el comercio y **no se puede cambiar seguido**.
+- Todo vive **en este mismo repo**, en dos áreas que comparten la API, los
+  helpers y el estilo. El diseño del cliente se hace en Claude Design, con
+  el mismo estilo "Cálida y de barrio".
+- **Perfil del cliente:** nombre, teléfono y cerrar sesión (y, más adelante,
+  un QR personal).
+
+Lo que esto le pide al backend (hoy un comercio solo tiene nombre, teléfono
+y plan, y un cliente es una fila por comercio, sin login) está en el TODO,
+§4.
+
 ## El backend con el que se va a conectar
 
 Según su documentación (`../project-platita-backend/docs/STATE.md`) y su
@@ -91,5 +124,10 @@ Consecuencias para este repo, registradas en el TODO (§4):
 
 ## Decisiones abiertas
 
+- **Lado del cliente:** cada cuánto se puede cambiar la categoría de un
+  comercio; si un comercio puede tener varios locales (cada uno con su
+  dirección y horarios) y cómo se relaciona con el saldo; y qué tan completo
+  es el mapa (un pin que el comercio ubica, o la dirección con un enlace
+  "Cómo llegar"). Ver [`../TODO.md`](../TODO.md) §7.
 - Si este repo se mantiene separado del backend y contra qué rama se
   integra (`dev` o `main`); a acordar con Germán Pereira.

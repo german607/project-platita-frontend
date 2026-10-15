@@ -249,3 +249,21 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   llamadas no llegaban al backend). Ahora una variable vacía vale lo mismo que
   no estar y usa el valor por defecto (`parseConfig` en `src/config.ts`, con
   tests).
+
+## 2026-10-15
+
+- Se definió el **próximo hito: el lado del cliente**. La web tendrá dos
+  áreas (comercio y cliente) en el mismo repo y con la misma API. El cliente
+  verá Lugares, el detalle de cada lugar, Mis saldos y su Perfil; solo mira
+  (cargar por su cuenta queda como "Próximamente"). Un comercio solo aparece
+  si lo activa, desde una pestaña nueva con su perfil público. La categoría
+  se elige y no se cambia seguido. El ingreso del cliente es por teléfono y
+  código de un solo uso: **se simula por ahora y hay que reemplazarlo por la
+  verificación real antes de publicar** (anotado como recordatorio P0 en el
+  TODO y en `STATE.md`).
+- Se registraron en el TODO (§7 y los pedidos al backend de §4), en
+  `STATE.md` y en `DISENO.md` las decisiones, las pantallas y lo que se le
+  pide al backend. Quedaron tres puntos por definir: cada cuánto se cambia la
+  categoría, si un comercio puede tener varios locales y qué tan completo es
+  el mapa.
+- Solo documentación: no se tocó código.
