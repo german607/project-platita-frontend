@@ -67,12 +67,12 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [~] **P2** Un nombre y una descripción para las promos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`name` y `description`, opcionales; el PATCH acepta `null` para borrarlos). El frontend ya tiene los campos en el formulario y los muestra en el listado
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
 
-**Para el lado del cliente** (borrador del 2026-10-15; faltan definir los puntos marcados "por definir", ver §7):
+**Para el lado del cliente** (decisiones cerradas el 2026-10-15; el texto para el backend se armó ese día):
 
 - [ ] **P0** Ingreso del cliente por teléfono + código de un solo uso (WhatsApp o SMS) y sesión; endpoints "del cliente" (`/me/…`) que solo devuelven los datos de quien está logueado
-- [ ] **P1** Perfil público del comercio, que edita el propio comercio: descripción, foto, dirección y mapa (coordenadas), horarios, categoría y un interruptor `visible` ("Aparecer en la app", apagado por defecto)
-- [ ] **P1** Categoría: una de una lista fija (cafetería, peluquería, panadería, lavadero, pilates, otros…); el comercio la elige y **no la puede cambiar seguido** (por definir: cada cuánto)
-- [ ] **P1** Varios locales por comercio (sucursales, cada una con su dirección, mapa y horarios); por definir si hace falta ya y cómo se relaciona con el saldo (que sigue siendo del comercio)
+- [ ] **P1** Perfil público del comercio, que edita el propio comercio: descripción, foto (por ahora solo una URL), categoría, horarios semanales (varios tramos por día, días cerrados) y un interruptor `visible` ("Aparecer en la app", apagado por defecto; para activarlo hace falta al menos un local activo). Los horarios, la descripción, la foto y la categoría son del comercio, no de cada local
+- [ ] **P1** Categoría: una de una lista fija (`CAFETERIA`, `BARBERIA_PELUQUERIA`, `PILATES_YOGA`, `PANADERIA`, `LAVADERO`, `OTRO`). La primera vez se elige libre; después **no se puede cambiar antes de 90 días** desde el último cambio (422 `CATEGORY_CHANGE_TOO_SOON` con la fecha desde la cual se puede). Si necesita cambiarla antes, el comercio nos escribe y la cambiamos nosotros a mano (el front lo explica en un tooltip)
+- [ ] **P1** Varios locales por comercio: cada local tiene una dirección (texto) y una etiqueta opcional; **solo la dirección cambia entre locales**. No hay mapa propio ni coordenadas: el front arma un botón "Cómo llegar" con la dirección. El saldo sigue siendo del comercio (vale en todos sus locales). Los locales no se borran, se dan de baja
 - [ ] **P1** Listado público de lugares: solo los visibles, con categoría, marca de promo activa y filtros; y el detalle de un lugar (promos activas, dirección, horarios, descripción, foto)
 - [ ] **P1** `GET /me/balances`: el saldo del cliente en cada comercio (se arma juntando sus filas de cliente por teléfono verificado)
 - [ ] **P2** Subida y almacenamiento de fotos
@@ -119,4 +119,8 @@ Decisiones del 2026-10-15 (resumen en `docs/STATE.md`). La web va a tener **dos 
 
 Reglas ya decididas: el cliente **solo mira** (no carga por su cuenta); un comercio **solo aparece si lo activa**; la categoría la elige el comercio y **no se cambia seguido**; dirección, mapa, horarios, descripción y foto los edita el comercio (porque se puede mudar, abrir otro local o cambiar el horario).
 
-**Por definir** (se preguntaron el 2026-10-15): cada cuánto se puede cambiar la categoría; si un comercio puede tener varios locales con su propia dirección y horarios; y qué tan completo es el mapa (un pin que el comercio ubica, o solo la dirección con un enlace "Cómo llegar").
+**Decidido el 2026-10-15 (segunda ronda):**
+- **Categoría:** se puede cambiar una vez cada **90 días**. Si necesita cambiarla antes, el comercio nos escribe y la cambiamos nosotros; el front lo dice en un **tooltip** al lado del selector.
+- **Varios locales:** un comercio puede tener más de uno y **lo único que cambia es la dirección** (se muestran varias ubicaciones). Hoy no es importante, pero el modelo y la pantalla quedan preparados para más de uno.
+- **Mapa:** un botón **"Cómo llegar"** que abre el mapa del celular con la dirección. Sin mapa propio ni coordenadas.
+- **Supuesto a confirmar:** los **horarios** son del comercio (uno solo), no de cada local; si más adelante cada local tiene los suyos, se mueven al local.

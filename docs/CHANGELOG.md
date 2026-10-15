@@ -267,3 +267,11 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   categoría, si un comercio puede tener varios locales y qué tan completo es
   el mapa.
 - Solo documentación: no se tocó código.
+- Se cerraron los tres puntos abiertos del lado del cliente: la categoría se
+  cambia **una vez cada 90 días** (con un tooltip que dice que, si necesita
+  antes, nos escriba); un comercio puede tener **varios locales** y lo único que
+  cambia es la dirección; el mapa es un botón **"Cómo llegar"** (sin mapa
+  propio ni coordenadas). Supuesto anotado: los horarios son del comercio.
+- Se armó el texto con los pedidos para el backend y dos prompts para Claude
+  Design (el lado del cliente y la pestaña de perfil del comercio); los
+  prompts quedaron guardados en `design/prompts/`.

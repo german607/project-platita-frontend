@@ -100,3 +100,8 @@ backend (a pedir, ver el TODO §4):
 El botón "Cargar saldo" del cliente va deshabilitado con "Próximamente".
 Del lado del comercio se suma una pestaña con su perfil público (dirección y
 mapa, horarios, foto, descripción, categoría e "Aparecer en la app").
+
+Los prompts para Claude Design de estas pantallas están guardados en
+`design/prompts/` (uno para el cliente y otro para la pestaña del comercio).
+La dirección se muestra con un botón "Cómo llegar" que abre el mapa del
+celular; no hay mapa propio.

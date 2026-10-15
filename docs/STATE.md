@@ -76,7 +76,12 @@ Decisiones tomadas:
   lado del comercio (nombre a definir) con su perfil público: dirección y
   mapa, horarios, foto, descripción, categoría y el interruptor "Aparecer en
   la app". Lo edita el dueño o el personal.
-- **La categoría** la elige el comercio y **no se puede cambiar seguido**.
+- **La categoría** la elige el comercio y se puede cambiar **una vez cada 90
+  días** (si necesita antes, nos escribe y lo cambiamos nosotros; el front lo
+  explica en un tooltip).
+- **Varios locales:** un comercio puede tener más de uno y lo único que cambia
+  es la dirección. **Mapa:** un botón "Cómo llegar" con la dirección, sin mapa
+  propio. Los horarios son del comercio (supuesto a confirmar).
 - Todo vive **en este mismo repo**, en dos áreas que comparten la API, los
   helpers y el estilo. El diseño del cliente se hace en Claude Design, con
   el mismo estilo "Cálida y de barrio".
@@ -124,10 +129,7 @@ Consecuencias para este repo, registradas en el TODO (§4):
 
 ## Decisiones abiertas
 
-- **Lado del cliente:** cada cuánto se puede cambiar la categoría de un
-  comercio; si un comercio puede tener varios locales (cada uno con su
-  dirección y horarios) y cómo se relaciona con el saldo; y qué tan completo
-  es el mapa (un pin que el comercio ubica, o la dirección con un enlace
-  "Cómo llegar"). Ver [`../TODO.md`](../TODO.md) §7.
+- **Lado del cliente:** si los horarios son del comercio o de cada local
+  (hoy se asume del comercio). Ver [`../TODO.md`](../TODO.md) §7.
 - Si este repo se mantiene separado del backend y contra qué rama se
   integra (`dev` o `main`); a acordar con Germán Pereira.
