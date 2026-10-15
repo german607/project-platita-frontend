@@ -2,15 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { NavLink, Outlet } from "react-router-dom";
 import { config } from "../config";
 import { getMerchant } from "../lib/api/endpoints";
+import { routes } from "../lib/routes";
 import { EmptyState } from "./states";
 
 // Navegación como en design/: menú oscuro lateral de 200px en pantallas
 // grandes, y menú inferior en el celular (donde se usa en el mostrador).
 const items = [
-  { to: "/", label: "Mostrador", end: true },
-  { to: "/clientes", label: "Clientes", end: false },
-  { to: "/promos", label: "Promos", end: false },
-  { to: "/reactivar", label: "Reactivar", end: false },
+  { to: routes.comercio.mostrador, label: "Mostrador", end: true },
+  { to: routes.comercio.clientes, label: "Clientes", end: false },
+  { to: routes.comercio.promos, label: "Promos", end: false },
+  { to: routes.comercio.reactivar, label: "Reactivar", end: false },
+  { to: routes.comercio.miComercio, label: "Mi comercio", end: false },
 ];
 
 const sideLink = ({ isActive }: { isActive: boolean }) =>
@@ -21,7 +23,7 @@ const sideLink = ({ isActive }: { isActive: boolean }) =>
 
 const bottomLink = ({ isActive }: { isActive: boolean }) =>
   [
-    "flex h-12 items-center justify-center text-[13px] font-extrabold",
+    "flex h-12 items-center justify-center text-[11.5px] font-extrabold",
     isActive ? "text-accion" : "text-suave",
   ].join(" ");
 
@@ -73,7 +75,7 @@ export function Layout() {
 
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-10 grid h-[58px] grid-cols-4 rounded-t-[24px] bg-tarjeta lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-10 grid h-[58px] grid-cols-5 rounded-t-[24px] bg-tarjeta lg:hidden"
       >
         {items.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.end} className={bottomLink}>

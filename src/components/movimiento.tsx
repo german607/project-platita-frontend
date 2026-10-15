@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ApiError } from "../lib/api/client";
 import { Button, ButtonLink } from "./Button";
 import { ErrorState } from "./states";
+import { routes } from "../lib/routes";
 
 // Piezas que comparten las pantallas que mueven saldo (Cargar saldo, Cobrar y,
 // más adelante, Ajuste).
@@ -33,7 +34,7 @@ export function ErrorDeMovimiento({
         <Button variant="mostaza" onClick={onRetry} className="mt-3">
           Reintentar
         </Button>
-        <ButtonLink to="/" variant="borde" className="mt-2">
+        <ButtonLink to={routes.comercio.mostrador} variant="borde" className="mt-2">
           Revisar el saldo en el Mostrador
         </ButtonLink>
       </div>
@@ -47,7 +48,7 @@ export function ErrorDeMovimiento({
 export function PantallaExito({
   titulo,
   children,
-  volverA = { to: "/", label: "Volver al mostrador" },
+  volverA = { to: routes.comercio.mostrador, label: "Volver al mostrador" },
 }: {
   titulo: string;
   children: ReactNode;

@@ -11,6 +11,7 @@ import { formatPesos, formatSigned } from "../lib/money";
 import { paymentLabel } from "../lib/payment";
 import { useMediaQuery } from "../lib/useMediaQuery";
 import { formatUyPhone } from "../lib/phone";
+import { routes } from "../lib/routes";
 
 // Ficha del cliente: su saldo, sus movimientos (con filtro por tipo) y desde
 // acá se cobra, se carga o se corrige con un ajuste. Diseño: docs/DISENO.md.
@@ -61,7 +62,7 @@ export function Ficha() {
   return (
     <section className="grid gap-4 lg:grid-cols-[320px_1fr] lg:gap-7">
       <div className="flex flex-col gap-3.5">
-        <Link to="/clientes" className="text-sm font-extrabold text-suave">
+        <Link to={routes.comercio.clientes} className="text-sm font-extrabold text-suave">
           ← Clientes
         </Link>
         <h1 className="font-titulo text-[28px] font-extrabold">{data.name ?? "Cliente sin nombre"}</h1>
@@ -75,10 +76,10 @@ export function Ficha() {
         </div>
 
         <div className="grid grid-cols-2 gap-2 lg:grid-cols-1 lg:gap-3.5">
-          <ButtonLink to={`/cobrar/${data.id}`} className="!h-[52px] !text-[17px] lg:!h-[68px] lg:!text-[22px]">
+          <ButtonLink to={routes.comercio.cobrar(data.id)} className="!h-[52px] !text-[17px] lg:!h-[68px] lg:!text-[22px]">
             Cobrar
           </ButtonLink>
-          <ButtonLink to={`/cargar/${data.id}`} variant="mostaza" className="!h-[52px] !text-[17px] lg:!h-16 lg:!text-xl">
+          <ButtonLink to={routes.comercio.cargar(data.id)} variant="mostaza" className="!h-[52px] !text-[17px] lg:!h-16 lg:!text-xl">
             <span className="lg:hidden">Cargar</span>
             <span className="hidden lg:inline">Cargar saldo</span>
           </ButtonLink>
@@ -133,7 +134,7 @@ export function Ficha() {
           </button>
         )}
 
-        <ButtonLink to={`/ajustar/${data.id}`} variant="borde" className="mt-3">
+        <ButtonLink to={routes.comercio.ajustar(data.id)} variant="borde" className="mt-3">
           Corregir con un ajuste
         </ButtonLink>
       </div>

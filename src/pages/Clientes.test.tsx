@@ -31,11 +31,11 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/clientes"]}>
+      <MemoryRouter initialEntries={["/comercio/clientes"]}>
         <Routes>
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/clientes/:customerId" element={<p>FICHA</p>} />
-          <Route path="/" element={<p>MOSTRADOR</p>} />
+          <Route path="/comercio/clientes" element={<Clientes />} />
+          <Route path="/comercio/clientes/:customerId" element={<p>FICHA</p>} />
+          <Route path="/comercio" element={<p>MOSTRADOR</p>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -57,8 +57,8 @@ describe("Clientes", () => {
 
     expect(await screen.findByText("$1.200")).toBeInTheDocument();
     expect(screen.getByText("$3.450")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Marta Rodríguez/ })).toHaveAttribute("href", "/clientes/c1");
-    expect(screen.getByRole("link", { name: /Sofía Techera/ })).toHaveAttribute("href", "/clientes/c2");
+    expect(screen.getByRole("link", { name: /Marta Rodríguez/ })).toHaveAttribute("href", "/comercio/clientes/c1");
+    expect(screen.getByRole("link", { name: /Sofía Techera/ })).toHaveAttribute("href", "/comercio/clientes/c2");
     expect(screen.getAllByText("099 123 456").length).toBeGreaterThan(0);
     expect(mockList).toHaveBeenCalledWith("m1", { search: undefined, limit: 20, cursor: undefined });
   });
@@ -76,7 +76,7 @@ describe("Clientes", () => {
     renderPage();
 
     expect(await screen.findByText("Todavía no hay clientes")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ir al mostrador" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Ir al mostrador" })).toHaveAttribute("href", "/comercio");
   });
 
   it("manda lo que se escribe tal cual (el backend entiende los teléfonos), esperando a que termine", async () => {

@@ -9,6 +9,7 @@ import { useMerchantId } from "../lib/merchant";
 import { formatPesos } from "../lib/money";
 import { formatUyPhone } from "../lib/phone";
 import { useDebounced } from "../lib/useDebounced";
+import { routes } from "../lib/routes";
 
 // Clientes: lista del comercio con su saldo y buscador por nombre o teléfono.
 // En el celular es una lista; en pantalla grande, una tabla. Diseño: docs/DISENO.md.
@@ -57,7 +58,7 @@ export function Clientes() {
           hint={search ? "Probá con otro nombre o con más números del teléfono." : "Aparecen solos cuando cargás saldo a alguien por primera vez."}
           action={
             search ? undefined : (
-              <ButtonLink to="/" variant="mostaza" className="max-w-xs">
+              <ButtonLink to={routes.comercio.mostrador} variant="mostaza" className="max-w-xs">
                 Ir al mostrador
               </ButtonLink>
             )
@@ -81,7 +82,7 @@ export function Clientes() {
             {customers.map((customer) => (
               <li key={customer.id} className="border-b border-arena lg:border-linea">
                 <Link
-                  to={`/clientes/${customer.id}`}
+                  to={routes.comercio.ficha(customer.id)}
                   className={`${grid} flex min-h-16 items-center justify-between gap-3 py-2 lg:h-[62px] lg:py-0`}
                 >
                   <span className="font-extrabold lg:text-base">

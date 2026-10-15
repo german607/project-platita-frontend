@@ -6,6 +6,7 @@ import { formatTime, todayRange } from "../lib/dates";
 import { formatSigned } from "../lib/money";
 import { formatUyPhone } from "../lib/phone";
 import { ErrorState } from "./states";
+import { routes } from "../lib/routes";
 
 // Panel "Hoy en el mostrador" (columna derecha del Mostrador en pantalla
 // grande): los últimos movimientos de todo el comercio desde las 00:00. Cada
@@ -63,7 +64,7 @@ function Fila({ row }: { row: MerchantTransaction }) {
 
   return (
     <li className="border-b border-linea last:border-b-0">
-      <Link to={`/clientes/${row.customer.id}`} className="flex items-center justify-between gap-3 py-3 text-[15px] font-bold">
+      <Link to={routes.comercio.ficha(row.customer.id)} className="flex items-center justify-between gap-3 py-3 text-[15px] font-bold">
         <span>
           {row.customer.name ?? formatUyPhone(row.customer.phone)}
           <span className="block text-[13px] text-suave">{`${formatTime(row.createdAt)} · ${detalle}`}</span>

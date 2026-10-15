@@ -39,10 +39,10 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/cobrar/c1"]}>
+      <MemoryRouter initialEntries={["/comercio/cobrar/c1"]}>
         <Routes>
-          <Route path="/cobrar/:customerId" element={<Cobrar />} />
-          <Route path="/" element={<p>MOSTRADOR</p>} />
+          <Route path="/comercio/cobrar/:customerId" element={<Cobrar />} />
+          <Route path="/comercio" element={<p>MOSTRADOR</p>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -100,7 +100,7 @@ describe("Cobrar", () => {
     expect(screen.getByText("$800")).toBeInTheDocument();
     expect(screen.getByText("Corte · a Marta")).toBeInTheDocument();
     expect(screen.getByText("Le quedan $400")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver al mostrador" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Volver al mostrador" })).toHaveAttribute("href", "/comercio");
   });
 
   it("cobra sin nota si no se escribe ninguna", async () => {
@@ -124,7 +124,7 @@ describe("Cobrar", () => {
     expect(screen.getByText("Le faltan $150")).toBeInTheDocument();
     expect(screen.getByText("Que cargue saldo y cobrás enseguida.")).toBeInTheDocument();
     expect(screen.getByText("No alcanza")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Cargar saldo" })).toHaveAttribute("href", "/cargar/c1");
+    expect(screen.getByRole("link", { name: "Cargar saldo" })).toHaveAttribute("href", "/comercio/cargar/c1");
     expect(screen.getByRole("button", { name: "Cobrar $1.350 (no disponible)" })).toBeDisabled();
     expect(mockCharge).not.toHaveBeenCalled();
   });

@@ -54,10 +54,10 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/cargar/c1"]}>
+      <MemoryRouter initialEntries={["/comercio/cargar/c1"]}>
         <Routes>
-          <Route path="/cargar/:customerId" element={<CargarSaldo />} />
-          <Route path="/" element={<p>MOSTRADOR</p>} />
+          <Route path="/comercio/cargar/:customerId" element={<CargarSaldo />} />
+          <Route path="/comercio" element={<p>MOSTRADOR</p>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -130,7 +130,7 @@ describe("Cargar saldo", () => {
     expect(screen.getByText("Marta ahora tiene")).toBeInTheDocument();
     expect(screen.getByText("$1.200")).toBeInTheDocument();
     expect(screen.getByText("$1.000 + $200 de bono · Efectivo")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver al mostrador" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Volver al mostrador" })).toHaveAttribute("href", "/comercio");
   });
 
   it("manda la forma de pago elegida", async () => {

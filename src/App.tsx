@@ -5,6 +5,7 @@ import { Ajuste } from "./pages/Ajuste";
 import { CargarSaldo } from "./pages/CargarSaldo";
 import { Clientes } from "./pages/Clientes";
 import { Cobrar } from "./pages/Cobrar";
+import { Entrada } from "./pages/Entrada";
 import { Ficha } from "./pages/Ficha";
 import { Mostrador } from "./pages/Mostrador";
 import { Placeholder } from "./pages/Placeholder";
@@ -26,7 +27,11 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route element={<Layout />}>
+          {/* Primera pantalla: elegir cliente o comercio. */}
+          <Route index element={<Entrada />} />
+
+          {/* Área del comercio. */}
+          <Route path="comercio" element={<Layout />}>
             <Route index element={<Mostrador />} />
             <Route path="cobrar/:customerId" element={<Cobrar />} />
             <Route path="cargar/:customerId" element={<CargarSaldo />} />
@@ -37,8 +42,13 @@ export function App() {
             <Route path="promos/nueva" element={<PromoForm />} />
             <Route path="promos/:ruleId/editar" element={<PromoForm />} />
             <Route path="reactivar" element={<Reactivar />} />
-            <Route path="*" element={<Placeholder title="No encontrada" />} />
+            <Route path="mi-comercio" element={<Placeholder title="Mi comercio" />} />
           </Route>
+
+          {/* Área del cliente (se arma a continuación). */}
+          <Route path="cliente/*" element={<Placeholder title="Lado del cliente" />} />
+
+          <Route path="*" element={<Placeholder title="No encontrada" />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

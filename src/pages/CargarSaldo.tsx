@@ -11,6 +11,7 @@ import { useMerchantId } from "../lib/merchant";
 import { formatPesos, parsePesos, pesosToCents } from "../lib/money";
 import { PAYMENT_METHODS as METHODS, paymentLabel, type PaymentMethod as Method } from "../lib/payment";
 import { useDebounced } from "../lib/useDebounced";
+import { routes } from "../lib/routes";
 
 // Cargar saldo: el cliente entrega plata (efectivo o Mercado Pago, que cobra
 // el comercio por su cuenta) y acá se registra su saldo, con el bono que
@@ -88,7 +89,7 @@ export function CargarSaldo() {
   return (
     <section className="flex flex-col gap-4">
       <h1 className="flex items-baseline gap-2 font-titulo text-[28px] font-extrabold">
-        <Link to="/" aria-label="Volver al mostrador">
+        <Link to={routes.comercio.mostrador} aria-label="Volver al mostrador">
           ←
         </Link>
         <span>Cargar saldo</span>

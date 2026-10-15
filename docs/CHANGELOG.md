@@ -275,3 +275,11 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - Se armó el texto con los pedidos para el backend y dos prompts para Claude
   Design (el lado del cliente y la pestaña de perfil del comercio); los
   prompts quedaron guardados en `design/prompts/`.
+- Las dos áreas de la web quedaron separadas por prefijo: el comercio bajo
+  `/comercio/…` y el cliente bajo `/cliente/…`, con una primera pantalla
+  `/` (**Entrada**: "Soy cliente" / "Soy un comercio"). Todas las rutas viven en
+  `src/lib/routes.ts` (ya no se escribe ninguna a mano) y se actualizaron
+  los enlaces y los tests. El menú del comercio suma la quinta pestaña "Mi
+  comercio" (todavía vacía). Motivo: evitar la confusión entre `/clientes`
+  (los clientes del comercio) y `/cliente` (el lado del cliente). Los diseños
+  del cliente y de "Mi comercio" se copiaron a `design/`. 153 tests.

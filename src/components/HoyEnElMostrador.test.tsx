@@ -91,7 +91,7 @@ describe("Hoy en el mostrador", () => {
     mockList.mockResolvedValue(page([row("t1", "TOPUP", 100000, 11, 40, marta)]));
     renderPanel();
 
-    expect(await screen.findByRole("link", { name: /Marta Rodríguez/ })).toHaveAttribute("href", "/clientes/c1");
+    expect(await screen.findByRole("link", { name: /Marta Rodríguez/ })).toHaveAttribute("href", "/comercio/clientes/c1");
   });
 
   it("si el cliente no tiene nombre, muestra su teléfono", async () => {
