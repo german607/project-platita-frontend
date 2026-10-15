@@ -66,12 +66,13 @@ Después:
 npm run dev
 ```
 
-Abrí **http://localhost:5173**. Arriba a la derecha tiene que aparecer el
-nombre de tu comercio.
+Abrí **http://localhost:5173** y elegí **Soy un comercio**. Arriba a la derecha
+tiene que aparecer el nombre de tu comercio. (La otra opción, **Soy cliente**,
+es el lado del cliente, que todavía se está armando.)
 
 ### 4. Probarlo
 
-1. En **Mostrador**, escribí un teléfono (por ejemplo `099 123 456`). Si no
+1. Después de elegir **Soy un comercio**, en **Mostrador** escribí un teléfono (por ejemplo `099 123 456`). Si no
    existe, **Crear cliente**.
 2. **Cargar saldo** → elegí $1.000 → mirá el bono → **Listo, confirmar**.
 3. Volvé al Mostrador, buscá el mismo teléfono y probá **Cobrar**.
@@ -88,6 +89,7 @@ nombre de tu comercio.
 | **Ajuste** | Corregir un saldo, con un motivo obligatorio |
 | **Promos** | Crear, editar y apagar las promos (no se borran) |
 | **Reactivar** | Clientes que hace tiempo no vienen |
+| **Mi comercio** | El perfil público: descripción, foto, categoría, locales, horarios y si aparece en la app de los clientes |
 
 ## Comandos
 

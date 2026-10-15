@@ -283,3 +283,20 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   comercio" (todavía vacía). Motivo: evitar la confusión entre `/clientes`
   (los clientes del comercio) y `/cliente` (el lado del cliente). Los diseños
   del cliente y de "Mi comercio" se copiaron a `design/`. 153 tests.
+- Se construyó la pestaña **Mi comercio** (`src/pages/MiComercio.tsx` y
+  `src/pages/mi-comercio/`) con el backend nuevo: interruptor "Aparecer en la
+  app" con lo que falta y la vista previa de la tarjeta, descripción y foto
+  (por enlace), categoría con su tooltip y el bloqueo de 90 días, locales con
+  baja y alta, horarios con validación y "copiar a todos los días", y una
+  barra de guardado (cambios sin guardar, guardando, guardado, error con
+  reintentar). Guardar manda solo lo que cambió, respeta el orden entre
+  comercio y locales y no duplica un local al reintentar. Maneja
+  `CATEGORY_CHANGE_TOO_SOON`, `PROFILE_INCOMPLETE` y
+  `LOCATION_REQUIRED_WHILE_VISIBLE`.
+- Piezas nuevas: `Switch`, `TarjetaLugar` (se reutiliza en Lugares del
+  cliente), `categories.ts`, `hours.ts` y `miComercio.ts` (lógica pura, con
+  tests). Se sumaron a la API los tipos y funciones de perfil, locales y
+  lugares públicos.
+- Verificado por la IA con `node_modules/.bin`: `tsc` sin errores y **214
+  tests pasando** en 21 archivos. Sin probar en el navegador contra el
+  backend nuevo.

@@ -30,7 +30,7 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **152 tests pasando** en 16
+  typecheck` sin errores y `npm run test:run` con **214 tests pasando** en 21
   archivos (dinero, teléfono, fechas, bono, cliente de la API y las nueve
   pantallas y formularios). El `typecheck` encontró un error real en su momento, ya
   corregido.
@@ -87,6 +87,16 @@ Decisiones tomadas:
   el mismo estilo "Cálida y de barrio".
 - **Perfil del cliente:** nombre, teléfono y cerrar sesión (y, más adelante,
   un QR personal).
+
+**Avance (2026-10-15):** los diseños del cliente y de "Mi comercio" están
+hechos (`design/`). El backend entregó la primera parte (perfil público del
+comercio, locales y lugares públicos; sin verificar corriendo). En el front
+están hechas: la **separación en dos áreas** (`/comercio` y `/cliente`, rutas
+en `src/lib/routes.ts`), la pantalla de **Entrada** y la pestaña **Mi
+comercio** (con tests, sin ver en el navegador). **Falta** el lado del
+cliente en sí: ingreso simulado, Lugares, Detalle, Mis saldos y Perfil. Mis
+saldos y el ingreso real esperan al backend (`/me/balances` y el código por
+WhatsApp o SMS).
 
 Lo que esto le pide al backend (hoy un comercio solo tiene nombre, teléfono
 y plan, y un cliente es una fila por comercio, sin login) está en el TODO,

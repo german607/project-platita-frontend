@@ -105,3 +105,25 @@ Los prompts para Claude Design de estas pantallas están guardados en
 `design/prompts/` (uno para el cliente y otro para la pestaña del comercio).
 La dirección se muestra con un botón "Cómo llegar" que abre el mapa del
 celular; no hay mapa propio.
+
+### Mi comercio (hecho el 2026-10-15)
+
+Diseño: `design/platita-mi-comercio.codigo.html`. Código: `src/pages/MiComercio.tsx`
+y `src/pages/mi-comercio/`. Cómo se aparta del diseño, a propósito:
+
+- **La descripción es recomendada, no obligatoria**: el diseño la lista entre lo
+  que falta para prender el interruptor, pero el backend solo exige un local y
+  una categoría. Se muestra en la lista ("recomendado") sin bloquear.
+- **La foto se carga con un enlace**, con su vista previa y "Quitar": el
+  backend todavía no guarda archivos (pedido en el TODO).
+- **"Copiar de otro día"**: el diseño no aclara de qué día se copia; quedó como un
+  selector de día (por defecto el lunes) y el botón "Copiar a todos los días".
+- **Locales**: además de "Dar de baja" se puede "Dar de alta" de nuevo, porque
+  no se borran. Un local nuevo todavía sin guardar se puede "Quitar".
+- **Horarios**: el cierre "24:00" que acepta el backend no se puede escribir en
+  el selector de hora del navegador; se usa 23:59. Hasta 6 tramos por día.
+- **Guardar** manda solo lo que cambió. Si se apaga "Aparecer en la app" se
+  guarda primero el comercio y después los locales; si no, al revés. Lo ya
+  guardado no se vuelve a mandar al reintentar.
+- La categoría se muestra **bloqueada** sumando 90 días a `categoryChangedAt`;
+  el 422 del backend manda igual (pedido: que devuelva la fecha).

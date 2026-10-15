@@ -70,12 +70,14 @@ en el frontend: se piden y se registran acá hasta que existan.
 **Para el lado del cliente** (decisiones cerradas el 2026-10-15; el texto para el backend se armó ese día):
 
 - [ ] **P0** Ingreso del cliente por teléfono + código de un solo uso (WhatsApp o SMS) y sesión; endpoints "del cliente" (`/me/…`) que solo devuelven los datos de quien está logueado
-- [ ] **P1** Perfil público del comercio, que edita el propio comercio: descripción, foto (por ahora solo una URL), categoría, horarios semanales (varios tramos por día, días cerrados) y un interruptor `visible` ("Aparecer en la app", apagado por defecto; para activarlo hace falta al menos un local activo). Los horarios, la descripción, la foto y la categoría son del comercio, no de cada local
-- [ ] **P1** Categoría: una de una lista fija (`CAFETERIA`, `BARBERIA_PELUQUERIA`, `PILATES_YOGA`, `PANADERIA`, `LAVADERO`, `OTRO`). La primera vez se elige libre; después **no se puede cambiar antes de 90 días** desde el último cambio (422 `CATEGORY_CHANGE_TOO_SOON` con la fecha desde la cual se puede). Si necesita cambiarla antes, el comercio nos escribe y la cambiamos nosotros a mano (el front lo explica en un tooltip)
-- [ ] **P1** Varios locales por comercio: cada local tiene una dirección (texto) y una etiqueta opcional; **solo la dirección cambia entre locales**. No hay mapa propio ni coordenadas: el front arma un botón "Cómo llegar" con la dirección. El saldo sigue siendo del comercio (vale en todos sus locales). Los locales no se borran, se dan de baja
-- [ ] **P1** Listado público de lugares: solo los visibles, con categoría, marca de promo activa y filtros; y el detalle de un lugar (promos activas, dirección, horarios, descripción, foto)
+- [~] **P1** Perfil público del comercio (descripción, foto por URL, categoría, horarios y `visible`): el backend lo resolvió el 2026-10-15 (sin verificar corriendo); el frontend ya lo usa en la pestaña "Mi comercio". Los errores `CATEGORY_CHANGE_TOO_SOON`, `PROFILE_INCOMPLETE` y `LOCATION_REQUIRED_WHILE_VISIBLE` están manejados
+- [~] **P1** Categoría de lista fija, con un cambio cada 90 días: el backend lo resolvió el 2026-10-15 (sin verificar corriendo); el frontend la muestra bloqueada con la fecha y maneja el 422
+- [~] **P1** Varios locales por comercio (solo cambia la dirección; baja en vez de borrar): el backend lo resolvió el 2026-10-15 (sin verificar corriendo); el frontend ya los edita en "Mi comercio"
+- [~] **P1** Listado y detalle públicos de lugares (`GET /places`, `GET /places/:id`): el backend lo resolvió el 2026-10-15 (sin verificar corriendo). **Falta construir las pantallas del cliente** (Lugares y Detalle)
 - [ ] **P1** `GET /me/balances`: el saldo del cliente en cada comercio (se arma juntando sus filas de cliente por teléfono verificado)
-- [ ] **P2** Subida y almacenamiento de fotos
+- [ ] **P2** Subida y almacenamiento de fotos (hoy el comercio carga la foto con un enlace)
+- [ ] **P2** Que `GET /merchants/:id` devuelva desde cuándo se puede cambiar la categoría (`categoryChangeAvailableAt`): hoy el front suma los 90 días por su cuenta para mostrar el bloqueo (el 422 del backend manda igual)
+- [ ] **P2** Idempotencia al crear un local: si se corta la red justo al crearlo, un reintento podría duplicarlo (el front ya evita duplicar los reintentos que él controla)
 - [ ] **P2** QR personal del cliente (ya está en el TODO del backend)
 
 ## 5. Calidad
@@ -105,15 +107,15 @@ en el frontend: se piden y se registran acá hasta que existan.
 Decisiones del 2026-10-15 (resumen en `docs/STATE.md`). La web va a tener **dos áreas** que comparten la misma API, los helpers y el estilo: **comercio** (lo que ya existe) y **cliente**. Se arma primero en web para pulir flujos y estilo, y que la app mobile reutilice todo.
 
 - [ ] **P0** **RECORDATORIO — ingreso real del cliente.** El cliente entra con su teléfono y un código de un solo uso que se le manda (WhatsApp o SMS): recién ahí es un usuario verificado. Hoy se **simula** (se elige un teléfono). Sin la verificación real **no se puede publicar**: cualquiera vería los saldos de cualquier número. Hay que reemplazar la simulación antes de salir
-- [ ] **P0** Diseño del lado del cliente en Claude Design (mismo estilo "Cálida y de barrio"): Lugares, detalle de un lugar, Mis saldos y Perfil
-- [ ] **P0** Estructura de código: dos áreas en el mismo repo (comercio y cliente), cada una con su layout, su menú y su ingreso, compartiendo `src/lib` y `src/components`
-- [ ] **P0** Pantalla de entrada ("Soy un comercio" / "Soy cliente") e ingreso **simulado** del cliente
+- [x] Diseño del lado del cliente y de "Mi comercio" hecho en Claude Design (`design/platita-cliente.codigo.html` y `design/platita-mi-comercio.codigo.html`, 2026-10-15)
+- [x] Estructura de código: dos áreas en el mismo repo, el comercio bajo `/comercio` y el cliente bajo `/cliente`, con todas las rutas en `src/lib/routes.ts` (2026-10-15)
+- [~] **P0** Pantalla de entrada ("Soy cliente" / "Soy un comercio") hecha; falta el ingreso **simulado** del cliente
 - [ ] **P1** **Lugares**: lista de los comercios que eligieron aparecer, con categoría y marca de si tienen una promo activa
 - [ ] **P1** **Detalle de un lugar**: promos activas, dirección con mapa, horarios, categoría, descripción, foto y el saldo del cliente en ese comercio
 - [ ] **P1** **Mis saldos**: lo que tiene en cada comercio
 - [ ] **P1** **Perfil**: nombre, teléfono y cerrar sesión
 - [ ] **P1** Botón "Cargar saldo" deshabilitado con la etiqueta "Próximamente" (a futuro, el cliente podrá cargar transfiriéndole al comercio que elija; hoy solo mira)
-- [ ] **P1** **Del lado del comercio, una pestaña nueva** (nombre a definir: "Contacto" o "Mi comercio"): dirección y mapa, horarios, foto, descripción, categoría y el interruptor "Aparecer en la app". Es el perfil del comercio; lo editan el dueño o el personal
+- [~] **P1** **Pestaña "Mi comercio"** del lado del comercio (`src/pages/MiComercio.tsx`, 5 secciones y barra de guardado; tests pasando, falta verla en el navegador contra el backend nuevo). Desvíos del diseño: la descripción es solo recomendada (el backend no la exige) y la foto se carga con un enlace (no hay subida todavía)
 - [ ] **P2** QR personal del cliente en su perfil, para mostrarle al cajero
 - [ ] **P2** Más ideas a medida que aparezcan
 

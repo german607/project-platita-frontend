@@ -38,6 +38,10 @@ src/
     payment.ts            formas de pago (efectivo, Mercado Pago, otro) y su nombre
     useDebounced.ts       espera a que termine de escribir (buscadores)
     useMediaQuery.ts      si la pantalla cumple una condición (ej. ancho de escritorio), y se actualiza sola
+    routes.ts             TODAS las rutas de la app (/comercio/… y /cliente/…); no se escribe ninguna a mano
+    categories.ts         las 6 categorías con sus etiquetas
+    hours.ts              horarios: validación, copiar a todos los días, "abierto ahora"
+    miComercio.ts         qué cambió, qué hay que guardar y qué falta para aparecer en la app
     api/
       client.ts           ÚNICA puerta a la API: fetch, ApiError, errores de red
       errors.ts           mensaje para personas según el code del backend
@@ -48,8 +52,10 @@ src/
     Button.tsx            botones grandes del diseño (acción, mostaza, claro) y su versión como enlace
     movimiento.tsx        piezas de las pantallas que mueven saldo: reintento seguro, pantalla de éxito
     HoyEnElMostrador.tsx  panel de los movimientos de hoy (Mostrador en pantalla grande)
+    Switch.tsx            interruptor con su texto ("Prendido" / "Apagado")
+    TarjetaLugar.tsx      la tarjeta de un comercio en la lista de Lugares
     states.tsx            vacío, cargando, error y éxito
-  pages/                  una pantalla por archivo: una por pantalla (Mostrador, CargarSaldo, Cobrar, Clientes, Ficha, Ajuste, Promos, PromoForm y Reactivar); Placeholder.tsx solo para rutas inexistentes
+  pages/                  una pantalla por archivo: una por pantalla (Entrada, Mostrador, CargarSaldo, Cobrar, Clientes, Ficha, Ajuste, Promos, PromoForm, Reactivar y MiComercio, esta última con sus secciones en `pages/mi-comercio/`); Placeholder.tsx para lo que todavía no se armó
   test/setup.ts           configuración de los tests
 design/                   referencia visual (ver DISENO.md)
 ```

@@ -7,6 +7,7 @@ import { Clientes } from "./pages/Clientes";
 import { Cobrar } from "./pages/Cobrar";
 import { Entrada } from "./pages/Entrada";
 import { Ficha } from "./pages/Ficha";
+import { MiComercio } from "./pages/MiComercio";
 import { Mostrador } from "./pages/Mostrador";
 import { Placeholder } from "./pages/Placeholder";
 import { PromoForm } from "./pages/PromoForm";
@@ -42,7 +43,7 @@ export function App() {
             <Route path="promos/nueva" element={<PromoForm />} />
             <Route path="promos/:ruleId/editar" element={<PromoForm />} />
             <Route path="reactivar" element={<Reactivar />} />
-            <Route path="mi-comercio" element={<Placeholder title="Mi comercio" />} />
+            <Route path="mi-comercio" element={<MiComercio />} />
           </Route>
 
           {/* Área del cliente (se arma a continuación). */}

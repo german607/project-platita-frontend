@@ -4,10 +4,15 @@ import type {
   BonusRule,
   CustomerWithBalance,
   InactivePage,
+  Location,
   Merchant,
   MerchantTransaction,
+  MerchantCategory,
   MovementResult,
+  OpeningHours,
   Page,
+  Place,
+  PlaceDetail,
   TopUpResult,
   Transaction,
   TransactionType,
@@ -37,6 +42,40 @@ const idempotencyHeaders = ({ idempotencyKey }: MovementOptions) =>
 // ---------- Comercio ----------
 
 export const getMerchant = (merchantId: string) => api<Merchant>(`/merchants/${merchantId}`);
+
+// Perfil público del comercio. Solo se manda lo que cambió. description y
+// photoUrl aceptan null para borrarlos; `openingHours` reemplaza la semana
+// completa; `category` no se puede borrar y solo se cambia cada 90 días.
+export type MerchantProfileChanges = {
+  description?: string | null;
+  photoUrl?: string | null;
+  category?: MerchantCategory;
+  visible?: boolean;
+  openingHours?: OpeningHours;
+};
+
+export const updateMerchant = (merchantId: string, changes: MerchantProfileChanges) =>
+  api<Merchant>(`/merchants/${merchantId}`, { method: "PATCH", body: changes });
+
+// ---------- Locales ----------
+
+export const listLocations = (merchantId: string) => api<{ data: Location[] }>(`/merchants/${merchantId}/locations`);
+
+export const createLocation = (merchantId: string, input: { label?: string; address: string }) =>
+  api<Location>(`/merchants/${merchantId}/locations`, { method: "POST", body: input });
+
+// No hay DELETE: un local se da de baja con active: false.
+export const updateLocation = (
+  locationId: string,
+  changes: { label?: string | null; address?: string; active?: boolean },
+) => api<Location>(`/locations/${locationId}`, { method: "PATCH", body: changes });
+
+// ---------- Lugares (lo que ve el cliente; sin login, sin datos de clientes) ----------
+
+export const listPlaces = (params: PageParams & { category?: MerchantCategory; search?: string } = {}) =>
+  api<Page<Place>>("/places", { query: params });
+
+export const getPlace = (merchantId: string) => api<PlaceDetail>(`/places/${merchantId}`);
 
 // ---------- Clientes ----------
 
