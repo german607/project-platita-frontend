@@ -141,3 +141,20 @@ export interface MovementResult {
   transaction: Transaction;
   balance: number;
 }
+
+// La persona (cliente), identificada por su teléfono; es la misma en todos los
+// comercios. Cada comercio tiene su ficha (Customer) con el saldo de ahí.
+export interface User {
+  id: string;
+  phone: string; // +598XXXXXXXX
+  name: string | null;
+  createdAt: string;
+}
+
+// Saldo de la persona en un comercio. Incluye los de saldo 0 y comercios que
+// pueden no estar en /places. Centésimos.
+export interface UserBalance {
+  merchant: { id: string; name: string; category: MerchantCategory | null; photoUrl: string | null };
+  balance: number;
+  lastVisitAt: string | null;
+}

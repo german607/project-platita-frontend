@@ -1,12 +1,15 @@
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { updateUser } from "../../lib/api/endpoints";
+import { friendlyMessage } from "../../lib/api/errors";
 import { formatUyPhone } from "../../lib/phone";
 import { routes } from "../../lib/routes";
 import { useSesionCliente } from "../../lib/sesionCliente";
 
 // Perfil: nombre (editable), teléfono verificado, QR para más adelante y cerrar
-// sesión. El nombre se guarda por ahora solo en este navegador (sesión
-// simulada); cuando haya login real, va a la API (TODO.md §4).
+// sesión. El nombre es el de la persona (PATCH /users/:id); el que anota cada
+// comercio de sus clientes no cambia.
 
 const card = "rounded-panel bg-tarjeta p-5 shadow-tarjeta";
 const MAX_NAME = 80;
@@ -17,12 +20,19 @@ export function Perfil() {
   const [editando, setEditando] = useState(false);
   const [borrador, setBorrador] = useState("");
 
+  const guardarNombre = useMutation({
+    mutationFn: (name: string | null) => updateUser(sesion!.userId, { name }),
+    onSuccess: (user) => {
+      cambiarNombre(user.name);
+      setEditando(false);
+    },
+  });
+
   if (!sesion) return null;
 
   const guardar = (e: React.FormEvent) => {
     e.preventDefault();
-    cambiarNombre(borrador.trim() || null);
-    setEditando(false);
+    guardarNombre.mutate(borrador.trim() || null);
   };
 
   return (
@@ -42,13 +52,18 @@ export function Perfil() {
               className="h-12 w-full rounded-campo border-2 border-borde bg-fondo px-4 font-bold outline-none focus:border-accion"
             />
             <div className="flex gap-3">
-              <button type="submit" className="h-11 rounded-tarjeta bg-accion px-5 font-extrabold text-tarjeta">
-                Guardar
+              <button type="submit" disabled={guardarNombre.isPending} className="h-11 rounded-tarjeta bg-accion px-5 font-extrabold text-tarjeta disabled:opacity-50">
+                {guardarNombre.isPending ? "Guardando…" : "Guardar"}
               </button>
               <button type="button" onClick={() => setEditando(false)} className="h-11 rounded-tarjeta border-2 border-tinta px-5 font-extrabold">
                 Cancelar
               </button>
             </div>
+            {guardarNombre.isError && (
+              <p role="alert" className="font-extrabold text-accion">
+                {friendlyMessage(guardarNombre.error)}
+              </p>
+            )}
           </form>
         ) : (
           <div className="flex items-center justify-between gap-3">

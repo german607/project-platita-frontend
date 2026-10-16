@@ -19,6 +19,7 @@ export function checkCode(code: string, sentAt: number, now: number = Date.now()
 }
 
 export interface SesionCliente {
+  userId: string; // el id del usuario en el backend: lo único que hace de "sesión"
   phone: string; // +598XXXXXXXX, ya verificado
   name: string | null;
 }
@@ -30,8 +31,8 @@ function leer(): SesionCliente | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw) as Partial<SesionCliente>;
-    if (typeof data.phone !== "string") return null;
-    return { phone: data.phone, name: typeof data.name === "string" ? data.name : null };
+    if (typeof data.phone !== "string" || typeof data.userId !== "string") return null;
+    return { userId: data.userId, phone: data.phone, name: typeof data.name === "string" ? data.name : null };
   } catch {
     return null;
   }
@@ -48,7 +49,7 @@ function guardar(sesion: SesionCliente | null) {
 
 interface Contexto {
   sesion: SesionCliente | null;
-  entrar: (phone: string) => void;
+  entrar: (user: { id: string; phone: string; name: string | null }) => void;
   salir: () => void;
   cambiarNombre: (name: string | null) => void;
 }
@@ -66,7 +67,7 @@ export function SesionClienteProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Contexto>(
     () => ({
       sesion,
-      entrar: (phone) => poner({ phone, name: null }),
+      entrar: (user) => poner({ userId: user.id, phone: user.phone, name: user.name }),
       salir: () => poner(null),
       cambiarNombre: (name) => sesion && poner({ ...sesion, name }),
     }),

@@ -7,11 +7,12 @@ import { listPlaces } from "../../lib/api/endpoints";
 import type { MerchantCategory } from "../../lib/api/types";
 import { CATEGORIES, categoryPlural } from "../../lib/categories";
 import { routes } from "../../lib/routes";
+import { useSaldos } from "../../lib/saldos";
 import { useDebounced } from "../../lib/useDebounced";
 
 // Lugares: los comercios que eligieron aparecer, con filtro por categoría y
-// búsqueda por nombre (los dos los resuelve el backend). Todavía sin "Tenés $X"
-// en cada tarjeta: falta el saldo del cliente (TODO.md §4, /me/balances).
+// búsqueda por nombre (los dos los resuelve el backend). Si la persona tiene
+// saldo en un lugar, la tarjeta lo dice; si los saldos no cargan, no se muestra.
 
 const PAGE_SIZE = 12;
 
@@ -22,6 +23,7 @@ export function Lugares() {
   const [raw, setRaw] = useState("");
   const [category, setCategory] = useState<MerchantCategory | undefined>();
   const search = useDebounced(raw.trim() || undefined);
+  const saldos = useSaldos().data;
 
   const query = useInfiniteQuery({
     queryKey: ["places", category, search],
@@ -92,6 +94,7 @@ export function Lugares() {
                     direccion={place.locations[0]?.address ?? null}
                     photoUrl={place.photoUrl}
                     hasPromo={place.hasActivePromo}
+                    saldo={saldos?.find((b) => b.merchant.id === place.id)?.balance}
                   />
                 </Link>
               </li>

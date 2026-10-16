@@ -324,3 +324,15 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - Menú del cliente: inferior en el celular y arriba en la web (`LayoutCliente`).
 - Verificado por la IA: `tsc` limpio y **230 tests pasando** en 23 archivos.
   Sin probar en el navegador contra el backend nuevo.
+
+## 2026-10-16 — Usuarios del backend: saldos reales del cliente
+
+- El ingreso simulado ahora hace `POST /users` con el teléfono y guarda el `userId`
+  como sesión (un solo lugar: `lib/sesionCliente.tsx`). Si el backend falla, avisa y no entra.
+- **Mis saldos** (`GET /users/:id/balances`, un saldo por comercio, también $0, sin
+  total), **"Tenés $X"** en las tarjetas de Lugares y **"Tu saldo acá"** en el
+  detalle, que buscan en esa misma lista (`lib/saldos.ts`, una sola consulta
+  compartida). Sin ficha en el lugar: "Todavía no tenés saldo".
+- **Perfil**: el nombre se guarda con `PATCH /users/:id`.
+- Esas rutas solo existen fuera de producción. `tsc` limpio, **237 tests**.
+  Sin probar contra el backend corriendo.

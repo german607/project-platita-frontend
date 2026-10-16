@@ -14,6 +14,8 @@ import type {
   Place,
   PlaceDetail,
   TopUpResult,
+  User,
+  UserBalance,
   Transaction,
   TransactionType,
 } from "./types";
@@ -76,6 +78,22 @@ export const listPlaces = (params: PageParams & { category?: MerchantCategory; s
   api<Page<Place>>("/places", { query: params });
 
 export const getPlace = (merchantId: string) => api<PlaceDetail>(`/places/${merchantId}`);
+
+// ---------- Usuario (la persona; ingreso SIMULADO, solo fuera de producción) ----------
+
+// Busca por teléfono o lo crea; si ya tiene nombre, no se lo pisa.
+export const upsertUser = (input: { phone: string; name?: string }) =>
+  api<User>("/users", { method: "POST", body: input });
+
+export const getUser = (userId: string) => api<User>(`/users/${userId}`);
+
+export const updateUser = (userId: string, input: { name: string | null }) =>
+  api<User>(`/users/${userId}`, { method: "PATCH", body: input });
+
+// Un elemento por comercio con ficha, también con saldo 0. Con sesión real pasa
+// a ser GET /me/balances con la misma forma.
+export const listUserBalances = (userId: string) =>
+  api<{ data: UserBalance[] }>(`/users/${userId}/balances`);
 
 // ---------- Clientes ----------
 

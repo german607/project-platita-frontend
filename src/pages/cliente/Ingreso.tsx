@@ -1,6 +1,9 @@
+import { useMutation } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
+import { upsertUser } from "../../lib/api/endpoints";
+import { friendlyMessage } from "../../lib/api/errors";
 import { formatUyPhone, normalizeUyPhone } from "../../lib/phone";
 import { routes } from "../../lib/routes";
 import { CODE_LENGTH, RESEND_SECONDS, checkCode, useSesionCliente } from "../../lib/sesionCliente";
@@ -25,6 +28,15 @@ export function Ingreso() {
   const [error, setError] = useState<"incorrecto" | "vencido" | "telefono" | null>(null);
   const [wait, setWait] = useState(0);
   const codeRef = useRef<HTMLInputElement>(null);
+
+  // Con el código bien, se busca o crea a la persona en el backend; su id es la sesión.
+  const ingresar = useMutation({
+    mutationFn: (e164: string) => upsertUser({ phone: e164 }),
+    onSuccess: (user) => {
+      entrar(user);
+      navigate(routes.cliente.lugares, { replace: true });
+    },
+  });
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -58,8 +70,7 @@ export function Ingreso() {
     if (!phone) return;
     const result = checkCode(code, sentAt);
     if (result === "ok") {
-      entrar(phone);
-      navigate(routes.cliente.lugares, { replace: true });
+      ingresar.mutate(phone);
     } else {
       setError(result);
     }
@@ -141,7 +152,16 @@ export function Ingreso() {
               El código venció
             </p>
           )}
-          {error !== "vencido" && <Button type="submit" disabled={code.length < CODE_LENGTH}>Entrar</Button>}
+          {ingresar.isError && (
+            <p role="alert" className="font-extrabold text-accion">
+              {friendlyMessage(ingresar.error)}
+            </p>
+          )}
+          {error !== "vencido" && (
+            <Button type="submit" disabled={code.length < CODE_LENGTH || ingresar.isPending}>
+              {ingresar.isPending ? "Entrando…" : "Entrar"}
+            </Button>
+          )}
           {wait > 0 && error !== "vencido" ? (
             <p className="text-center font-bold text-suave">{`Reenviar código en ${formatCountdown(wait)}`}</p>
           ) : (

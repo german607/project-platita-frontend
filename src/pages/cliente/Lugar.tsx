@@ -8,16 +8,18 @@ import { WEEKDAYS, formatRanges, isOpenNow, weekdayOf } from "../../lib/hours";
 import { directionsUrl } from "../../lib/maps";
 import { formatPesos } from "../../lib/money";
 import { routes } from "../../lib/routes";
+import { useSaldos } from "../../lib/saldos";
 
-// Detalle de un lugar: promos, dónde queda, horarios. Falta "Tu saldo acá":
-// necesita el saldo del cliente en este comercio (TODO.md §4). "Cargar saldo"
-// es un botón deshabilitado a propósito: todavía no se puede.
+// Detalle de un lugar: promos, dónde queda, horarios y el saldo de la persona
+// ahí (se busca en la lista de saldos; si no hay ficha, "Todavía no tenés saldo").
+// "Cargar saldo" es un botón deshabilitado a propósito: todavía no se puede.
 
 const card = "rounded-panel bg-tarjeta p-5 shadow-tarjeta";
 
 export function Lugar() {
   const { merchantId = "" } = useParams();
   const query = useQuery({ queryKey: ["place", merchantId], queryFn: () => getPlace(merchantId) });
+  const saldos = useSaldos();
 
   const volver = (
     <Link to={routes.cliente.lugares} className="font-extrabold text-suave">
@@ -43,6 +45,7 @@ export function Lugar() {
   }
 
   const place = query.data;
+  const saldoAqui = saldos.data?.find((b) => b.merchant.id === place.id)?.balance;
   const today = weekdayOf();
   const abierto = isOpenNow(place.openingHours);
   const tieneHorarios = WEEKDAYS.some((d) => place.openingHours[d.key].length > 0);
@@ -65,8 +68,17 @@ export function Lugar() {
         {place.description && <p className="mt-2">{place.description}</p>}
       </header>
 
-      <section className={`${card} flex items-center justify-between gap-4`} aria-label="Cargar saldo">
-        <p className="font-bold text-suave">Cargar saldo en este lugar</p>
+      <section className={`${card} flex items-center justify-between gap-4`} aria-label="Tu saldo acá">
+        <div>
+          <p className="font-bold text-suave">Tu saldo acá</p>
+          {saldos.isPending ? (
+            <p className="font-titulo text-2xl font-extrabold text-suave">…</p>
+          ) : saldoAqui === undefined ? (
+            <p className="font-extrabold text-suave">{saldos.isError ? "No pudimos ver tu saldo" : "Todavía no tenés saldo"}</p>
+          ) : (
+            <p className="font-titulo text-3xl font-extrabold text-saldo">{formatPesos(saldoAqui)}</p>
+          )}
+        </div>
         <button type="button" disabled className="rounded-tarjeta bg-arena px-4 py-3 text-left font-extrabold text-suave">
           Cargar saldo
           <span className="block text-sm font-bold">Próximamente</span>
