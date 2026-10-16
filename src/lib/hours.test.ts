@@ -4,12 +4,14 @@ import {
   copyToAllDays,
   dayErrors,
   emptyHours,
+  formatRanges,
   hasHoursErrors,
   hoursErrors,
   isOpenNow,
   nextRange,
   sameHours,
   sortedHours,
+  weekdayOf,
 } from "./hours";
 
 const r = (from: string, to: string) => ({ from, to });
@@ -102,5 +104,21 @@ describe("isOpenNow", () => {
   it("está cerrado fuera de los tramos y los días sin horario", () => {
     expect(isOpenNow(hours, new Date(2026, 9, 13, 14, 0))).toBe(false);
     expect(isOpenNow(hours, new Date(2026, 9, 14, 10, 0))).toBe(false);
+  });
+});
+
+describe("formatRanges y weekdayOf", () => {
+  it("muestra los tramos como se leen en el detalle", () => {
+    expect(formatRanges([{ from: "09:00", to: "13:00" }, { from: "16:00", to: "20:30" }])).toBe("9 a 13 · 16 a 20:30");
+    expect(formatRanges([{ from: "08:00", to: "24:00" }])).toBe("8 a 24");
+  });
+
+  it("un día sin tramos es 'Cerrado'", () => {
+    expect(formatRanges([])).toBe("Cerrado");
+  });
+
+  it("weekdayOf usa las claves del backend", () => {
+    expect(weekdayOf(new Date(2026, 9, 15))).toBe("thu"); // jueves 15 de octubre de 2026
+    expect(weekdayOf(new Date(2026, 9, 18))).toBe("sun");
   });
 });

@@ -111,6 +111,9 @@ celular; no hay mapa propio.
 Diseño: `design/platita-mi-comercio.codigo.html`. Código: `src/pages/MiComercio.tsx`
 y `src/pages/mi-comercio/`. Cómo se aparta del diseño, a propósito:
 
+- **Menú:** la pestaña va aparte, al fondo del menú lateral y a la derecha de la
+  barra inferior en el celular, para no entrar por error (se usa poco).
+
 - **La descripción es recomendada, no obligatoria**: el diseño la lista entre lo
   que falta para prender el interruptor, pero el backend solo exige un local y
   una categoría. Se muestra en la lista ("recomendado") sin bloquear.

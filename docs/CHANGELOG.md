@@ -300,3 +300,27 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - Verificado por la IA con `node_modules/.bin`: `tsc` sin errores y **214
   tests pasando** en 21 archivos. Sin probar en el navegador contra el
   backend nuevo.
+
+## 2026-10-15 — "Mi comercio" queda aparte en el menú
+
+- En el menú lateral, "Mi comercio" pasa al fondo, separado por una línea y
+  con letra más chica y apagada; en el celular queda a la derecha de la barra
+  inferior, tras un divisor. Motivo: se usa poco (al principio y algún cambio
+  eventual) y así no se entra por error. Solo cambia `components/Layout.tsx`;
+  la ruta es la misma. `tsc` limpio y 214 tests pasando.
+
+## 2026-10-15 — Lado del cliente, primera parte
+
+- **Ingreso simulado** (`pages/cliente/Ingreso.tsx`, `lib/sesionCliente.tsx`):
+  celular → código de 6 dígitos (válido solo `000000`, vence a los 5 minutos,
+  reenvío con cuenta regresiva); estados "Código incorrecto" y "El código
+  venció". La sesión vive en `localStorage`. Sin sesión, `/cliente/*` manda al
+  ingreso. ⚠ Reemplazar por la verificación real antes de publicar (TODO P0).
+- **Lugares**, **Detalle de un lugar** y **Perfil** con los datos de `/places`.
+  Detalle: promos, locales con "Cómo llegar" (enlace a mapas con la dirección),
+  horarios con "Abierto ahora" y el día de hoy marcado, y "Cargar saldo ·
+  Próximamente" deshabilitado. **Mis saldos** muestra "Próximamente" hasta que
+  el backend tenga `/me/balances` (no se arma recorriendo comercio por comercio).
+- Menú del cliente: inferior en el celular y arriba en la web (`LayoutCliente`).
+- Verificado por la IA: `tsc` limpio y **230 tests pasando** en 23 archivos.
+  Sin probar en el navegador contra el backend nuevo.

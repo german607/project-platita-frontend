@@ -109,12 +109,12 @@ Decisiones del 2026-10-15 (resumen en `docs/STATE.md`). La web va a tener **dos 
 - [ ] **P0** **RECORDATORIO — ingreso real del cliente.** El cliente entra con su teléfono y un código de un solo uso que se le manda (WhatsApp o SMS): recién ahí es un usuario verificado. Hoy se **simula** (se elige un teléfono). Sin la verificación real **no se puede publicar**: cualquiera vería los saldos de cualquier número. Hay que reemplazar la simulación antes de salir
 - [x] Diseño del lado del cliente y de "Mi comercio" hecho en Claude Design (`design/platita-cliente.codigo.html` y `design/platita-mi-comercio.codigo.html`, 2026-10-15)
 - [x] Estructura de código: dos áreas en el mismo repo, el comercio bajo `/comercio` y el cliente bajo `/cliente`, con todas las rutas en `src/lib/routes.ts` (2026-10-15)
-- [~] **P0** Pantalla de entrada ("Soy cliente" / "Soy un comercio") hecha; falta el ingreso **simulado** del cliente
-- [ ] **P1** **Lugares**: lista de los comercios que eligieron aparecer, con categoría y marca de si tienen una promo activa
-- [ ] **P1** **Detalle de un lugar**: promos activas, dirección con mapa, horarios, categoría, descripción, foto y el saldo del cliente en ese comercio
-- [ ] **P1** **Mis saldos**: lo que tiene en cada comercio
-- [ ] **P1** **Perfil**: nombre, teléfono y cerrar sesión
-- [ ] **P1** Botón "Cargar saldo" deshabilitado con la etiqueta "Próximamente" (a futuro, el cliente podrá cargar transfiriéndole al comercio que elija; hoy solo mira)
+- [x] Pantalla de entrada ("Soy cliente" / "Soy un comercio") e ingreso **simulado** del cliente: celular → código (el único válido es `000000`, vence a los 5 min, reenvío con cuenta regresiva); la sesión se guarda en el navegador (`src/lib/sesionCliente.tsx`). ⚠ Es la simulación del P0 de arriba
+- [~] **P1** **Lugares**: hecho (lista, búsqueda, filtro por categoría, "Ver más"); falta "Tenés $X" en cada tarjeta, que espera `/me/balances`
+- [~] **P1** **Detalle de un lugar**: hecho (promos, locales con "Cómo llegar", horarios con "Abierto ahora" y el día de hoy marcado, "Cargar saldo · Próximamente" deshabilitado); falta "Tu saldo acá", que espera `/me/balances`
+- [ ] **P1** **Mis saldos**: hoy muestra "Próximamente"; espera `GET /me/balances` (no se arma recorriendo comercio por comercio)
+- [x] **Perfil**: nombre (editable, guardado solo en este navegador mientras la sesión sea simulada), teléfono verificado, QR "Próximamente" y cerrar sesión
+- [x] Botón "Cargar saldo" deshabilitado con la etiqueta "Próximamente" en el detalle de un lugar (a futuro, el cliente podrá cargar transfiriéndole al comercio que elija; hoy solo mira)
 - [~] **P1** **Pestaña "Mi comercio"** del lado del comercio (`src/pages/MiComercio.tsx`, 5 secciones y barra de guardado; tests pasando, falta verla en el navegador contra el backend nuevo). Desvíos del diseño: la descripción es solo recomendada (el backend no la exige) y la foto se carga con un enlace (no hay subida todavía)
 - [ ] **P2** QR personal del cliente en su perfil, para mostrarle al cajero
 - [ ] **P2** Más ideas a medida que aparezcan

@@ -93,10 +93,11 @@ hechos (`design/`). El backend entregó la primera parte (perfil público del
 comercio, locales y lugares públicos; sin verificar corriendo). En el front
 están hechas: la **separación en dos áreas** (`/comercio` y `/cliente`, rutas
 en `src/lib/routes.ts`), la pantalla de **Entrada** y la pestaña **Mi
-comercio** (con tests, sin ver en el navegador). **Falta** el lado del
-cliente en sí: ingreso simulado, Lugares, Detalle, Mis saldos y Perfil. Mis
-saldos y el ingreso real esperan al backend (`/me/balances` y el código por
-WhatsApp o SMS).
+comercio** (con tests, sin ver en el navegador). Del lado del cliente
+están hechos el **ingreso simulado** (código `000000`), **Lugares**, **Detalle
+de un lugar** y **Perfil**. **Falta** Mis saldos y el "Tenés $X"/"Tu saldo
+acá", que esperan `/me/balances`, y el ingreso real (código por WhatsApp o
+SMS). Sin ver en el navegador contra el backend nuevo.
 
 Lo que esto le pide al backend (hoy un comercio solo tiene nombre, teléfono
 y plan, y un cliente es una fila por comercio, sin login) está en el TODO,

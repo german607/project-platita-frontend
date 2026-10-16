@@ -92,3 +92,20 @@ export function isOpenNow(hours: OpeningHours, now: Date = new Date()): boolean 
   const current = now.getHours() * 60 + now.getMinutes();
   return hours[keys[now.getDay()]].some((r) => validFrom(r.from) && validTo(r.to) && minutes(r.from) <= current && current < minutes(r.to));
 }
+
+// "09:00" → "9", "09:30" → "9:30": como se lee en el detalle de un lugar.
+const shortTime = (time: string) => {
+  const [h, m] = time.split(":");
+  return m === "00" ? String(Number(h)) : `${Number(h)}:${m}`;
+};
+
+// "9 a 13 · 16 a 20", o "Cerrado" si no abre ese día.
+export function formatRanges(ranges: TimeRange[]): string {
+  if (ranges.length === 0) return "Cerrado";
+  return ranges.map((r) => `${shortTime(r.from)} a ${shortTime(r.to)}`).join(" · ");
+}
+
+// El día de la semana de `now`, con las mismas claves que usa el backend.
+export function weekdayOf(now: Date = new Date()): Weekday {
+  return (["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const)[now.getDay()];
+}

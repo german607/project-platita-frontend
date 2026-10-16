@@ -12,13 +12,28 @@ const items = [
   { to: routes.comercio.clientes, label: "Clientes", end: false },
   { to: routes.comercio.promos, label: "Promos", end: false },
   { to: routes.comercio.reactivar, label: "Reactivar", end: false },
-  { to: routes.comercio.miComercio, label: "Mi comercio", end: false },
 ];
+
+// Se usa poco (al principio y para algún cambio eventual), así que va aparte y
+// al final, lejos de lo que se toca todos los días.
+const perfil = { to: routes.comercio.miComercio, label: "Mi comercio", end: false };
 
 const sideLink = ({ isActive }: { isActive: boolean }) =>
   [
     "flex h-12 items-center rounded-[14px] px-3 text-base font-extrabold",
     isActive ? "bg-mostaza text-tinta" : "text-crema",
+  ].join(" ");
+
+const sideLinkAparte = ({ isActive }: { isActive: boolean }) =>
+  [
+    "flex h-11 items-center rounded-[14px] px-3 text-sm font-bold",
+    isActive ? "bg-mostaza text-tinta" : "text-arena",
+  ].join(" ");
+
+const bottomLinkAparte = ({ isActive }: { isActive: boolean }) =>
+  [
+    "flex h-12 items-center justify-center px-3 text-[11px] font-bold",
+    isActive ? "text-accion" : "text-suave/80",
   ].join(" ");
 
 const bottomLink = ({ isActive }: { isActive: boolean }) =>
@@ -49,6 +64,11 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
+        <nav className="mt-auto border-t border-suave/40 pt-3" aria-label="Configuración">
+          <NavLink to={perfil.to} end={perfil.end} className={sideLinkAparte}>
+            {perfil.label}
+          </NavLink>
+        </nav>
       </aside>
 
       <div className="mx-auto max-w-[900px] px-5 pb-28 pt-[22px] lg:ml-[200px] lg:px-9 lg:pb-8 lg:pt-7">
@@ -75,13 +95,19 @@ export function Layout() {
 
       <nav
         aria-label="Principal"
-        className="fixed inset-x-0 bottom-0 z-10 grid h-[58px] grid-cols-5 rounded-t-[24px] bg-tarjeta lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-10 flex h-[58px] items-center rounded-t-[24px] bg-tarjeta lg:hidden"
       >
-        {items.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} className={bottomLink}>
-            {item.label}
-          </NavLink>
-        ))}
+        <div className="grid flex-1 grid-cols-4">
+          {items.map((item) => (
+            <NavLink key={item.to} to={item.to} end={item.end} className={bottomLink}>
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+        <span aria-hidden="true" className="h-6 w-px bg-borde" />
+        <NavLink to={perfil.to} end={perfil.end} className={bottomLinkAparte}>
+          {perfil.label}
+        </NavLink>
       </nav>
     </div>
   );
