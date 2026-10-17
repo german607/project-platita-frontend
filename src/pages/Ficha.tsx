@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { NombreCliente } from "../components/NombreCliente";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ButtonLink } from "../components/Button";
@@ -65,7 +66,7 @@ export function Ficha() {
         <Link to={routes.comercio.clientes} className="text-sm font-extrabold text-suave">
           ← Clientes
         </Link>
-        <h1 className="font-titulo text-[28px] font-extrabold">{data.name ?? "Cliente sin nombre"}</h1>
+        <h1 className="font-titulo text-[28px] font-extrabold"><NombreCliente customer={data} fallback="Cliente sin nombre" /></h1>
         <p className="text-suave">{`${formatUyPhone(data.phone)} · ${visitLabel(data.lastVisitAt).toLowerCase()}`}</p>
 
         <div className="rounded-[24px] bg-saldo px-5 py-3.5 text-tarjeta">

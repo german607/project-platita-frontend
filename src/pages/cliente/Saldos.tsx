@@ -32,13 +32,18 @@ export function Saldos() {
             <li key={merchant.id}>
               <Link
                 to={routes.cliente.lugar(merchant.id)}
-                className="flex items-center justify-between gap-3 rounded-panel bg-tarjeta p-4 shadow-tarjeta"
+                className="flex items-stretch gap-3 overflow-hidden rounded-panel bg-tarjeta shadow-tarjeta"
               >
-                <div>
+                <div className="relative w-24 shrink-0 bg-[repeating-linear-gradient(45deg,#EADCBC,#EADCBC_10px,#F2E6CC_10px,#F2E6CC_20px)]">
+                  {merchant.photoUrl && <img src={merchant.photoUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+                </div>
+                <div className="flex min-w-0 flex-1 items-center justify-between gap-3 py-4 pr-4">
+                <div className="min-w-0">
                   <p className="font-titulo text-lg font-extrabold leading-tight">{merchant.name}</p>
                   {merchant.category && <p className="text-sm font-bold text-suave">{categoryPlural(merchant.category)}</p>}
                 </div>
                 <p className={`font-titulo text-2xl font-extrabold ${balance > 0 ? "text-saldo" : "text-suave"}`}>{formatPesos(balance)}</p>
+                </div>
               </Link>
             </li>
           ))}

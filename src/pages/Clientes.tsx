@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { NombreCliente } from "../components/NombreCliente";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ButtonLink } from "../components/Button";
@@ -86,7 +87,7 @@ export function Clientes() {
                   className={`${grid} flex min-h-16 items-center justify-between gap-3 py-2 lg:h-[62px] lg:py-0`}
                 >
                   <span className="font-extrabold lg:text-base">
-                    {customer.name ?? "Sin nombre"}
+                    <NombreCliente customer={customer} />
                     <span className="block text-[13px] font-bold text-suave lg:hidden">{formatUyPhone(customer.phone)}</span>
                   </span>
                   <span className="hidden lg:block">{formatUyPhone(customer.phone)}</span>

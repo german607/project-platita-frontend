@@ -336,3 +336,15 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - **Perfil**: el nombre se guarda con `PATCH /users/:id`.
 - Esas rutas solo existen fuera de producción. `tsc` limpio, **237 tests**.
   Sin probar contra el backend corriendo.
+
+## 2026-10-17 — Ajustes de apariencia
+
+- **Mis saldos:** cada tarjeta lleva la foto del comercio pegada al borde
+  izquierdo (recortada por la tarjeta, recta del lado derecho), con el nombre,
+  la categoría y el saldo como antes. Sin foto, el bloque rayado "foto".
+- **Nombre de la persona en el área del comercio:** `NombreCliente` muestra el
+  nombre que anotó el comercio y, más chico entre paréntesis, el de la persona
+  si es distinto ("Juanito (Juan)"); uno solo si coinciden sin mayúsculas ni
+  tildes (`lib/customerName.ts`). Se usa en Clientes, Ficha, Mostrador y
+  Reactivar. ⚠ El backend todavía no manda `userName` en las fichas: pedido en
+  TODO §4; hasta entonces se ve como antes. `tsc` limpio, 241 tests.

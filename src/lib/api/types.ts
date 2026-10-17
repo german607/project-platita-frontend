@@ -74,7 +74,8 @@ export interface Customer {
   id: string;
   merchantId: string;
   phone: string; // +598XXXXXXXX
-  name: string | null;
+  name: string | null; // como lo anota el comercio
+  userName?: string | null; // el nombre de la persona (pedido al backend: todavía no viene)
   createdAt: string;
   lastVisitAt: string | null;
 }
