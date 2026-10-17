@@ -10,6 +10,7 @@ import type { MovementResult } from "../lib/api/types";
 import { useIdempotencyKey } from "../lib/idempotency";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos, parsePesos, pesosToCents } from "../lib/money";
+import { routes } from "../lib/routes";
 
 // Cobrar: descuenta del saldo del cliente lo que consumió. Si no alcanza, no
 // se cobra: se muestra cuánto le falta y se lleva a Cargar saldo.
@@ -78,7 +79,7 @@ export function Cobrar() {
   return (
     <section className="flex flex-col gap-4">
       <h1 className="flex items-baseline gap-2 font-titulo text-[28px] font-extrabold">
-        <Link to="/" aria-label="Volver al mostrador">
+        <Link to={routes.comercio.mostrador} aria-label="Volver al mostrador">
           ←
         </Link>
         <span>Cobrar</span>
@@ -139,7 +140,7 @@ export function Cobrar() {
                 <p className="font-titulo text-[30px] font-extrabold leading-[1.05] lg:text-5xl">{`Le faltan ${formatPesos(falta)}`}</p>
                 <p className="mt-1 text-sm lg:mt-2 lg:text-base">Que cargue saldo y cobrás enseguida.</p>
               </div>
-              <ButtonLink to={`/cargar/${customerId}`} variant="mostaza">
+              <ButtonLink to={routes.comercio.cargar(customerId)} variant="mostaza">
                 Cargar saldo
               </ButtonLink>
               <button

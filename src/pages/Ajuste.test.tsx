@@ -41,10 +41,10 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/ajustar/c1"]}>
+      <MemoryRouter initialEntries={["/comercio/ajustar/c1"]}>
         <Routes>
-          <Route path="/ajustar/:customerId" element={<Ajuste />} />
-          <Route path="/clientes/:customerId" element={<p>FICHA</p>} />
+          <Route path="/comercio/ajustar/:customerId" element={<Ajuste />} />
+          <Route path="/comercio/clientes/:customerId" element={<p>FICHA</p>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -100,7 +100,7 @@ describe("Ajuste", () => {
     expect(screen.getByText("Marta ahora tiene")).toBeInTheDocument();
     expect(screen.getByText("$1.100")).toBeInTheDocument();
     expect(screen.getByText(`-$100 · ${MOTIVO}`)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver a la ficha" })).toHaveAttribute("href", "/clientes/c1");
+    expect(screen.getByRole("link", { name: "Volver a la ficha" })).toHaveAttribute("href", "/comercio/clientes/c1");
   });
 
   it("guarda una suma con signo positivo", async () => {

@@ -249,3 +249,102 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   llamadas no llegaban al backend). Ahora una variable vacía vale lo mismo que
   no estar y usa el valor por defecto (`parseConfig` en `src/config.ts`, con
   tests).
+
+## 2026-10-15
+
+- Se definió el **próximo hito: el lado del cliente**. La web tendrá dos
+  áreas (comercio y cliente) en el mismo repo y con la misma API. El cliente
+  verá Lugares, el detalle de cada lugar, Mis saldos y su Perfil; solo mira
+  (cargar por su cuenta queda como "Próximamente"). Un comercio solo aparece
+  si lo activa, desde una pestaña nueva con su perfil público. La categoría
+  se elige y no se cambia seguido. El ingreso del cliente es por teléfono y
+  código de un solo uso: **se simula por ahora y hay que reemplazarlo por la
+  verificación real antes de publicar** (anotado como recordatorio P0 en el
+  TODO y en `STATE.md`).
+- Se registraron en el TODO (§7 y los pedidos al backend de §4), en
+  `STATE.md` y en `DISENO.md` las decisiones, las pantallas y lo que se le
+  pide al backend. Quedaron tres puntos por definir: cada cuánto se cambia la
+  categoría, si un comercio puede tener varios locales y qué tan completo es
+  el mapa.
+- Solo documentación: no se tocó código.
+- Se cerraron los tres puntos abiertos del lado del cliente: la categoría se
+  cambia **una vez cada 90 días** (con un tooltip que dice que, si necesita
+  antes, nos escriba); un comercio puede tener **varios locales** y lo único que
+  cambia es la dirección; el mapa es un botón **"Cómo llegar"** (sin mapa
+  propio ni coordenadas). Supuesto anotado: los horarios son del comercio.
+- Se armó el texto con los pedidos para el backend y dos prompts para Claude
+  Design (el lado del cliente y la pestaña de perfil del comercio); los
+  prompts quedaron guardados en `design/prompts/`.
+- Las dos áreas de la web quedaron separadas por prefijo: el comercio bajo
+  `/comercio/…` y el cliente bajo `/cliente/…`, con una primera pantalla
+  `/` (**Entrada**: "Soy cliente" / "Soy un comercio"). Todas las rutas viven en
+  `src/lib/routes.ts` (ya no se escribe ninguna a mano) y se actualizaron
+  los enlaces y los tests. El menú del comercio suma la quinta pestaña "Mi
+  comercio" (todavía vacía). Motivo: evitar la confusión entre `/clientes`
+  (los clientes del comercio) y `/cliente` (el lado del cliente). Los diseños
+  del cliente y de "Mi comercio" se copiaron a `design/`. 153 tests.
+- Se construyó la pestaña **Mi comercio** (`src/pages/MiComercio.tsx` y
+  `src/pages/mi-comercio/`) con el backend nuevo: interruptor "Aparecer en la
+  app" con lo que falta y la vista previa de la tarjeta, descripción y foto
+  (por enlace), categoría con su tooltip y el bloqueo de 90 días, locales con
+  baja y alta, horarios con validación y "copiar a todos los días", y una
+  barra de guardado (cambios sin guardar, guardando, guardado, error con
+  reintentar). Guardar manda solo lo que cambió, respeta el orden entre
+  comercio y locales y no duplica un local al reintentar. Maneja
+  `CATEGORY_CHANGE_TOO_SOON`, `PROFILE_INCOMPLETE` y
+  `LOCATION_REQUIRED_WHILE_VISIBLE`.
+- Piezas nuevas: `Switch`, `TarjetaLugar` (se reutiliza en Lugares del
+  cliente), `categories.ts`, `hours.ts` y `miComercio.ts` (lógica pura, con
+  tests). Se sumaron a la API los tipos y funciones de perfil, locales y
+  lugares públicos.
+- Verificado por la IA con `node_modules/.bin`: `tsc` sin errores y **214
+  tests pasando** en 21 archivos. Sin probar en el navegador contra el
+  backend nuevo.
+
+## 2026-10-15 — "Mi comercio" queda aparte en el menú
+
+- En el menú lateral, "Mi comercio" pasa al fondo, separado por una línea y
+  con letra más chica y apagada; en el celular queda a la derecha de la barra
+  inferior, tras un divisor. Motivo: se usa poco (al principio y algún cambio
+  eventual) y así no se entra por error. Solo cambia `components/Layout.tsx`;
+  la ruta es la misma. `tsc` limpio y 214 tests pasando.
+
+## 2026-10-15 — Lado del cliente, primera parte
+
+- **Ingreso simulado** (`pages/cliente/Ingreso.tsx`, `lib/sesionCliente.tsx`):
+  celular → código de 6 dígitos (válido solo `000000`, vence a los 5 minutos,
+  reenvío con cuenta regresiva); estados "Código incorrecto" y "El código
+  venció". La sesión vive en `localStorage`. Sin sesión, `/cliente/*` manda al
+  ingreso. ⚠ Reemplazar por la verificación real antes de publicar (TODO P0).
+- **Lugares**, **Detalle de un lugar** y **Perfil** con los datos de `/places`.
+  Detalle: promos, locales con "Cómo llegar" (enlace a mapas con la dirección),
+  horarios con "Abierto ahora" y el día de hoy marcado, y "Cargar saldo ·
+  Próximamente" deshabilitado. **Mis saldos** muestra "Próximamente" hasta que
+  el backend tenga `/me/balances` (no se arma recorriendo comercio por comercio).
+- Menú del cliente: inferior en el celular y arriba en la web (`LayoutCliente`).
+- Verificado por la IA: `tsc` limpio y **230 tests pasando** en 23 archivos.
+  Sin probar en el navegador contra el backend nuevo.
+
+## 2026-10-16 — Usuarios del backend: saldos reales del cliente
+
+- El ingreso simulado ahora hace `POST /users` con el teléfono y guarda el `userId`
+  como sesión (un solo lugar: `lib/sesionCliente.tsx`). Si el backend falla, avisa y no entra.
+- **Mis saldos** (`GET /users/:id/balances`, un saldo por comercio, también $0, sin
+  total), **"Tenés $X"** en las tarjetas de Lugares y **"Tu saldo acá"** en el
+  detalle, que buscan en esa misma lista (`lib/saldos.ts`, una sola consulta
+  compartida). Sin ficha en el lugar: "Todavía no tenés saldo".
+- **Perfil**: el nombre se guarda con `PATCH /users/:id`.
+- Esas rutas solo existen fuera de producción. `tsc` limpio, **237 tests**.
+  Sin probar contra el backend corriendo.
+
+## 2026-10-17 — Ajustes de apariencia
+
+- **Mis saldos:** cada tarjeta lleva la foto del comercio pegada al borde
+  izquierdo (recortada por la tarjeta, recta del lado derecho), con el nombre,
+  la categoría y el saldo como antes. Sin foto, el bloque rayado "foto".
+- **Nombre de la persona en el área del comercio:** `NombreCliente` muestra el
+  nombre que anotó el comercio y, más chico entre paréntesis, el de la persona
+  si es distinto ("Juanito (Juan)"); uno solo si coinciden sin mayúsculas ni
+  tildes (`lib/customerName.ts`). Se usa en Clientes, Ficha, Mostrador y
+  Reactivar. ⚠ El backend todavía no manda `userName` en las fichas: pedido en
+  TODO §4; hasta entonces se ve como antes. `tsc` limpio, 241 tests.

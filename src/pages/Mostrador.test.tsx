@@ -95,8 +95,8 @@ describe("Mostrador", () => {
     expect(screen.getByText("$1.200")).toBeInTheDocument();
     expect(screen.getByText("Todavía no vino")).toBeInTheDocument();
     expect(mockList).toHaveBeenCalledWith("m1", { phone: "+59899123456", limit: 1 });
-    expect(screen.getByRole("link", { name: "Cobrar" })).toHaveAttribute("href", "/cobrar/c1");
-    expect(screen.getByRole("link", { name: "Cargar saldo" })).toHaveAttribute("href", "/cargar/c1");
+    expect(screen.getByRole("link", { name: "Cobrar" })).toHaveAttribute("href", "/comercio/cobrar/c1");
+    expect(screen.getByRole("link", { name: "Cargar saldo" })).toHaveAttribute("href", "/comercio/cargar/c1");
   });
 
   it("si el backend ignorara el filtro y devolviera a otra persona, no se la muestra", async () => {

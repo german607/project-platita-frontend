@@ -79,3 +79,15 @@ export function todayRange(now: Date = new Date()): { from: string; to: string }
   const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   return { from: isoWithOffset(start), to: isoWithOffset(end) };
 }
+
+const MONTHS_LONG = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+// "12 de enero" (y el año si es de otro año). Para avisos como "Podés cambiarla desde el…".
+export function formatLongDate(iso: string, now: Date = new Date()): string {
+  const date = new Date(iso);
+  const base = `${date.getDate()} de ${MONTHS_LONG[date.getMonth()]}`;
+  return date.getFullYear() === now.getFullYear() ? base : `${base} de ${date.getFullYear()}`;
+}

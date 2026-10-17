@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { NombreCliente } from "../components/NombreCliente";
 import { useState } from "react";
 import { Button, ButtonLink } from "../components/Button";
 import { HoyEnElMostrador } from "../components/HoyEnElMostrador";
@@ -10,6 +11,7 @@ import { useMerchantId } from "../lib/merchant";
 import { formatPesos } from "../lib/money";
 import { normalizeUyPhone } from "../lib/phone";
 import { useMediaQuery } from "../lib/useMediaQuery";
+import { routes } from "../lib/routes";
 
 // Mostrador: la pantalla que se usa con el cliente delante. Se escribe el
 // teléfono; si el cliente existe se ve su saldo y se pasa a Cobrar o Cargar,
@@ -119,7 +121,7 @@ function ClienteEncontrado({ customer }: { customer: CustomerWithBalance }) {
   return (
     <>
       <div className={card}>
-        <p className="text-lg font-extrabold lg:text-xl">{customer.name ?? "Cliente sin nombre"}</p>
+        <p className="text-lg font-extrabold lg:text-xl"><NombreCliente customer={customer} fallback="Cliente sin nombre" /></p>
         <p className="text-sm text-suave">{visitLabel(customer.lastVisitAt)}</p>
         <div className="mt-3.5 rounded-[20px] bg-saldo px-4 py-3 text-tarjeta lg:rounded-[22px] lg:px-[22px] lg:py-3.5">
           <p className="text-sm lg:text-[15px]">Tiene de saldo</p>
@@ -130,8 +132,8 @@ function ClienteEncontrado({ customer }: { customer: CustomerWithBalance }) {
       </div>
 
       <div className="mt-2 flex flex-col gap-3 lg:flex-row">
-        <ButtonLink to={`/cobrar/${customer.id}`}>Cobrar</ButtonLink>
-        <ButtonLink to={`/cargar/${customer.id}`} variant="mostaza">
+        <ButtonLink to={routes.comercio.cobrar(customer.id)}>Cobrar</ButtonLink>
+        <ButtonLink to={routes.comercio.cargar(customer.id)} variant="mostaza">
           Cargar saldo
         </ButtonLink>
       </div>

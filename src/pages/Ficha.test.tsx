@@ -65,10 +65,10 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/clientes/c1"]}>
+      <MemoryRouter initialEntries={["/comercio/clientes/c1"]}>
         <Routes>
-          <Route path="/clientes/:customerId" element={<Ficha />} />
-          <Route path="/clientes" element={<p>CLIENTES</p>} />
+          <Route path="/comercio/clientes/:customerId" element={<Ficha />} />
+          <Route path="/comercio/clientes" element={<p>CLIENTES</p>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -107,10 +107,10 @@ describe("Ficha del cliente", () => {
     renderPage();
     await screen.findByRole("heading", { name: "Marta Rodríguez" });
 
-    expect(screen.getByRole("link", { name: "Cobrar" })).toHaveAttribute("href", "/cobrar/c1");
-    expect(screen.getByRole("link", { name: /Cargar/ })).toHaveAttribute("href", "/cargar/c1");
-    expect(screen.getByRole("link", { name: "Corregir con un ajuste" })).toHaveAttribute("href", "/ajustar/c1");
-    expect(screen.getByRole("link", { name: "← Clientes" })).toHaveAttribute("href", "/clientes");
+    expect(screen.getByRole("link", { name: "Cobrar" })).toHaveAttribute("href", "/comercio/cobrar/c1");
+    expect(screen.getByRole("link", { name: /Cargar/ })).toHaveAttribute("href", "/comercio/cargar/c1");
+    expect(screen.getByRole("link", { name: "Corregir con un ajuste" })).toHaveAttribute("href", "/comercio/ajustar/c1");
+    expect(screen.getByRole("link", { name: "← Clientes" })).toHaveAttribute("href", "/comercio/clientes");
   });
 
   it("lista los movimientos con tipo, detalle y monto con signo", async () => {

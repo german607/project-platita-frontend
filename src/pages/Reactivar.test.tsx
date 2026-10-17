@@ -51,10 +51,10 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/reactivar"]}>
+      <MemoryRouter initialEntries={["/comercio/reactivar"]}>
         <Routes>
-          <Route path="/reactivar" element={<Reactivar />} />
-          <Route path="/clientes/:customerId" element={<p>FICHA</p>} />
+          <Route path="/comercio/reactivar" element={<Reactivar />} />
+          <Route path="/comercio/clientes/:customerId" element={<p>FICHA</p>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -81,7 +81,7 @@ describe("Reactivar", () => {
     expect(screen.getAllByText("$320").length).toBeGreaterThan(0);
     expect(screen.getAllByText("$1.500").length).toBeGreaterThan(0);
     expect(screen.getAllByText("$0").length).toBeGreaterThan(0);
-    expect(screen.getByRole("link", { name: /Nicolás Acosta/ })).toHaveAttribute("href", "/clientes/c1");
+    expect(screen.getByRole("link", { name: /Nicolás Acosta/ })).toHaveAttribute("href", "/comercio/clientes/c1");
   });
 
   it("si nunca vino, lo dice contando desde que se anotó", async () => {

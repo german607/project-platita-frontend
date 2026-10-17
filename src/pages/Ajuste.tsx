@@ -10,6 +10,7 @@ import type { MovementResult } from "../lib/api/types";
 import { useIdempotencyKey } from "../lib/idempotency";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos, formatSigned, parsePesos, pesosToCents } from "../lib/money";
+import { routes } from "../lib/routes";
 
 // Ajuste: corrección manual del saldo, sumando o restando. Es la única forma
 // de arreglar un error: los movimientos no se editan ni se borran, así que
@@ -92,7 +93,7 @@ export function Ajuste() {
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-4">
       <h1 className="flex items-baseline gap-2 font-titulo text-[28px] font-extrabold">
-        <Link to={`/clientes/${customerId}`} aria-label="Volver a la ficha del cliente">
+        <Link to={routes.comercio.ficha(customerId)} aria-label="Volver a la ficha del cliente">
           ←
         </Link>
         <span>Corregir saldo</span>
@@ -207,7 +208,7 @@ function ExitoDeAjuste({
   cents: number | null;
 }) {
   return (
-    <PantallaExito titulo="¡Ajuste guardado!" volverA={{ to: `/clientes/${customerId}`, label: "Volver a la ficha" }}>
+    <PantallaExito titulo="¡Ajuste guardado!" volverA={{ to: routes.comercio.ficha(customerId), label: "Volver a la ficha" }}>
       <p className="mt-1.5">{`${name} ahora tiene`}</p>
       <MontoGrande>{formatPesos(result.balance)}</MontoGrande>
       <p>{`${cents === null ? "" : `${formatSigned(cents)} · `}${note}`}</p>

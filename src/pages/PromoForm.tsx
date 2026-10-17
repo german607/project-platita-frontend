@@ -8,6 +8,7 @@ import type { BonusRule } from "../lib/api/types";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos, parsePesos, pesosToCents } from "../lib/money";
 import { Interruptor } from "./Promos";
+import { routes } from "../lib/routes";
 
 // Crear o editar una promo ("Cargando desde $1.000, le regalo $200"). Es la
 // misma pantalla para las dos cosas: con :ruleId edita, sin él crea.
@@ -39,7 +40,7 @@ export function PromoForm() {
       <EmptyState
         title="No encontramos esa promo"
         action={
-          <ButtonLink to="/promos" variant="mostaza" className="max-w-xs">
+          <ButtonLink to={routes.comercio.promos} variant="mostaza" className="max-w-xs">
             Volver a las promos
           </ButtonLink>
         }
@@ -94,14 +95,14 @@ function Formulario({ rule, all, merchantId }: { rule: BonusRule | undefined; al
           }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["bonus-rules", merchantId] });
-      navigate("/promos");
+      navigate(routes.comercio.promos);
     },
   });
 
   return (
     <section className="mx-auto flex max-w-xl flex-col gap-4">
       <h1 className="flex items-baseline gap-2 font-titulo text-[28px] font-extrabold">
-        <Link to="/promos" aria-label="Volver a las promos">
+        <Link to={routes.comercio.promos} aria-label="Volver a las promos">
           ←
         </Link>
         <span>{rule ? "Editar promo" : "Nueva promo"}</span>
@@ -207,7 +208,7 @@ function Formulario({ rule, all, merchantId }: { rule: BonusRule | undefined; al
         >
           {save.isPending ? "Guardando…" : "Guardar promo"}
         </Button>
-        <ButtonLink to="/promos" variant="borde">
+        <ButtonLink to={routes.comercio.promos} variant="borde">
           Cancelar
         </ButtonLink>
       </div>

@@ -45,9 +45,9 @@ function renderAt(path: string) {
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[path]}>
         <Routes>
-          <Route path="/promos" element={<p>LISTA</p>} />
-          <Route path="/promos/nueva" element={<PromoForm />} />
-          <Route path="/promos/:ruleId/editar" element={<PromoForm />} />
+          <Route path="/comercio/promos" element={<p>LISTA</p>} />
+          <Route path="/comercio/promos/nueva" element={<PromoForm />} />
+          <Route path="/comercio/promos/:ruleId/editar" element={<PromoForm />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -66,7 +66,7 @@ beforeEach(() => {
 
 describe("Promo · crear", () => {
   it("arranca vacía y no deja guardar", async () => {
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
 
     expect(await screen.findByText("Nueva promo")).toBeInTheDocument();
     expect(guardar()).toBeDisabled();
@@ -75,7 +75,7 @@ describe("Promo · crear", () => {
 
   it("muestra cómo lo ve el cliente y guarda con los montos en pesos", async () => {
     mockCreate.mockResolvedValue({ ...r1, id: "r9" });
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
     await screen.findByText("Nueva promo");
     type(desde(), "1500");
     type(regalo(), "250,50");
@@ -91,7 +91,7 @@ describe("Promo · crear", () => {
 
   it("guarda el nombre y la descripción cuando se escriben", async () => {
     mockCreate.mockResolvedValue({ ...r1, id: "r9" });
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
     await screen.findByText("Nueva promo");
     type(desde(), "1500");
     type(regalo(), "250");
@@ -112,7 +112,7 @@ describe("Promo · crear", () => {
 
   it("sin nombre ni descripción, no los manda", async () => {
     mockCreate.mockResolvedValue({ ...r1, id: "r9" });
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
     await screen.findByText("Nueva promo");
     type(desde(), "1500");
     type(regalo(), "250");
@@ -126,7 +126,7 @@ describe("Promo · crear", () => {
 
   it("puede guardarse apagada", async () => {
     mockCreate.mockResolvedValue({ ...r1, id: "r9", active: false });
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
     await screen.findByText("Nueva promo");
     type(desde(), "500");
     type(regalo(), "50");
@@ -139,7 +139,7 @@ describe("Promo · crear", () => {
   });
 
   it("no deja guardar montos inválidos y lo explica", async () => {
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
     await screen.findByText("Nueva promo");
     type(desde(), "abc");
     type(regalo(), "0");
@@ -149,7 +149,7 @@ describe("Promo · crear", () => {
   });
 
   it("avisa si ya hay otra promo activa con el mismo mínimo", async () => {
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
     await screen.findByText("Nueva promo");
     type(desde(), "1000");
     type(regalo(), "300");
@@ -163,7 +163,7 @@ describe("Promo · crear", () => {
 
   it("si falla al guardar, lo dice y no sale de la pantalla", async () => {
     mockCreate.mockRejectedValue(new ApiError(400, "VALIDATION_ERROR", "Datos inválidos"));
-    renderAt("/promos/nueva");
+    renderAt("/comercio/promos/nueva");
     await screen.findByText("Nueva promo");
     type(desde(), "1500");
     type(regalo(), "250");
@@ -176,7 +176,7 @@ describe("Promo · crear", () => {
 
 describe("Promo · editar", () => {
   it("parte con los valores de la promo", async () => {
-    renderAt("/promos/r1/editar");
+    renderAt("/comercio/promos/r1/editar");
 
     expect(await screen.findByText("Editar promo")).toBeInTheDocument();
     expect(desde()).toHaveValue("1000");
@@ -186,7 +186,7 @@ describe("Promo · editar", () => {
 
   it("guarda los cambios en la misma promo", async () => {
     mockUpdate.mockResolvedValue({ ...r1, bonusAmount: 30000 });
-    renderAt("/promos/r1/editar");
+    renderAt("/comercio/promos/r1/editar");
     await screen.findByText("Editar promo");
     type(regalo(), "300");
     fireEvent.click(guardar());
@@ -209,7 +209,7 @@ describe("Promo · editar", () => {
       data: [{ ...r1, name: "Promo de verano", description: "Válida hasta fin de mes" }, r2],
     });
     mockUpdate.mockResolvedValue(r1);
-    renderAt("/promos/r1/editar");
+    renderAt("/comercio/promos/r1/editar");
     await screen.findByText("Editar promo");
 
     expect(screen.getByLabelText("Nombre (opcional)")).toHaveValue("Promo de verano");
@@ -230,16 +230,16 @@ describe("Promo · editar", () => {
   });
 
   it("no avisa de mínimo repetido contra sí misma", async () => {
-    renderAt("/promos/r1/editar");
+    renderAt("/comercio/promos/r1/editar");
     await screen.findByText("Editar promo");
 
     expect(screen.queryByText(/Ya hay otra promo activa con ese mínimo/)).not.toBeInTheDocument();
   });
 
   it("si la promo no existe, lo dice y lleva de vuelta", async () => {
-    renderAt("/promos/zzz/editar");
+    renderAt("/comercio/promos/zzz/editar");
 
     expect(await screen.findByText("No encontramos esa promo")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver a las promos" })).toHaveAttribute("href", "/promos");
+    expect(screen.getByRole("link", { name: "Volver a las promos" })).toHaveAttribute("href", "/comercio/promos");
   });
 });

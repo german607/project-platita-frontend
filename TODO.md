@@ -53,6 +53,7 @@ Cosas que la interfaz necesita y la API de hoy no resuelve. No se simulan
 en el frontend: se piden y se registran acá hasta que existan.
 
 - [~] **P0** CORS: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) con la variable `CORS_ORIGINS` (lista de orígenes, nunca `*`). En desarrollo el front sigue usando el proxy de Vite; en producción hay que poner la URL absoluta del backend en `VITE_API_URL` y la del front en `CORS_ORIGINS`
+- [ ] **P1** **Nombre de la persona en las fichas**: que `Customer` (en `/merchants/:m/customers`, `/customers/:id` y `/inactive`) traiga `userName` (el nombre del usuario, `User.name`). El front ya lo muestra al lado del nombre que anotó el comercio ("Juanito (Juan)", uno solo si coinciden) apenas llegue; no se arma pidiendo `/users/:id` por cada cliente. Los movimientos de hoy (`customer` dentro de `/merchants/:m/transactions`) también lo necesitarían
 - [~] **P1** Búsqueda por teléfono: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo): `?search=` ahora normaliza (también parcial) y `?phone=` es exacto. El frontend ya dejó el rodeo (Mostrador usa `?phone=`; Clientes manda el texto tal cual)
 - [~] **P1** Movimientos del comercio, para el panel "Hoy en el mostrador": el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`GET /merchants/:m/transactions?from=&to=&type=`, con `customer {id, name, phone}` en cada fila; `from` inclusivo y `to` exclusivo, ISO con offset). El frontend ya lo usa en el panel "Hoy en el mostrador"
 - [ ] **P0** Autenticación de comercios (hoy cualquiera con un id opera): hasta que exista, el frontend usa un comercio fijo por configuración
@@ -66,6 +67,19 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [~] **P2** Total de clientes inactivos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`total` en `/inactive`). El frontend ya lo usa en el contador de Reactivar
 - [~] **P2** Un nombre y una descripción para las promos: el backend lo resolvió el 2026-10-13 (sin commitear ni verificar corriendo) (`name` y `description`, opcionales; el PATCH acepta `null` para borrarlos). El frontend ya tiene los campos en el formulario y los muestra en el listado
 - [ ] **P2** Envío de WhatsApp a inactivos (hoy el botón queda deshabilitado)
+
+**Para el lado del cliente** (decisiones cerradas el 2026-10-15; el texto para el backend se armó ese día):
+
+- [ ] **P0** Ingreso del cliente por teléfono + código de un solo uso (WhatsApp o SMS) y sesión; endpoints "del cliente" (`/me/…`) que solo devuelven los datos de quien está logueado
+- [~] **P1** Perfil público del comercio (descripción, foto por URL, categoría, horarios y `visible`): el backend lo resolvió el 2026-10-15 (sin verificar corriendo); el frontend ya lo usa en la pestaña "Mi comercio". Los errores `CATEGORY_CHANGE_TOO_SOON`, `PROFILE_INCOMPLETE` y `LOCATION_REQUIRED_WHILE_VISIBLE` están manejados
+- [~] **P1** Categoría de lista fija, con un cambio cada 90 días: el backend lo resolvió el 2026-10-15 (sin verificar corriendo); el frontend la muestra bloqueada con la fecha y maneja el 422
+- [~] **P1** Varios locales por comercio (solo cambia la dirección; baja en vez de borrar): el backend lo resolvió el 2026-10-15 (sin verificar corriendo); el frontend ya los edita en "Mi comercio"
+- [~] **P1** Listado y detalle públicos de lugares (`GET /places`, `GET /places/:id`): el backend lo resolvió el 2026-10-15 (sin verificar corriendo). **Falta construir las pantallas del cliente** (Lugares y Detalle)
+- [ ] **P1** `GET /me/balances`: el saldo del cliente en cada comercio (se arma juntando sus filas de cliente por teléfono verificado)
+- [ ] **P2** Subida y almacenamiento de fotos (hoy el comercio carga la foto con un enlace)
+- [ ] **P2** Que `GET /merchants/:id` devuelva desde cuándo se puede cambiar la categoría (`categoryChangeAvailableAt`): hoy el front suma los 90 días por su cuenta para mostrar el bloqueo (el 422 del backend manda igual)
+- [ ] **P2** Idempotencia al crear un local: si se corta la red justo al crearlo, un reintento podría duplicarlo (el front ya evita duplicar los reintentos que él controla)
+- [ ] **P2** QR personal del cliente (ya está en el TODO del backend)
 
 ## 5. Calidad
 
@@ -88,3 +102,28 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** CI: lint, typecheck y tests
 - [ ] **P1** Hosting estático barato
 - [ ] **P2** Instalable en el celular (PWA)
+
+## 7. Lado del cliente (web primero, mobile después)
+
+Decisiones del 2026-10-15 (resumen en `docs/STATE.md`). La web va a tener **dos áreas** que comparten la misma API, los helpers y el estilo: **comercio** (lo que ya existe) y **cliente**. Se arma primero en web para pulir flujos y estilo, y que la app mobile reutilice todo.
+
+- [ ] **P0** **RECORDATORIO — ingreso real del cliente.** El cliente entra con su teléfono y un código de un solo uso que se le manda (WhatsApp o SMS): recién ahí es un usuario verificado. Hoy se **simula** (se elige un teléfono). Sin la verificación real **no se puede publicar**: cualquiera vería los saldos de cualquier número. Hay que reemplazar la simulación antes de salir
+- [x] Diseño del lado del cliente y de "Mi comercio" hecho en Claude Design (`design/platita-cliente.codigo.html` y `design/platita-mi-comercio.codigo.html`, 2026-10-15)
+- [x] Estructura de código: dos áreas en el mismo repo, el comercio bajo `/comercio` y el cliente bajo `/cliente`, con todas las rutas en `src/lib/routes.ts` (2026-10-15)
+- [x] Pantalla de entrada ("Soy cliente" / "Soy un comercio") e ingreso **simulado** del cliente: celular → código (el único válido es `000000`, vence a los 5 min, reenvío con cuenta regresiva); la sesión se guarda en el navegador (`src/lib/sesionCliente.tsx`). ⚠ Es la simulación del P0 de arriba. Desde el 2026-10-16 el código correcto hace `POST /users` y guarda el `userId` como sesión (`SesionCliente.userId`, un solo lugar). Esas rutas solo existen fuera de producción (`INSECURE_USER_ROUTES` del backend). Con la sesión real: `GET /me/balances` con `Authorization: Bearer`, misma forma, y cambiar `useSaldos` y `lib/api/endpoints.ts`
+- [x] **Lugares**: lista, búsqueda, filtro por categoría, "Ver más" y "Tenés $X" en la tarjeta si hay saldo
+- [x] **Detalle de un lugar**: promos, locales con "Cómo llegar", horarios con "Abierto ahora", "Tu saldo acá" (buscado en `/users/:id/balances`) y "Cargar saldo · Próximamente" deshabilitado
+- [x] **Mis saldos**: un saldo por comercio (también $0), nunca sumados, con `GET /users/:id/balances`
+- [x] **Perfil**: nombre (editable, `PATCH /users/:id`), teléfono verificado, QR "Próximamente" y cerrar sesión
+- [x] Botón "Cargar saldo" deshabilitado con la etiqueta "Próximamente" en el detalle de un lugar (a futuro, el cliente podrá cargar transfiriéndole al comercio que elija; hoy solo mira)
+- [~] **P1** **Pestaña "Mi comercio"** del lado del comercio (`src/pages/MiComercio.tsx`, 5 secciones y barra de guardado; tests pasando, falta verla en el navegador contra el backend nuevo). Desvíos del diseño: la descripción es solo recomendada (el backend no la exige) y la foto se carga con un enlace (no hay subida todavía)
+- [ ] **P2** QR personal del cliente en su perfil, para mostrarle al cajero
+- [ ] **P2** Más ideas a medida que aparezcan
+
+Reglas ya decididas: el cliente **solo mira** (no carga por su cuenta); un comercio **solo aparece si lo activa**; la categoría la elige el comercio y **no se cambia seguido**; dirección, mapa, horarios, descripción y foto los edita el comercio (porque se puede mudar, abrir otro local o cambiar el horario).
+
+**Decidido el 2026-10-15 (segunda ronda):**
+- **Categoría:** se puede cambiar una vez cada **90 días**. Si necesita cambiarla antes, el comercio nos escribe y la cambiamos nosotros; el front lo dice en un **tooltip** al lado del selector.
+- **Varios locales:** un comercio puede tener más de uno y **lo único que cambia es la dirección** (se muestran varias ubicaciones). Hoy no es importante, pero el modelo y la pantalla quedan preparados para más de uno.
+- **Mapa:** un botón **"Cómo llegar"** que abre el mapa del celular con la dirección. Sin mapa propio ni coordenadas.
+- **Supuesto a confirmar:** los **horarios** son del comercio (uno solo), no de cada local; si más adelante cada local tiene los suyos, se mueven al local.

@@ -32,9 +32,9 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={["/promos"]}>
+      <MemoryRouter initialEntries={["/comercio/promos"]}>
         <Routes>
-          <Route path="/promos" element={<Promos />} />
+          <Route path="/comercio/promos" element={<Promos />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -83,7 +83,7 @@ describe("Promos", () => {
 
     const switches = await screen.findAllByRole("switch");
     expect(switches.map((s) => s.getAttribute("aria-checked"))).toEqual(["false", "true"]);
-    expect(screen.getAllByRole("link", { name: "Editar" })[0]).toHaveAttribute("href", "/promos/r3/editar");
+    expect(screen.getAllByRole("link", { name: "Editar" })[0]).toHaveAttribute("href", "/comercio/promos/r3/editar");
   });
 
   it("apaga una promo (no se borra) y refresca la lista", async () => {
@@ -123,7 +123,7 @@ describe("Promos", () => {
     expect(await screen.findByText("Todavía no tenés promos")).toBeInTheDocument();
     expect(screen.getByText("Creá una para que tus clientes carguen más.")).toBeInTheDocument();
     for (const link of screen.getAllByRole("link", { name: "+ Crear promo" })) {
-      expect(link).toHaveAttribute("href", "/promos/nueva");
+      expect(link).toHaveAttribute("href", "/comercio/promos/nueva");
     }
   });
 

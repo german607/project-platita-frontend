@@ -6,6 +6,7 @@ import { listBonusRules, updateBonusRule } from "../lib/api/endpoints";
 import type { BonusRule } from "../lib/api/types";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos } from "../lib/money";
+import { routes } from "../lib/routes";
 
 // Promos: las reglas de bonificación del comercio. No se borran: se apagan
 // (así el historial de bonos ya dados sigue siendo explicable). Diseño:
@@ -34,7 +35,7 @@ export function Promos() {
   });
 
   const crear = (
-    <ButtonLink to="/promos/nueva" className="lg:!h-14 lg:!w-auto lg:!rounded-[20px] lg:!px-6 lg:!text-lg lg:!shadow-none">
+    <ButtonLink to={routes.comercio.promoNueva} className="lg:!h-14 lg:!w-auto lg:!rounded-[20px] lg:!px-6 lg:!text-lg lg:!shadow-none">
       + Crear promo
     </ButtonLink>
   );
@@ -56,7 +57,7 @@ export function Promos() {
           title="Todavía no tenés promos"
           hint="Creá una para que tus clientes carguen más."
           action={
-            <ButtonLink to="/promos/nueva" variant="mostaza" className="max-w-xs">
+            <ButtonLink to={routes.comercio.promoNueva} variant="mostaza" className="max-w-xs">
               + Crear promo
             </ButtonLink>
           }
@@ -80,7 +81,7 @@ export function Promos() {
               </div>
               <div className="flex items-center justify-between gap-3 lg:justify-end lg:gap-5">
                 <Link
-                  to={`/promos/${rule.id}/editar`}
+                  to={routes.comercio.promoEditar(rule.id)}
                   className="flex h-12 items-center rounded-[16px] border-2 border-tinta px-[18px] font-extrabold lg:px-5"
                 >
                   Editar

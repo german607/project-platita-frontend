@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysAgo, daysSince, formatTime, formatWhen, todayRange, visitLabel, visitShort } from "./dates";
+import { daysAgo, daysSince, formatLongDate, formatTime, formatWhen, todayRange, visitLabel, visitShort } from "./dates";
 
 // "Ahora": 13 de octubre de 2026, mediodía (hora local).
 const now = new Date(2026, 9, 13, 12, 0, 0);
@@ -97,5 +97,13 @@ describe("todayRange", () => {
     const { from, to } = todayRange(new Date(2026, 9, 31, 12));
     expect(from).toMatch(/^2026-10-31T00:00:00/);
     expect(to).toMatch(/^2026-11-01T00:00:00/);
+  });
+});
+
+describe("formatLongDate", () => {
+  it("dice día y mes completo, y el año solo si es de otro año", () => {
+    expect(formatLongDate(new Date(2026, 0, 12, 10).toISOString(), now)).toBe("12 de enero");
+    expect(formatLongDate(new Date(2026, 11, 3, 10).toISOString(), now)).toBe("3 de diciembre");
+    expect(formatLongDate(new Date(2027, 0, 12, 10).toISOString(), now)).toBe("12 de enero de 2027");
   });
 });

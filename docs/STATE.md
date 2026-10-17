@@ -30,7 +30,7 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   Expo / React Native. Detalle, estructura y comandos en
   [`FRONTEND.md`](FRONTEND.md).
 - **Verificado (2026-10-13):** `npm install` (247 paquetes), `npm run
-  typecheck` sin errores y `npm run test:run` con **152 tests pasando** en 16
+  typecheck` sin errores y `npm run test:run` con **214 tests pasando** en 21
   archivos (dinero, teléfono, fechas, bono, cliente de la API y las nueve
   pantallas y formularios). El `typecheck` encontró un error real en su momento, ya
   corregido.
@@ -53,6 +53,56 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   días. Faltan piezas del diseño que dependen del backend (ver "Pedidos al
   backend" en el [`TODO`](../TODO.md)). Ver [`../TODO.md`](../TODO.md) §2 y
   §3.
+
+## Próximo hito: el lado del cliente (decidido el 2026-10-15)
+
+La web va a tener **dos tipos de usuario**, en la misma app y con la misma
+API: el **comercio** (lo que ya está construido) y el **cliente**. El
+cliente ve *Lugares* (los comercios con el servicio y si tienen una promo
+activa), el detalle de cada lugar (promos, dirección con mapa, horarios,
+categoría), *Mis saldos* (lo que tiene en cada comercio) y su *Perfil*. Se
+hace primero en web para pulir flujos y estilo, y que después la app mobile
+reutilice todo. Detalle y pendientes: [`../TODO.md`](../TODO.md) §7.
+
+Decisiones tomadas:
+- **Ingreso del cliente:** con su teléfono y un código de un solo uso
+  (WhatsApp o SMS); recién ahí es un usuario verificado. **Por ahora se
+  simula.** **Recordatorio: reemplazar la simulación por la verificación real
+  antes de publicar** (sin eso, cualquiera vería los saldos de cualquier
+  teléfono).
+- **El cliente solo mira.** Más adelante podrá cargar por su cuenta,
+  transfiriéndole al comercio que elija: por ahora, un botón "Próximamente".
+- **Un comercio solo aparece si lo activa.** Se suma una pestaña nueva del
+  lado del comercio (nombre a definir) con su perfil público: dirección y
+  mapa, horarios, foto, descripción, categoría y el interruptor "Aparecer en
+  la app". Lo edita el dueño o el personal.
+- **La categoría** la elige el comercio y se puede cambiar **una vez cada 90
+  días** (si necesita antes, nos escribe y lo cambiamos nosotros; el front lo
+  explica en un tooltip).
+- **Varios locales:** un comercio puede tener más de uno y lo único que cambia
+  es la dirección. **Mapa:** un botón "Cómo llegar" con la dirección, sin mapa
+  propio. Los horarios son del comercio (supuesto a confirmar).
+- Todo vive **en este mismo repo**, en dos áreas que comparten la API, los
+  helpers y el estilo. El diseño del cliente se hace en Claude Design, con
+  el mismo estilo "Cálida y de barrio".
+- **Perfil del cliente:** nombre, teléfono y cerrar sesión (y, más adelante,
+  un QR personal).
+
+**Avance (2026-10-15):** los diseños del cliente y de "Mi comercio" están
+hechos (`design/`). El backend entregó la primera parte (perfil público del
+comercio, locales y lugares públicos; sin verificar corriendo). En el front
+están hechas: la **separación en dos áreas** (`/comercio` y `/cliente`, rutas
+en `src/lib/routes.ts`), la pantalla de **Entrada** y la pestaña **Mi
+comercio** (con tests, sin ver en el navegador). Del lado del cliente
+están hechos el **ingreso simulado** (código `000000`), **Lugares**, **Detalle
+de un lugar** y **Perfil**. Con la actualización de "usuario" del backend (2026-10-16) también están
+**Mis saldos**, "Tenés $X" y "Tu saldo acá", y el nombre del Perfil se guarda
+en la API. **Falta** el ingreso real (código por WhatsApp o SMS): hoy la
+"sesión" es el id de un usuario creado con solo el teléfono. Sin ver en el navegador contra el backend nuevo.
+
+Lo que esto le pide al backend (hoy un comercio solo tiene nombre, teléfono
+y plan, y un cliente es una fila por comercio, sin login) está en el TODO,
+§4.
 
 ## El backend con el que se va a conectar
 
@@ -91,5 +141,7 @@ Consecuencias para este repo, registradas en el TODO (§4):
 
 ## Decisiones abiertas
 
+- **Lado del cliente:** si los horarios son del comercio o de cada local
+  (hoy se asume del comercio). Ver [`../TODO.md`](../TODO.md) §7.
 - Si este repo se mantiene separado del backend y contra qué rama se
   integra (`dev` o `main`); a acordar con Germán Pereira.

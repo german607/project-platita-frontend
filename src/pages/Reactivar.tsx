@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { NombreCliente } from "../components/NombreCliente";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState, ErrorState, LoadingState } from "../components/states";
@@ -8,6 +9,7 @@ import { daysAgo } from "../lib/dates";
 import { useMerchantId } from "../lib/merchant";
 import { formatPesos } from "../lib/money";
 import { formatUyPhone } from "../lib/phone";
+import { routes } from "../lib/routes";
 
 // Reactivar: los clientes que hace tiempo no vienen, para mandarles una promo.
 // El envío por WhatsApp todavía no existe en el backend: el botón queda
@@ -125,9 +127,9 @@ function Fila({ customer }: { customer: CustomerWithBalance }) {
 
   return (
     <li className="border-b border-arena py-3 lg:flex lg:h-[72px] lg:items-center lg:gap-4 lg:border-linea lg:py-0">
-      <Link to={`/clientes/${customer.id}`} className="block lg:flex-[2]">
+      <Link to={routes.comercio.ficha(customer.id)} className="block lg:flex-[2]">
         <span className="flex justify-between gap-3 lg:block">
-          <b className="text-base lg:text-[17px]">{customer.name ?? "Sin nombre"}</b>
+          <b className="text-base lg:text-[17px]"><NombreCliente customer={customer} /></b>
           <b className="font-titulo text-xl lg:hidden">{saldo}</b>
         </span>
         <span className="block text-[13px] font-bold text-suave lg:text-sm">

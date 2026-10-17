@@ -81,3 +81,52 @@ están dibujados entre otros "Mostrador · cliente nuevo", "Cobrar · éxito",
 - Los listados llegan como `{ data, nextCursor }`.
 - Todavía no hay login: el comercio se fija por configuración mientras no
   exista autenticación.
+
+## Lado del cliente (pendiente de diseño)
+
+Todavía no hay diseño: se va a hacer en Claude Design, con el mismo estilo
+(tokens, tipografías y reglas de arriba), pensado primero para el celular.
+Las pantallas decididas el 2026-10-15, y lo que va a necesitar cada una del
+backend (a pedir, ver el TODO §4):
+
+| Pantalla | Qué muestra | Qué hace falta del backend |
+|---|---|---|
+| **Lugares** | Los comercios que eligieron aparecer, con categoría y una marca de si tienen una promo activa | Listado público de comercios visibles, con categoría y `promo activa` |
+| **Detalle de un lugar** | Promos activas, dirección con mapa, horarios, categoría, descripción, foto y el saldo del cliente ahí | Perfil público del comercio y sus promos activas |
+| **Mis saldos** | Lo que el cliente tiene en cada comercio | `GET /me/balances` (con el cliente verificado) |
+| **Perfil** | Nombre, teléfono, cerrar sesión; más adelante, QR personal | Sesión del cliente |
+| **Ingreso** | Teléfono y código de un solo uso | Verificación por código (hoy se simula) |
+
+El botón "Cargar saldo" del cliente va deshabilitado con "Próximamente".
+Del lado del comercio se suma una pestaña con su perfil público (dirección y
+mapa, horarios, foto, descripción, categoría e "Aparecer en la app").
+
+Los prompts para Claude Design de estas pantallas están guardados en
+`design/prompts/` (uno para el cliente y otro para la pestaña del comercio).
+La dirección se muestra con un botón "Cómo llegar" que abre el mapa del
+celular; no hay mapa propio.
+
+### Mi comercio (hecho el 2026-10-15)
+
+Diseño: `design/platita-mi-comercio.codigo.html`. Código: `src/pages/MiComercio.tsx`
+y `src/pages/mi-comercio/`. Cómo se aparta del diseño, a propósito:
+
+- **Menú:** la pestaña va aparte, al fondo del menú lateral y a la derecha de la
+  barra inferior en el celular, para no entrar por error (se usa poco).
+
+- **La descripción es recomendada, no obligatoria**: el diseño la lista entre lo
+  que falta para prender el interruptor, pero el backend solo exige un local y
+  una categoría. Se muestra en la lista ("recomendado") sin bloquear.
+- **La foto se carga con un enlace**, con su vista previa y "Quitar": el
+  backend todavía no guarda archivos (pedido en el TODO).
+- **"Copiar de otro día"**: el diseño no aclara de qué día se copia; quedó como un
+  selector de día (por defecto el lunes) y el botón "Copiar a todos los días".
+- **Locales**: además de "Dar de baja" se puede "Dar de alta" de nuevo, porque
+  no se borran. Un local nuevo todavía sin guardar se puede "Quitar".
+- **Horarios**: el cierre "24:00" que acepta el backend no se puede escribir en
+  el selector de hora del navegador; se usa 23:59. Hasta 6 tramos por día.
+- **Guardar** manda solo lo que cambió. Si se apaga "Aparecer en la app" se
+  guarda primero el comercio y después los locales; si no, al revés. Lo ya
+  guardado no se vuelve a mandar al reintentar.
+- La categoría se muestra **bloqueada** sumando 90 días a `categoryChangedAt`;
+  el 422 del backend manda igual (pedido: que devuelva la fecha).
