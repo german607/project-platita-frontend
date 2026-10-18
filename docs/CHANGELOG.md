@@ -347,3 +347,14 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   si es distinto ("Juanito (Juan)"); uno solo si coinciden sin mayúsculas ni
   tildes (`lib/customerName.ts`). Se usa en Clientes, Ficha, Mostrador y
   Reactivar. El backend ya manda `userName` en las fichas (probado, TODO §4). `tsc` limpio, 241 tests.
+
+## 2026-10-18 — Dependencias
+
+- `react-router-dom` 6 → **7.18.4**. Cerrar sesión pasó a ser la ruta
+  `/cliente/salir` (`pages/cliente/Salir.tsx`): con router 7, borrar la sesión
+  y navegar a la entrada en el mismo clic hacía que el guardia de
+  `LayoutCliente` mandara al ingreso.
+- `vite` 5 → **6.4.4** y `vitest` 2 → **3.2.x**. `npm audit` bajó de 15 a 10
+  avisos, todos de herramientas de desarrollo. `vitest` 4 no se pudo: el npm
+  10.5.0 falla al instalarlo (bug de npm). Queda en el TODO §6.
+- `package-lock.json` regenerado. `tsc` limpio, 241 tests.
