@@ -368,3 +368,12 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   `@testing-library/dom` como dependencia de desarrollo. Con el lockfile
   generado, `npm install` y `npm ci` comunes funcionan. 241 tests, `tsc` y
   `vite build` bien.
+
+## 2026-10-18 — Plan del ingreso real
+
+- Nuevo `docs/PLAN-INGRESO-REAL.md`: investigación de proveedores de código por
+  mensaje (Twilio Verify, Plivo, Firebase, WhatsApp con Meta) y plan para el
+  backend: interfaz `OtpProvider` con un archivo por proveedor (`dev`, `twilio`,
+  `propio`) elegido por `OTP_PROVIDER`, endpoints `/auth/*` y `/me/*`, sesiones
+  con refresh token, límites de seguridad, orden de trabajo y qué cambia en el
+  front. Precios a confirmar antes de contratar.
