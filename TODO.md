@@ -94,9 +94,10 @@ en el frontend: se piden y se registran acá hasta que existan.
 
 ## 6. Despliegue
 
-- [ ] **P1** Vulnerabilidades de `npm audit` (analizadas el 2026-10-13: 15 en total, 2 críticas y 6 altas, pero **solo 2 moderadas llegan a producción**). Plan, en este orden:
-  - [ ] **P1** `react-router-dom` 6.30 → 7.18.x: es lo único que viaja en la app. Las 2 moderadas (redirección abierta con `\` en `<Link>`/`navigate` y deserialización en SSR) casi no aplican acá (SPA sin SSR, enlaces con ids que genera el backend), pero es barato y además apaga los avisos de los future flags. Pide Node >= 20: sirve con el actual
-  - [ ] **P1** `vite` 5 → 6.4.4 y `vitest` 2 → 4.1.11 (con `@vitejs/plugin-react` compatible): arregla las 2 críticas (`vitest` con su UI y `tinypool`), la alta de `vite` y las moderadas de `esbuild` y `@vitest/mocker`. Corren con Node 20 (vite 7/8 y vitest 5 piden Node >= 20.19 o 22: no usar con el Node actual). Son solo herramientas de desarrollo: no están en lo que se publica
+- [ ] **P1** Vulnerabilidades de `npm audit` (analizadas el 2026-10-13: 15 en total, 2 críticas y 6 altas; el 2026-10-18 bajaron a 10, todas de desarrollo, pero **solo 2 moderadas llegan a producción**). Plan, en este orden:
+  - [x] `react-router-dom` 6.30 → 7.18.4 (2026-10-18). Cambió una cosa: cerrar sesión ahora es la ruta `/cliente/salir` (con router 7, borrar la sesión y navegar a la vez mandaba al ingreso en vez de a la entrada)
+  - [x] `vite` 5 → 6.4.4 (2026-10-18): apaga la alta de `vite` y las de `esbuild`. `vitest` 2 → 3.2 (por ahora)
+  - [ ] **P1** `vitest` 3 → 4.1.11: apagaría las 2 que quedan de esa cadena (`tinypool` crítica y `@vitest/mocker` moderada; solo herramientas de desarrollo). **Bloqueado por el npm del equipo (10.5.0)**: con vitest 4 falla con `Cannot read properties of null (reading 'edgesOut')` (bug de npm al resolver las dependencias de pares). Hace falta actualizar npm (`npm install -g npm@10`) o usar Node 22 con su npm; después, subir vitest y regenerar `package-lock.json`. Queda en vitest 3.x hasta entonces
   - [ ] **P2** `tailwindcss` 3 → 4: las 5 restantes (`braces`, `micromatch`, `chokidar`, `postcss-selector-parser`, `postcss-nested`/`fast-glob`) vienen de su cadena y solo afectan al *build* sobre nuestro propio código. Migración grande (configuración y plugin distintos): se deja para cuando haya tiempo
   - No usar `npm audit fix --force`: mezcla los tres cambios mayores de golpe
 - [ ] **P1** CI: lint, typecheck y tests
