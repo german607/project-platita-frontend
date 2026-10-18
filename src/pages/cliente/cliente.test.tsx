@@ -12,6 +12,7 @@ import { Ingreso } from "./Ingreso";
 import { Lugar } from "./Lugar";
 import { Lugares } from "./Lugares";
 import { Perfil } from "./Perfil";
+import { Salir } from "./Salir";
 import { Saldos } from "./Saldos";
 
 vi.mock("../../lib/api/endpoints", () => ({
@@ -36,6 +37,7 @@ function renderApp(path: string) {
           <Routes>
             <Route path="/" element={<p>entrada</p>} />
             <Route path="/cliente/ingreso" element={<Ingreso />} />
+            <Route path="/cliente/salir" element={<Salir />} />
             <Route path="/cliente" element={<LayoutCliente />}>
               <Route path="lugares" element={<Lugares />} />
               <Route path="lugares/:merchantId" element={<Lugar />} />
@@ -257,8 +259,8 @@ describe("Perfil", () => {
     expect(mockUpdateUser).toHaveBeenCalledWith("u1", { name: "Marta Rodríguez" });
     expect(JSON.parse(localStorage.getItem("platita.cliente")!).name).toBe("Marta Rodríguez");
 
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
-    expect(screen.getByText("entrada")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("link", { name: "Cerrar sesión" }));
+    expect(await screen.findByText("entrada")).toBeInTheDocument();
     expect(localStorage.getItem("platita.cliente")).toBeNull();
   });
 });

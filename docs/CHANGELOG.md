@@ -346,5 +346,4 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   nombre que anotó el comercio y, más chico entre paréntesis, el de la persona
   si es distinto ("Juanito (Juan)"); uno solo si coinciden sin mayúsculas ni
   tildes (`lib/customerName.ts`). Se usa en Clientes, Ficha, Mostrador y
-  Reactivar. ⚠ El backend todavía no manda `userName` en las fichas: pedido en
-  TODO §4; hasta entonces se ve como antes. `tsc` limpio, 241 tests.
+  Reactivar. El backend ya manda `userName` en las fichas (probado, TODO §4). `tsc` limpio, 241 tests.

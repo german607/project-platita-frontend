@@ -25,5 +25,7 @@ export const routes = {
     lugar: (merchantId: string) => `/cliente/lugares/${merchantId}`,
     saldos: "/cliente/saldos",
     perfil: "/cliente/perfil",
+    // Cierra la sesión y vuelve a la entrada (fuera de la zona con sesión).
+    salir: "/cliente/salir",
   },
 } as const;

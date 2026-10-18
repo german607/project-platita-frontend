@@ -16,6 +16,7 @@ import { Ingreso } from "./pages/cliente/Ingreso";
 import { Lugar } from "./pages/cliente/Lugar";
 import { Lugares } from "./pages/cliente/Lugares";
 import { Perfil } from "./pages/cliente/Perfil";
+import { Salir } from "./pages/cliente/Salir";
 import { Saldos } from "./pages/cliente/Saldos";
 import { PromoForm } from "./pages/PromoForm";
 import { Promos } from "./pages/Promos";
@@ -56,6 +57,7 @@ export function App() {
 
             {/* Área del cliente: el ingreso es público; el resto pide sesión. */}
             <Route path="cliente/ingreso" element={<Ingreso />} />
+            <Route path="cliente/salir" element={<Salir />} />
             <Route path="cliente" element={<LayoutCliente />}>
               <Route index element={<Navigate to="lugares" replace />} />
               <Route path="lugares" element={<Lugares />} />
