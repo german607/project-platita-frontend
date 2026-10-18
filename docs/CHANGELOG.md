@@ -358,3 +358,13 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   avisos, todos de herramientas de desarrollo. `vitest` 4 no se pudo: el npm
   10.5.0 falla al instalarlo (bug de npm). Queda en el TODO §6.
 - `package-lock.json` regenerado. `tsc` limpio, 241 tests.
+
+## 2026-10-18 — vitest 4
+
+- `vitest` 3 → **4.1.12**. `npm audit`: de 10 a **7** avisos, todos de la cadena
+  de `tailwindcss` (se apagan migrando a Tailwind 4). Para instalarlo hubo que
+  generar el lockfile con `npm install --legacy-peer-deps` (bug de npm con los
+  pares opcionales de vitest 4, también en npm 10.9) y declarar
+  `@testing-library/dom` como dependencia de desarrollo. Con el lockfile
+  generado, `npm install` y `npm ci` comunes funcionan. 241 tests, `tsc` y
+  `vite build` bien.

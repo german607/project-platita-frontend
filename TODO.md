@@ -94,10 +94,10 @@ en el frontend: se piden y se registran acá hasta que existan.
 
 ## 6. Despliegue
 
-- [ ] **P1** Vulnerabilidades de `npm audit` (analizadas el 2026-10-13: 15 en total, 2 críticas y 6 altas; el 2026-10-18 bajaron a 10, todas de desarrollo, pero **solo 2 moderadas llegan a producción**). Plan, en este orden:
+- [ ] **P1** Vulnerabilidades de `npm audit` (analizadas el 2026-10-13: 15 en total, 2 críticas y 6 altas; el 2026-10-18 bajaron a 7, todas de desarrollo y de la cadena de `tailwindcss`, pero **solo 2 moderadas llegan a producción**). Plan, en este orden:
   - [x] `react-router-dom` 6.30 → 7.18.4 (2026-10-18). Cambió una cosa: cerrar sesión ahora es la ruta `/cliente/salir` (con router 7, borrar la sesión y navegar a la vez mandaba al ingreso en vez de a la entrada)
   - [x] `vite` 5 → 6.4.4 (2026-10-18): apaga la alta de `vite` y las de `esbuild`. `vitest` 2 → 3.2 (por ahora)
-  - [ ] **P1** `vitest` 3 → 4.1.11: apagaría las 2 que quedan de esa cadena (`tinypool` crítica y `@vitest/mocker` moderada; solo herramientas de desarrollo). **Bloqueado por el npm del equipo (10.5.0)**: con vitest 4 falla con `Cannot read properties of null (reading 'edgesOut')` (bug de npm al resolver las dependencias de pares). Hace falta actualizar npm (`npm install -g npm@10`) o usar Node 22 con su npm; después, subir vitest y regenerar `package-lock.json`. Queda en vitest 3.x hasta entonces
+  - [x] `vitest` 3 → 4.1.12 (2026-10-18): apaga `tinypool` (crítica) y `@vitest/mocker`. Con npm 10.5 y también con 10.9 el `npm install` común falla (`Cannot read properties of null (reading 'edgesOut')`, bug de npm con los pares opcionales de vitest 4); se resolvió instalando una vez con `npm install --legacy-peer-deps`, lo que obligó a declarar `@testing-library/dom` (par de `@testing-library/react`). Con el lockfile ya generado, `npm install` y `npm ci` comunes andan. Si algún día se regenera el lockfile desde cero, repetir con `--legacy-peer-deps`
   - [ ] **P2** `tailwindcss` 3 → 4: las 5 restantes (`braces`, `micromatch`, `chokidar`, `postcss-selector-parser`, `postcss-nested`/`fast-glob`) vienen de su cadena y solo afectan al *build* sobre nuestro propio código. Migración grande (configuración y plugin distintos): se deja para cuando haya tiempo
   - No usar `npm audit fix --force`: mezcla los tres cambios mayores de golpe
 - [ ] **P1** CI: lint, typecheck y tests
