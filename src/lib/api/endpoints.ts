@@ -1,5 +1,7 @@
 import { api } from "./client";
 import type {
+  AuthConfig,
+  AuthSession,
   BonusPreview,
   BonusRule,
   CustomerWithBalance,
@@ -79,21 +81,29 @@ export const listPlaces = (params: PageParams & { category?: MerchantCategory; s
 
 export const getPlace = (merchantId: string) => api<PlaceDetail>(`/places/${merchantId}`);
 
-// ---------- Usuario (la persona; ingreso SIMULADO, solo fuera de producción) ----------
+// ---------- Ingreso y cuenta de la persona (cliente) ----------
 
-// Busca por teléfono o lo crea; si ya tiene nombre, no se lo pisa.
-export const upsertUser = (input: { phone: string; name?: string }) =>
-  api<User>("/users", { method: "POST", body: input });
+export const getAuthConfig = () => api<AuthConfig>("/auth/config");
 
-export const getUser = (userId: string) => api<User>(`/users/${userId}`);
+// Manda el código por mensaje. 204 sin cuerpo; los límites los pone el backend
+// (429 TOO_MANY_REQUESTS con details.retryAfterSeconds).
+export const requestCode = (phone: string) =>
+  api<void>("/auth/request-code", { method: "POST", body: { phone } });
 
-export const updateUser = (userId: string, input: { name: string | null }) =>
-  api<User>(`/users/${userId}`, { method: "PATCH", body: input });
+// Verifica el código y devuelve la sesión; si la persona no existía, la crea.
+export const verifyCode = (phone: string, code: string) =>
+  api<AuthSession>("/auth/verify-code", { method: "POST", body: { phone, code } });
 
-// Un elemento por comercio con ficha, también con saldo 0. Con sesión real pasa
-// a ser GET /me/balances con la misma forma.
-export const listUserBalances = (userId: string) =>
-  api<{ data: UserBalance[] }>(`/users/${userId}/balances`);
+export const logout = () => api<void>("/auth/logout", { method: "POST", auth: true });
+
+// Todo lo que sigue sale del usuario de la sesión (nunca de un id que mande el front).
+export const getMe = () => api<User>("/me", { auth: true });
+
+export const updateMe = (input: { name: string | null }) =>
+  api<User>("/me", { method: "PATCH", body: input, auth: true });
+
+// Un elemento por comercio con ficha, también con saldo 0.
+export const listMyBalances = () => api<{ data: UserBalance[] }>("/me/balances", { auth: true });
 
 // ---------- Clientes ----------
 

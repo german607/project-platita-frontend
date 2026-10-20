@@ -1,5 +1,12 @@
 # Plan: ingreso real del cliente (código por mensaje)
 
+> **Estado (2026-10-20):** el backend lo implementó (PR #8) con algunas diferencias
+> respecto de este plan: la sesión es **un solo token opaco de 60 días que se
+> renueva al usarlo** (no hay `accessToken`/`refreshToken` ni `/auth/refresh`),
+> `verify-code` devuelve `{ token, expiresAt, user }`, y existe `GET /auth/config`.
+> El front ya está adaptado. Lo que vale es `docs/BACKEND.md` del backend; este
+> documento queda como registro de la idea y de cómo se cambia de proveedor.
+
 Escrito el 2026-10-18. Es el P0 de `TODO.md` §7: hoy el ingreso del cliente está
 **simulado** (código `000000`, `POST /users` sin verificar) y **no se puede
 publicar así**. Este documento es para pasarle al backend y también deja

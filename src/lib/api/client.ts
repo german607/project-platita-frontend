@@ -16,7 +16,20 @@ export class ApiError extends Error {
 
 type Query = Record<string, string | number | boolean | undefined>;
 
+// La sesión del cliente se conecta acá (lib/sesionCliente.tsx) para que `api`
+// mande el token y reaccione a una sesión vencida sin conocer React.
+interface AuthHandlers {
+  getToken: () => string | null;
+  onInvalidSession: () => void;
+}
+let authHandlers: AuthHandlers = { getToken: () => null, onInvalidSession: () => {} };
+export function setAuthHandlers(handlers: AuthHandlers) {
+  authHandlers = handlers;
+}
+
 interface RequestOptions {
+  // true: manda `Authorization: Bearer <token>` de la sesión del cliente.
+  auth?: boolean;
   method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
   query?: Query;
@@ -35,10 +48,15 @@ function buildUrl(path: string, query?: Query): string {
 
 // Única puerta de entrada a la API. Todas las llamadas pasan por acá.
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, headers: extraHeaders, signal } = options;
+  const { method = "GET", body, query, headers: extraHeaders, signal, auth = false } = options;
 
   // El backend rechaza un content-type JSON sin cuerpo: solo se manda con body.
-  const headers = { ...(body !== undefined ? { "content-type": "application/json" } : {}), ...extraHeaders };
+  const token = auth ? authHandlers.getToken() : null;
+  const headers = {
+    ...(body !== undefined ? { "content-type": "application/json" } : {}),
+    ...(token ? { authorization: `Bearer ${token}` } : {}),
+    ...extraHeaders,
+  };
 
   let res: Response;
   try {
@@ -65,6 +83,8 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
 
   if (!res.ok) {
     const e = (data ?? {}) as { error?: string; code?: string; details?: unknown };
+    // Sesión vencida, cerrada o desconocida: el front vuelve a pedir el código.
+    if (auth && res.status === 401 && e.code === "INVALID_SESSION") authHandlers.onInvalidSession();
     throw new ApiError(res.status, e.code ?? `HTTP_${res.status}`, e.error ?? res.statusText, e.details);
   }
   return data as T;

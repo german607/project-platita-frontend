@@ -97,8 +97,9 @@ comercio** (con tests, sin ver en el navegador). Del lado del cliente
 están hechos el **ingreso simulado** (código `000000`), **Lugares**, **Detalle
 de un lugar** y **Perfil**. Con la actualización de "usuario" del backend (2026-10-16) también están
 **Mis saldos**, "Tenés $X" y "Tu saldo acá", y el nombre del Perfil se guarda
-en la API. **Falta** el ingreso real (código por WhatsApp o SMS): hoy la
-"sesión" es el id de un usuario creado con solo el teléfono. Sin ver en el navegador contra el backend nuevo.
+en la API. El ingreso del cliente ya usa el **código por mensaje** del backend
+(2026-10-20); falta probarlo con un celular real y que el backend quite
+`/users/*`. Sin ver en el navegador contra el backend nuevo.
 
 Lo que esto le pide al backend (hoy un comercio solo tiene nombre, teléfono
 y plan, y un cliente es una fila por comercio, sin login) está en el TODO,

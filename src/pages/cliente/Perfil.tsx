@@ -1,14 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { updateUser } from "../../lib/api/endpoints";
+import { updateMe } from "../../lib/api/endpoints";
 import { friendlyMessage } from "../../lib/api/errors";
 import { formatUyPhone } from "../../lib/phone";
 import { routes } from "../../lib/routes";
 import { useSesionCliente } from "../../lib/sesionCliente";
 
 // Perfil: nombre (editable), teléfono verificado, QR para más adelante y cerrar
-// sesión. El nombre es el de la persona (PATCH /users/:id); el que anota cada
+// sesión. El nombre es el de la persona (PATCH /me); el que anota cada
 // comercio de sus clientes no cambia.
 
 const card = "rounded-panel bg-tarjeta p-5 shadow-tarjeta";
@@ -20,7 +20,7 @@ export function Perfil() {
   const [borrador, setBorrador] = useState("");
 
   const guardarNombre = useMutation({
-    mutationFn: (name: string | null) => updateUser(sesion!.userId, { name }),
+    mutationFn: (name: string | null) => updateMe({ name }),
     onSuccess: (user) => {
       cambiarNombre(user.name);
       setEditando(false);

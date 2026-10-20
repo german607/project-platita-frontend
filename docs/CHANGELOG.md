@@ -377,3 +377,22 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   `propio`) elegido por `OTP_PROVIDER`, endpoints `/auth/*` y `/me/*`, sesiones
   con refresh token, límites de seguridad, orden de trabajo y qué cambia en el
   front. Precios a confirmar antes de contratar.
+
+## 2026-10-20 — Ingreso real del cliente
+
+- El ingreso pasa del simulado (`POST /users`) al **código por mensaje** del
+  backend: `POST /auth/request-code` y `POST /auth/verify-code`. Errores
+  mostrados por `code`: `INVALID_PHONE`, `TOO_MANY_REQUESTS` (cuenta regresiva con
+  `details.retryAfterSeconds`), `OTP_PROVIDER_ERROR`, `CODE_INCORRECT` (con los
+  intentos que quedan), `CODE_EXPIRED` (deja pedir uno nuevo) y `TOO_MANY_ATTEMPTS`.
+- Sesión: `{ token, expiresAt, userId, phone, name }` en `lib/sesionCliente.tsx`.
+  `lib/api/client.ts` manda `Authorization: Bearer` en los pedidos con `auth: true`
+  y, ante un `401 INVALID_SESSION`, cierra la sesión (el guardia manda al ingreso).
+  Una sesión vencida guardada no se usa. Sin refresh token.
+- Perfil, saldos y cerrar sesión pasan a `PATCH /me`, `GET /me/balances` y
+  `POST /auth/logout` (si no hay conexión, igual se sale). Se sacó todo uso de
+  `/users/*`.
+- El aviso "Ingreso de prueba: el código es …" sale solo si `GET /auth/config`
+  trae `devCode`; con `realPhonesConfigured` aclara "(salvo números con
+  verificación real)".
+- `tsc` limpio y **248 tests**. Sin probar contra el backend ni con un celular real.

@@ -159,3 +159,21 @@ export interface UserBalance {
   balance: number;
   lastVisitAt: string | null;
 }
+
+// Ingreso real del cliente: la respuesta de verificar el código. El token es
+// opaco, dura 60 días y el backend lo renueva al usarlo (no hay refresh token).
+export interface AuthSession {
+  token: string;
+  expiresAt: string;
+  user: User;
+}
+
+// Cómo está configurado el envío de códigos (GET /auth/config). `devCode` solo
+// viene con el proveedor de pruebas; `realPhonesConfigured` avisa que algunos
+// teléfonos se verifican de verdad aunque el resto use el código de prueba.
+export interface AuthConfig {
+  otpProvider: string;
+  channel: string;
+  devCode: string | null;
+  realPhonesConfigured: boolean;
+}
