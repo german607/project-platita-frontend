@@ -346,5 +346,58 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   nombre que anotó el comercio y, más chico entre paréntesis, el de la persona
   si es distinto ("Juanito (Juan)"); uno solo si coinciden sin mayúsculas ni
   tildes (`lib/customerName.ts`). Se usa en Clientes, Ficha, Mostrador y
-  Reactivar. ⚠ El backend todavía no manda `userName` en las fichas: pedido en
-  TODO §4; hasta entonces se ve como antes. `tsc` limpio, 241 tests.
+  Reactivar. El backend ya manda `userName` en las fichas (probado, TODO §4). `tsc` limpio, 241 tests.
+
+## 2026-10-18 — Dependencias
+
+- `react-router-dom` 6 → **7.18.4**. Cerrar sesión pasó a ser la ruta
+  `/cliente/salir` (`pages/cliente/Salir.tsx`): con router 7, borrar la sesión
+  y navegar a la entrada en el mismo clic hacía que el guardia de
+  `LayoutCliente` mandara al ingreso.
+- `vite` 5 → **6.4.4** y `vitest` 2 → **3.2.x**. `npm audit` bajó de 15 a 10
+  avisos, todos de herramientas de desarrollo. `vitest` 4 no se pudo: el npm
+  10.5.0 falla al instalarlo (bug de npm). Queda en el TODO §6.
+- `package-lock.json` regenerado. `tsc` limpio, 241 tests.
+
+## 2026-10-18 — vitest 4
+
+- `vitest` 3 → **4.1.12**. `npm audit`: de 10 a **7** avisos, todos de la cadena
+  de `tailwindcss` (se apagan migrando a Tailwind 4). Para instalarlo hubo que
+  generar el lockfile con `npm install --legacy-peer-deps` (bug de npm con los
+  pares opcionales de vitest 4, también en npm 10.9) y declarar
+  `@testing-library/dom` como dependencia de desarrollo. Con el lockfile
+  generado, `npm install` y `npm ci` comunes funcionan. 241 tests, `tsc` y
+  `vite build` bien.
+
+## 2026-10-18 — Plan del ingreso real
+
+- Nuevo `docs/PLAN-INGRESO-REAL.md`: investigación de proveedores de código por
+  mensaje (Twilio Verify, Plivo, Firebase, WhatsApp con Meta) y plan para el
+  backend: interfaz `OtpProvider` con un archivo por proveedor (`dev`, `twilio`,
+  `propio`) elegido por `OTP_PROVIDER`, endpoints `/auth/*` y `/me/*`, sesiones
+  con refresh token, límites de seguridad, orden de trabajo y qué cambia en el
+  front. Precios a confirmar antes de contratar.
+
+## 2026-10-20 — Ingreso real del cliente
+
+- El ingreso pasa del simulado (`POST /users`) al **código por mensaje** del
+  backend: `POST /auth/request-code` y `POST /auth/verify-code`. Errores
+  mostrados por `code`: `INVALID_PHONE`, `TOO_MANY_REQUESTS` (cuenta regresiva con
+  `details.retryAfterSeconds`), `OTP_PROVIDER_ERROR`, `CODE_INCORRECT` (con los
+  intentos que quedan), `CODE_EXPIRED` (deja pedir uno nuevo) y `TOO_MANY_ATTEMPTS`.
+- Sesión: `{ token, expiresAt, userId, phone, name }` en `lib/sesionCliente.tsx`.
+  `lib/api/client.ts` manda `Authorization: Bearer` en los pedidos con `auth: true`
+  y, ante un `401 INVALID_SESSION`, cierra la sesión (el guardia manda al ingreso).
+  Una sesión vencida guardada no se usa. Sin refresh token.
+- Perfil, saldos y cerrar sesión pasan a `PATCH /me`, `GET /me/balances` y
+  `POST /auth/logout` (si no hay conexión, igual se sale). Se sacó todo uso de
+  `/users/*`.
+- El aviso "Ingreso de prueba: el código es …" sale solo si `GET /auth/config`
+  trae `devCode`; con `realPhonesConfigured` aclara "(salvo números con
+  verificación real)".
+- `tsc` limpio y **248 tests**. Sin probar contra el backend ni con un celular real.
+
+## 2026-10-20 — Ingreso real probado
+
+- Probado con un celular real: llegó el SMS (Twilio Verify, cuenta de prueba) y
+  el ingreso funcionó de punta a punta.

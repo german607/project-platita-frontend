@@ -75,7 +75,7 @@ export interface Customer {
   merchantId: string;
   phone: string; // +598XXXXXXXX
   name: string | null; // como lo anota el comercio
-  userName?: string | null; // el nombre de la persona (pedido al backend: todavía no viene)
+  userName?: string | null; // el nombre de la persona (User.name)
   createdAt: string;
   lastVisitAt: string | null;
 }
@@ -158,4 +158,22 @@ export interface UserBalance {
   merchant: { id: string; name: string; category: MerchantCategory | null; photoUrl: string | null };
   balance: number;
   lastVisitAt: string | null;
+}
+
+// Ingreso real del cliente: la respuesta de verificar el código. El token es
+// opaco, dura 60 días y el backend lo renueva al usarlo (no hay refresh token).
+export interface AuthSession {
+  token: string;
+  expiresAt: string;
+  user: User;
+}
+
+// Cómo está configurado el envío de códigos (GET /auth/config). `devCode` solo
+// viene con el proveedor de pruebas; `realPhonesConfigured` avisa que algunos
+// teléfonos se verifican de verdad aunque el resto use el código de prueba.
+export interface AuthConfig {
+  otpProvider: string;
+  channel: string;
+  devCode: string | null;
+  realPhonesConfigured: boolean;
 }

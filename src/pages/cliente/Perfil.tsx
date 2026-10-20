@@ -1,27 +1,26 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { updateUser } from "../../lib/api/endpoints";
+import { Link } from "react-router-dom";
+import { updateMe } from "../../lib/api/endpoints";
 import { friendlyMessage } from "../../lib/api/errors";
 import { formatUyPhone } from "../../lib/phone";
 import { routes } from "../../lib/routes";
 import { useSesionCliente } from "../../lib/sesionCliente";
 
 // Perfil: nombre (editable), teléfono verificado, QR para más adelante y cerrar
-// sesión. El nombre es el de la persona (PATCH /users/:id); el que anota cada
+// sesión. El nombre es el de la persona (PATCH /me); el que anota cada
 // comercio de sus clientes no cambia.
 
 const card = "rounded-panel bg-tarjeta p-5 shadow-tarjeta";
 const MAX_NAME = 80;
 
 export function Perfil() {
-  const { sesion, cambiarNombre, salir } = useSesionCliente();
-  const navigate = useNavigate();
+  const { sesion, cambiarNombre } = useSesionCliente();
   const [editando, setEditando] = useState(false);
   const [borrador, setBorrador] = useState("");
 
   const guardarNombre = useMutation({
-    mutationFn: (name: string | null) => updateUser(sesion!.userId, { name }),
+    mutationFn: (name: string | null) => updateMe({ name }),
     onSuccess: (user) => {
       cambiarNombre(user.name);
       setEditando(false);
@@ -98,16 +97,9 @@ export function Perfil() {
         <p className="mt-1 text-suave">Más adelante se lo mostrás al cajero.</p>
       </div>
 
-      <button
-        type="button"
-        onClick={() => {
-          salir();
-          navigate(routes.entrada, { replace: true });
-        }}
-        className="h-12 self-start rounded-tarjeta border-2 border-accion px-6 font-extrabold text-accion"
-      >
+      <Link to={routes.cliente.salir} replace className="flex h-12 items-center self-start rounded-tarjeta border-2 border-accion px-6 font-extrabold text-accion">
         Cerrar sesión
-      </button>
+      </Link>
     </section>
   );
 }

@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LayoutCliente } from "../../components/LayoutCliente";
 import { ApiError } from "../../lib/api/client";
-import { getPlace, listPlaces, listUserBalances, updateUser, upsertUser } from "../../lib/api/endpoints";
+import { getAuthConfig, getPlace, listMyBalances, listPlaces, logout, requestCode, updateMe, verifyCode } from "../../lib/api/endpoints";
 import type { PlaceDetail } from "../../lib/api/types";
 import { emptyHours } from "../../lib/hours";
 import { SesionClienteProvider } from "../../lib/sesionCliente";
@@ -12,20 +12,27 @@ import { Ingreso } from "./Ingreso";
 import { Lugar } from "./Lugar";
 import { Lugares } from "./Lugares";
 import { Perfil } from "./Perfil";
+import { Salir } from "./Salir";
 import { Saldos } from "./Saldos";
 
 vi.mock("../../lib/api/endpoints", () => ({
   listPlaces: vi.fn(),
   getPlace: vi.fn(),
-  upsertUser: vi.fn(),
-  updateUser: vi.fn(),
-  listUserBalances: vi.fn(),
+  getAuthConfig: vi.fn(),
+  requestCode: vi.fn(),
+  verifyCode: vi.fn(),
+  logout: vi.fn(),
+  updateMe: vi.fn(),
+  listMyBalances: vi.fn(),
 }));
 const mockList = vi.mocked(listPlaces);
 const mockPlace = vi.mocked(getPlace);
-const mockUpsert = vi.mocked(upsertUser);
-const mockUpdateUser = vi.mocked(updateUser);
-const mockBalances = vi.mocked(listUserBalances);
+const mockConfig = vi.mocked(getAuthConfig);
+const mockRequest = vi.mocked(requestCode);
+const mockVerify = vi.mocked(verifyCode);
+const mockLogout = vi.mocked(logout);
+const mockUpdateMe = vi.mocked(updateMe);
+const mockBalances = vi.mocked(listMyBalances);
 
 function renderApp(path: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -36,6 +43,7 @@ function renderApp(path: string) {
           <Routes>
             <Route path="/" element={<p>entrada</p>} />
             <Route path="/cliente/ingreso" element={<Ingreso />} />
+            <Route path="/cliente/salir" element={<Salir />} />
             <Route path="/cliente" element={<LayoutCliente />}>
               <Route path="lugares" element={<Lugares />} />
               <Route path="lugares/:merchantId" element={<Lugar />} />
@@ -49,7 +57,7 @@ function renderApp(path: string) {
   );
 }
 
-const entrar = () => localStorage.setItem("platita.cliente", JSON.stringify({ userId: "u1", phone: "+59899123456", name: null }));
+const entrar = () => localStorage.setItem("platita.cliente", JSON.stringify({ token: "tok", expiresAt: "2099-01-01T00:00:00.000Z", userId: "u1", phone: "+59899123456", name: null }));
 
 const place = (extra = {}) => ({
   id: "m1",
@@ -72,54 +80,109 @@ beforeEach(() => {
   vi.resetAllMocks();
   localStorage.clear();
   mockBalances.mockResolvedValue({ data: [] });
+  mockConfig.mockResolvedValue({ otpProvider: "dev", channel: "sms", devCode: "000000", realPhonesConfigured: false });
+  mockRequest.mockResolvedValue(undefined);
+  mockLogout.mockResolvedValue(undefined);
 });
 
+const auth = (extra = {}) => ({ token: "tok", expiresAt: "2099-01-01T00:00:00.000Z", user: user(extra) });
+const pedirCodigo = (celular = "099123456") => {
+  fireEvent.change(screen.getByLabelText("Tu celular"), { target: { value: celular } });
+  fireEvent.click(screen.getByRole("button", { name: "Mandame el código" }));
+};
+const escribirCodigo = (code: string) => {
+  fireEvent.change(screen.getByLabelText(/Código de 6 dígitos/), { target: { value: code } });
+  fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
+};
+
 describe("Ingreso del cliente", () => {
-  it("con teléfono y código correcto busca o crea a la persona y entra a Lugares", async () => {
+  it("pide el código, lo verifica y entra a Lugares con la sesión del backend", async () => {
     mockList.mockResolvedValue({ data: [], nextCursor: null });
-    mockUpsert.mockResolvedValue(user());
+    mockVerify.mockResolvedValue(auth());
     renderApp("/cliente/ingreso");
 
-    fireEvent.change(screen.getByLabelText("Tu celular"), { target: { value: "099 123 456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Mandame el código" }));
-    expect(screen.getByText("Te lo mandamos al 099 123 456.")).toBeInTheDocument();
+    pedirCodigo("099 123 456");
+    expect(await screen.findByText("Te lo mandamos al 099 123 456.")).toBeInTheDocument();
+    expect(mockRequest).toHaveBeenCalledWith("+59899123456");
 
-    fireEvent.change(screen.getByLabelText(/Código de 6 dígitos/), { target: { value: "000000" } });
-    fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
-
+    escribirCodigo("123456");
     expect(await screen.findByRole("heading", { name: "Lugares" })).toBeInTheDocument();
-    expect(mockUpsert).toHaveBeenCalledWith({ phone: "+59899123456" });
-    expect(JSON.parse(localStorage.getItem("platita.cliente")!)).toMatchObject({ userId: "u1", phone: "+59899123456" });
+    expect(mockVerify).toHaveBeenCalledWith("+59899123456", "123456");
+    expect(JSON.parse(localStorage.getItem("platita.cliente")!)).toMatchObject({ token: "tok", userId: "u1", phone: "+59899123456" });
   });
 
-  it("rechaza un teléfono inválido y un código incorrecto", () => {
+  it("un teléfono inválido se rechaza sin llamar al backend", () => {
     renderApp("/cliente/ingreso");
-    fireEvent.change(screen.getByLabelText("Tu celular"), { target: { value: "123" } });
-    fireEvent.click(screen.getByRole("button", { name: "Mandame el código" }));
+    pedirCodigo("123");
     expect(screen.getByRole("alert")).toHaveTextContent("Revisá el número");
-
-    fireEvent.change(screen.getByLabelText("Tu celular"), { target: { value: "099123456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Mandame el código" }));
-    fireEvent.change(screen.getByLabelText(/Código de 6 dígitos/), { target: { value: "482719" } });
-    fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("Código incorrecto");
-    expect(localStorage.getItem("platita.cliente")).toBeNull();
-    expect(mockUpsert).not.toHaveBeenCalled();
+    expect(mockRequest).not.toHaveBeenCalled();
   });
 
-  it("si el backend falla al crear la sesión, avisa y no entra", async () => {
-    mockUpsert.mockRejectedValue(new ApiError(0, "NETWORK_ERROR", "x"));
+  it("si el backend rechaza el teléfono o no puede mandar el código, lo dice y se queda en el paso 1", async () => {
+    mockRequest.mockRejectedValueOnce(new ApiError(502, "OTP_PROVIDER_ERROR", "x"));
     renderApp("/cliente/ingreso");
-    fireEvent.change(screen.getByLabelText("Tu celular"), { target: { value: "099123456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Mandame el código" }));
-    fireEvent.change(screen.getByLabelText(/Código de 6 dígitos/), { target: { value: "000000" } });
-    fireEvent.click(screen.getByRole("button", { name: "Entrar" }));
+    pedirCodigo();
+    expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos mandar el código");
+    expect(screen.getByText("Ingresá tu celular")).toBeInTheDocument();
+  });
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("No hay conexión con el servidor");
+  it("si pidió demasiados códigos, usa retryAfterSeconds para la cuenta regresiva", async () => {
+    mockRequest.mockRejectedValueOnce(new ApiError(429, "TOO_MANY_REQUESTS", "x", { retryAfterSeconds: 75 }));
+    renderApp("/cliente/ingreso");
+    pedirCodigo();
+    expect(await screen.findByRole("button", { name: "Esperá 1:15" })).toBeDisabled();
+  });
+
+  it("código incorrecto: dice cuántos intentos quedan y no entra", async () => {
+    mockVerify.mockRejectedValue(new ApiError(422, "CODE_INCORRECT", "x", { attemptsLeft: 3 }));
+    renderApp("/cliente/ingreso");
+    pedirCodigo();
+    await screen.findByText("Poné el código");
+    escribirCodigo("482719");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Código incorrecto. Te quedan 3 intentos.");
     expect(localStorage.getItem("platita.cliente")).toBeNull();
+  });
+
+  it("código vencido: lo dice y deja de ofrecer 'Entrar'", async () => {
+    mockVerify.mockRejectedValue(new ApiError(422, "CODE_EXPIRED", "x"));
+    renderApp("/cliente/ingreso");
+    pedirCodigo();
+    await screen.findByText("Poné el código");
+    escribirCodigo("482719");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("El código venció");
+    expect(screen.queryByRole("button", { name: "Entrar" })).not.toBeInTheDocument();
+  });
+
+  it("muestra el aviso del código de prueba solo si el backend lo informa", async () => {
+    renderApp("/cliente/ingreso");
+    pedirCodigo();
+    expect(await screen.findByText("Ingreso de prueba: el código es 000000.")).toBeInTheDocument();
+  });
+
+  it("con números reales configurados, aclara que el 000000 tiene excepciones", async () => {
+    mockConfig.mockResolvedValue({ otpProvider: "dev", channel: "sms", devCode: "000000", realPhonesConfigured: true });
+    renderApp("/cliente/ingreso");
+    pedirCodigo();
+    expect(await screen.findByText("Ingreso de prueba: el código es 000000 (salvo números con verificación real).")).toBeInTheDocument();
+  });
+
+  it("con el proveedor real no muestra ningún código de prueba", async () => {
+    mockConfig.mockResolvedValue({ otpProvider: "twilio", channel: "sms", devCode: null, realPhonesConfigured: false });
+    renderApp("/cliente/ingreso");
+    pedirCodigo();
+    await screen.findByText("Poné el código");
+    expect(screen.queryByText(/Ingreso de prueba/)).not.toBeInTheDocument();
   });
 
   it("sin sesión, las pantallas del cliente mandan al ingreso", () => {
+    renderApp("/cliente/lugares");
+    expect(screen.getByText("Ingresá tu celular")).toBeInTheDocument();
+  });
+
+  it("una sesión vencida guardada no cuenta", () => {
+    localStorage.setItem("platita.cliente", JSON.stringify({ token: "t", expiresAt: "2000-01-01T00:00:00.000Z", userId: "u1", phone: "+59899123456", name: null }));
     renderApp("/cliente/lugares");
     expect(screen.getByText("Ingresá tu celular")).toBeInTheDocument();
   });
@@ -210,7 +273,7 @@ describe("Detalle de un lugar", () => {
     renderApp("/cliente/lugares/m1");
 
     expect(await screen.findByText("$1.200")).toBeInTheDocument();
-    expect(mockBalances).toHaveBeenCalledWith("u1");
+    expect(mockBalances).toHaveBeenCalled();
   });
 
   it("si no tiene ficha en el lugar, dice que no tiene saldo", async () => {
@@ -244,7 +307,7 @@ describe("Detalle de un lugar", () => {
 describe("Perfil", () => {
   it("muestra el teléfono verificado, deja editar el nombre y cerrar sesión", async () => {
     entrar();
-    mockUpdateUser.mockResolvedValue(user({ name: "Marta Rodríguez" }));
+    mockUpdateMe.mockResolvedValue(user({ name: "Marta Rodríguez" }));
     renderApp("/cliente/perfil");
 
     expect(screen.getByText("099 123 456")).toBeInTheDocument();
@@ -254,11 +317,12 @@ describe("Perfil", () => {
     fireEvent.change(screen.getByLabelText("Nombre"), { target: { value: "Marta Rodríguez" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
     expect(await screen.findByText("Marta Rodríguez")).toBeInTheDocument();
-    expect(mockUpdateUser).toHaveBeenCalledWith("u1", { name: "Marta Rodríguez" });
+    expect(mockUpdateMe).toHaveBeenCalledWith({ name: "Marta Rodríguez" });
     expect(JSON.parse(localStorage.getItem("platita.cliente")!).name).toBe("Marta Rodríguez");
 
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar sesión" }));
-    expect(screen.getByText("entrada")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("link", { name: "Cerrar sesión" }));
+    expect(await screen.findByText("entrada")).toBeInTheDocument();
+    expect(mockLogout).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem("platita.cliente")).toBeNull();
   });
 });

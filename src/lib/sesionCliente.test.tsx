@@ -1,19 +1,65 @@
-import { describe, expect, it } from "vitest";
-import { CODE_TTL_MS, SIMULATED_CODE, checkCode } from "./sesionCliente";
+import { render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it } from "vitest";
+import { api } from "./api/client";
+import { SesionClienteProvider, useSesionCliente } from "./sesionCliente";
 
-describe("checkCode", () => {
-  const sent = 1_000_000;
-
-  it("acepta el código simulado a tiempo", () => {
-    expect(checkCode(SIMULATED_CODE, sent, sent + 1000)).toBe("ok");
+// El token sale del almacenamiento: `api` lo manda solo en los pedidos con `auth`.
+describe("sesión del cliente y la API", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    void SesionClienteProvider; // importa el módulo, que conecta la sesión con `api`
   });
 
-  it("rechaza otro código", () => {
-    expect(checkCode("482719", sent, sent + 1000)).toBe("incorrecto");
+  const guardarSesion = (expiresAt: string) =>
+    localStorage.setItem(
+      "platita.cliente",
+      JSON.stringify({ token: "tok123", expiresAt, userId: "u1", phone: "+59899123456", name: null }),
+    );
+
+  const headersDelPedido = async (auth: boolean) => {
+    let headers: Record<string, string> = {};
+    globalThis.fetch = (async (_url: string, init?: RequestInit) => {
+      headers = (init?.headers ?? {}) as Record<string, string>;
+      return new Response("{}", { status: 200 });
+    }) as typeof fetch;
+    await api("/x", { auth });
+    return headers;
+  };
+
+  it("manda el token solo cuando el pedido es de la sesión", async () => {
+    guardarSesion(new Date(Date.now() + 86_400_000).toISOString());
+    expect((await headersDelPedido(true)).authorization).toBe("Bearer tok123");
+    expect((await headersDelPedido(false)).authorization).toBeUndefined();
   });
 
-  it("pasado el tiempo, el código venció aunque sea el correcto", () => {
-    expect(checkCode(SIMULATED_CODE, sent, sent + CODE_TTL_MS + 1)).toBe("vencido");
-    expect(checkCode(SIMULATED_CODE, sent, sent + CODE_TTL_MS)).toBe("ok");
+  it("una sesión vencida no manda nada", async () => {
+    guardarSesion(new Date(Date.now() - 1000).toISOString());
+    expect((await headersDelPedido(true)).authorization).toBeUndefined();
+  });
+
+  it("ante un 401 INVALID_SESSION cierra la sesión (y un 401 de otro tipo, no)", async () => {
+    guardarSesion(new Date(Date.now() + 86_400_000).toISOString());
+    const responder = (code: string) => {
+      globalThis.fetch = (async () =>
+        new Response(JSON.stringify({ error: "x", code }), { status: 401 })) as typeof fetch;
+    };
+    function Estado() {
+      const { sesion } = useSesionCliente();
+      return <p>{sesion ? "con sesión" : "sin sesión"}</p>;
+    }
+    render(
+      <SesionClienteProvider>
+        <Estado />
+      </SesionClienteProvider>,
+    );
+
+    responder("OTRO");
+    await api("/me", { auth: true }).catch(() => {});
+    expect(screen.getByText("con sesión")).toBeInTheDocument();
+
+    responder("INVALID_SESSION");
+    await api("/me", { auth: true }).catch(() => {});
+    await waitFor(() => expect(screen.getByText("sin sesión")).toBeInTheDocument());
+    expect(localStorage.getItem("platita.cliente")).toBeNull();
   });
 });

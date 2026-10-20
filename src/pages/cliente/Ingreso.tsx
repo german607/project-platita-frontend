@@ -1,21 +1,52 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button";
-import { upsertUser } from "../../lib/api/endpoints";
+import { ApiError } from "../../lib/api/client";
 import { friendlyMessage } from "../../lib/api/errors";
+import { getAuthConfig, requestCode, verifyCode } from "../../lib/api/endpoints";
 import { formatUyPhone, normalizeUyPhone } from "../../lib/phone";
 import { routes } from "../../lib/routes";
-import { CODE_LENGTH, RESEND_SECONDS, checkCode, useSesionCliente } from "../../lib/sesionCliente";
+import { CODE_LENGTH, RESEND_SECONDS, useSesionCliente } from "../../lib/sesionCliente";
 
-// Ingreso del cliente en dos pasos: celular → código de 6 dígitos. El código
-// está SIMULADO (ver lib/sesionCliente.tsx). Diseño: design/platita-cliente.codigo.html.
+// Ingreso del cliente en dos pasos: celular → código de 6 dígitos que le llega
+// por mensaje (POST /auth/request-code y /auth/verify-code). Los límites y el
+// vencimiento los pone el backend; acá solo se muestra lo que responde.
+// Diseño: design/platita-cliente.codigo.html.
 
 const campo =
   "h-14 w-full rounded-campo border-2 border-borde bg-tarjeta px-5 text-xl font-bold outline-none focus:border-accion";
 
-function formatCountdown(seconds: number) {
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+const formatCountdown = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+
+const retryAfter = (error: unknown): number | null => {
+  const seconds = (error as ApiError | undefined)?.details as { retryAfterSeconds?: unknown } | undefined;
+  return typeof seconds?.retryAfterSeconds === "number" ? Math.ceil(seconds.retryAfterSeconds) : null;
+};
+
+// Qué decirle a la persona según el código de error del backend.
+function mensajeDeCodigo(error: unknown): string {
+  if (error instanceof ApiError) {
+    switch (error.code) {
+      case "INVALID_PHONE":
+        return "Revisá el número: tiene que ser un celular de Uruguay.";
+      case "TOO_MANY_REQUESTS":
+        return "Pediste muchos códigos seguidos. Esperá un poco y probá de nuevo.";
+      case "OTP_PROVIDER_ERROR":
+        return "No pudimos mandar el código. Probá en un rato.";
+      case "CODE_INCORRECT": {
+        const left = (error.details as { attemptsLeft?: unknown } | undefined)?.attemptsLeft;
+        return typeof left === "number" ? `Código incorrecto. Te quedan ${left} ${left === 1 ? "intento" : "intentos"}.` : "Código incorrecto";
+      }
+      case "CODE_EXPIRED":
+        return "El código venció";
+      case "TOO_MANY_ATTEMPTS":
+        return "Fallaste demasiadas veces. Pedí un código nuevo.";
+      case "VALIDATION_ERROR":
+        return `El código tiene ${CODE_LENGTH} dígitos.`;
+    }
+  }
+  return friendlyMessage(error);
 }
 
 export function Ingreso() {
@@ -23,17 +54,32 @@ export function Ingreso() {
   const navigate = useNavigate();
   const [raw, setRaw] = useState("");
   const [phone, setPhone] = useState<string | null>(null); // confirmado en el paso 1
-  const [sentAt, setSentAt] = useState(0);
   const [code, setCode] = useState("");
-  const [error, setError] = useState<"incorrecto" | "vencido" | "telefono" | null>(null);
   const [wait, setWait] = useState(0);
+  const [telefonoMalo, setTelefonoMalo] = useState(false);
   const codeRef = useRef<HTMLInputElement>(null);
 
-  // Con el código bien, se busca o crea a la persona en el backend; su id es la sesión.
-  const ingresar = useMutation({
-    mutationFn: (e164: string) => upsertUser({ phone: e164 }),
-    onSuccess: (user) => {
-      entrar(user);
+  // El aviso "el código es 000000" solo aparece si el backend usa el proveedor de pruebas.
+  const config = useQuery({ queryKey: ["auth-config"], queryFn: getAuthConfig, retry: false, staleTime: Infinity });
+  const devCode = config.data?.devCode ?? null;
+
+  const pedir = useMutation({
+    mutationFn: (e164: string) => requestCode(e164),
+    onSuccess: (_data, e164) => {
+      setPhone(e164);
+      setCode("");
+      setWait(RESEND_SECONDS);
+    },
+    onError: (error) => {
+      const seconds = retryAfter(error);
+      if (seconds) setWait(seconds);
+    },
+  });
+
+  const verificar = useMutation({
+    mutationFn: ({ e164, value }: { e164: string; value: string }) => verifyCode(e164, value),
+    onSuccess: (auth) => {
+      entrar(auth);
       navigate(routes.cliente.lugares, { replace: true });
     },
   });
@@ -50,31 +96,27 @@ export function Ingreso() {
 
   if (sesion) return <Navigate to={routes.cliente.lugares} replace />;
 
-  const mandarCodigo = (e164: string) => {
-    setPhone(e164);
-    setSentAt(Date.now());
-    setCode("");
-    setError(null);
-    setWait(RESEND_SECONDS);
-  };
-
   const paso1 = (e: React.FormEvent) => {
     e.preventDefault();
     const e164 = normalizeUyPhone(raw);
-    if (!e164) return setError("telefono");
-    mandarCodigo(e164);
+    setTelefonoMalo(!e164);
+    if (e164) pedir.mutate(e164);
   };
 
   const paso2 = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone) return;
-    const result = checkCode(code, sentAt);
-    if (result === "ok") {
-      ingresar.mutate(phone);
-    } else {
-      setError(result);
-    }
+    if (phone) verificar.mutate({ e164: phone, value: code });
   };
+
+  const reenviar = () => {
+    if (!phone) return;
+    verificar.reset();
+    pedir.mutate(phone);
+  };
+
+  const verifyError = verificar.error;
+  const vencido = verifyError instanceof ApiError && verifyError.code === "CODE_EXPIRED";
+  const sinIntentos = verifyError instanceof ApiError && verifyError.code === "TOO_MANY_ATTEMPTS";
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-5 py-10">
@@ -99,17 +141,20 @@ export function Ingreso() {
               value={raw}
               onChange={(e) => {
                 setRaw(e.target.value);
-                setError(null);
+                setTelefonoMalo(false);
+                pedir.reset();
               }}
               className={campo}
             />
           </label>
-          {error === "telefono" && (
+          {(telefonoMalo || pedir.isError) && (
             <p role="alert" className="font-extrabold text-accion">
-              Revisá el número: tiene que ser un celular de Uruguay.
+              {telefonoMalo ? "Revisá el número: tiene que ser un celular de Uruguay." : mensajeDeCodigo(pedir.error)}
             </p>
           )}
-          <Button type="submit">Mandame el código</Button>
+          <Button type="submit" disabled={pedir.isPending || wait > 0}>
+            {pedir.isPending ? "Mandando…" : wait > 0 ? `Esperá ${formatCountdown(wait)}` : "Mandame el código"}
+          </Button>
         </form>
       ) : (
         <form onSubmit={paso2} className="flex flex-col gap-5" noValidate>
@@ -117,7 +162,8 @@ export function Ingreso() {
             type="button"
             onClick={() => {
               setPhone(null);
-              setError(null);
+              verificar.reset();
+              pedir.reset();
             }}
             className="self-start font-extrabold text-suave"
           >
@@ -137,39 +183,34 @@ export function Ingreso() {
               value={code}
               onChange={(e) => {
                 setCode(e.target.value.replace(/\D/g, ""));
-                setError(null);
+                verificar.reset();
               }}
               className={`${campo} text-center tracking-[0.5em]`}
             />
           </label>
-          {error === "incorrecto" && (
+          {(verificar.isError || pedir.isError) && (
             <p role="alert" className="font-extrabold text-accion">
-              Código incorrecto
+              {mensajeDeCodigo(verificar.isError ? verificar.error : pedir.error)}
             </p>
           )}
-          {error === "vencido" && (
-            <p role="alert" className="font-extrabold text-accion">
-              El código venció
-            </p>
-          )}
-          {ingresar.isError && (
-            <p role="alert" className="font-extrabold text-accion">
-              {friendlyMessage(ingresar.error)}
-            </p>
-          )}
-          {error !== "vencido" && (
-            <Button type="submit" disabled={code.length < CODE_LENGTH || ingresar.isPending}>
-              {ingresar.isPending ? "Entrando…" : "Entrar"}
+          {!vencido && !sinIntentos && (
+            <Button type="submit" disabled={code.length < CODE_LENGTH || verificar.isPending}>
+              {verificar.isPending ? "Entrando…" : "Entrar"}
             </Button>
           )}
-          {wait > 0 && error !== "vencido" ? (
+          {wait > 0 ? (
             <p className="text-center font-bold text-suave">{`Reenviar código en ${formatCountdown(wait)}`}</p>
           ) : (
-            <Button variant="borde" onClick={() => mandarCodigo(phone)}>
+            <Button variant="borde" onClick={reenviar} disabled={pedir.isPending}>
               Reenviar código
             </Button>
           )}
-          <p className="text-center text-sm text-suave">Ingreso de prueba: el código es 000000.</p>
+          {devCode && (
+            <p className="text-center text-sm text-suave">
+              {`Ingreso de prueba: el código es ${devCode}`}
+              {config.data?.realPhonesConfigured ? " (salvo números con verificación real)" : ""}.
+            </p>
+          )}
         </form>
       )}
     </main>
