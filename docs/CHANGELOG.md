@@ -396,3 +396,8 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   trae `devCode`; con `realPhonesConfigured` aclara "(salvo números con
   verificación real)".
 - `tsc` limpio y **248 tests**. Sin probar contra el backend ni con un celular real.
+
+## 2026-10-20 — Ingreso real probado
+
+- Probado con un celular real: llegó el SMS (Twilio Verify, cuenta de prueba) y
+  el ingreso funcionó de punta a punta.
