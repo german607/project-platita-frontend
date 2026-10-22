@@ -12,7 +12,6 @@ import { Ficha } from "./pages/Ficha";
 import { MiComercio } from "./pages/MiComercio";
 import { Mostrador } from "./pages/Mostrador";
 import { Placeholder } from "./pages/Placeholder";
-import { Ingreso } from "./pages/cliente/Ingreso";
 import { Lugar } from "./pages/cliente/Lugar";
 import { Lugares } from "./pages/cliente/Lugares";
 import { Perfil } from "./pages/cliente/Perfil";
@@ -37,7 +36,7 @@ export function App() {
       <SesionClienteProvider>
         <BrowserRouter>
           <Routes>
-            {/* Primera pantalla: elegir cliente o comercio. */}
+            {/* Pantalla de inicio: los lugares y la entrada. */}
             <Route index element={<Entrada />} />
 
             {/* Área del comercio. */}
@@ -55,8 +54,7 @@ export function App() {
               <Route path="mi-comercio" element={<MiComercio />} />
             </Route>
 
-            {/* Área del cliente: el ingreso es público; el resto pide sesión. */}
-            <Route path="cliente/ingreso" element={<Ingreso />} />
+            {/* Área del cliente: pide sesión (se entra desde la pantalla de inicio). */}
             <Route path="cliente/salir" element={<Salir />} />
             <Route path="cliente" element={<LayoutCliente />}>
               <Route index element={<Navigate to="lugares" replace />} />

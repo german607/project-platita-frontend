@@ -1,18 +1,19 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import { Button } from "../../components/Button";
-import { ApiError } from "../../lib/api/client";
-import { friendlyMessage } from "../../lib/api/errors";
-import { getAuthConfig, requestCode, verifyCode } from "../../lib/api/endpoints";
-import { formatUyPhone, normalizeUyPhone } from "../../lib/phone";
-import { routes } from "../../lib/routes";
-import { CODE_LENGTH, RESEND_SECONDS, useSesionCliente } from "../../lib/sesionCliente";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../components/Button";
+import { ApiError } from "../lib/api/client";
+import { friendlyMessage } from "../lib/api/errors";
+import { getAuthConfig, requestCode, verifyCode } from "../lib/api/endpoints";
+import { formatUyPhone, normalizeUyPhone } from "../lib/phone";
+import { routes } from "../lib/routes";
+import { CODE_LENGTH, RESEND_SECONDS, useSesionCliente } from "../lib/sesionCliente";
 
-// Ingreso del cliente en dos pasos: celular → código de 6 dígitos que le llega
+// Formulario de entrada (en la pantalla de inicio) en dos pasos: celular → código de 6 dígitos que le llega
 // por mensaje (POST /auth/request-code y /auth/verify-code). Los límites y el
 // vencimiento los pone el backend; acá solo se muestra lo que responde.
-// Diseño: design/platita-cliente.codigo.html.
+// Cualquiera entra con el celular: si la persona no existía, su cuenta se crea al
+// verificar el código. Diseño: design/platita-cliente.codigo.html.
 
 const campo =
   "h-14 w-full rounded-campo border-2 border-borde bg-tarjeta px-5 text-xl font-bold outline-none focus:border-accion";
@@ -49,8 +50,8 @@ function mensajeDeCodigo(error: unknown): string {
   return friendlyMessage(error);
 }
 
-export function Ingreso() {
-  const { sesion, entrar } = useSesionCliente();
+export function FormularioIngreso() {
+  const { entrar } = useSesionCliente();
   const navigate = useNavigate();
   const [raw, setRaw] = useState("");
   const [phone, setPhone] = useState<string | null>(null); // confirmado en el paso 1
@@ -94,8 +95,6 @@ export function Ingreso() {
     if (phone) codeRef.current?.focus();
   }, [phone]);
 
-  if (sesion) return <Navigate to={routes.cliente.lugares} replace />;
-
   const paso1 = (e: React.FormEvent) => {
     e.preventDefault();
     const e164 = normalizeUyPhone(raw);
@@ -119,17 +118,12 @@ export function Ingreso() {
   const sinIntentos = verifyError instanceof ApiError && verifyError.code === "TOO_MANY_ATTEMPTS";
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-5 py-10">
-      <h1 className="font-titulo text-[32px] font-extrabold text-accion">platita</h1>
-
+    <div className="flex flex-col gap-6">
       {!phone ? (
         <form onSubmit={paso1} className="flex flex-col gap-5" noValidate>
-          <Link to={routes.entrada} className="font-extrabold text-suave">
-            ← Volver
-          </Link>
           <div>
-            <h2 className="font-titulo text-[28px] font-extrabold">Ingresá tu celular</h2>
-            <p className="mt-1 text-suave">Te mandamos un código para confirmar que sos vos.</p>
+            <h2 className="font-titulo text-[28px] font-extrabold">Entrá a Platita</h2>
+            <p className="mt-1 text-suave">Ingresá tu celular y te mandamos un código para confirmar que sos vos.</p>
           </div>
           <label className="flex flex-col gap-2 font-extrabold">
             Tu celular
@@ -155,6 +149,7 @@ export function Ingreso() {
           <Button type="submit" disabled={pedir.isPending || wait > 0}>
             {pedir.isPending ? "Mandando…" : wait > 0 ? `Esperá ${formatCountdown(wait)}` : "Mandame el código"}
           </Button>
+          <p className="-mt-2 text-center text-xs text-suave/70">Si es tu primera vez, tu cuenta se crea sola.</p>
         </form>
       ) : (
         <form onSubmit={paso2} className="flex flex-col gap-5" noValidate>
@@ -213,6 +208,6 @@ export function Ingreso() {
           )}
         </form>
       )}
-    </main>
+    </div>
   );
 }

@@ -401,3 +401,16 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 
 - Probado con un celular real: llegó el SMS (Twilio Verify, cuenta de prueba) y
   el ingreso funcionó de punta a punta.
+
+## 2026-10-22 — Pantalla de inicio nueva
+
+- La raíz ya no pregunta "¿Cómo querés entrar?". Sin sesión muestra, de un lado,
+  los **lugares que están en Platita** (`GET /places`, 6 tarjetas, sin saldos) y,
+  del otro, **entrar con el celular** (código por mensaje); en el celular primero
+  entrar y abajo los lugares. Un solo botón: la cuenta se crea sola la primera
+  vez, con una línea chica que lo aclara. Con sesión, va directo a Lugares.
+- El formulario de ingreso pasó a `components/FormularioIngreso.tsx` y se borró
+  la ruta `/cliente/ingreso`: sin sesión, el área del cliente manda al inicio.
+- El comercio entra por un enlace discreto "Soy un comercio" (sin cuenta, como
+  hasta ahora). Pedido al backend de **cuentas de comercio** en TODO §4.
+- `tsc` limpio, **251 tests**, build bien. Sin ver en el navegador.

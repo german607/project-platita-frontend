@@ -3,7 +3,7 @@ import { routes } from "../lib/routes";
 import { useSesionCliente } from "../lib/sesionCliente";
 
 // Navegación del cliente: menú inferior en el celular y menú arriba en la web
-// (contenido de hasta 900px). Sin sesión, se manda al ingreso.
+// (contenido de hasta 900px). Sin sesión, se manda a la pantalla de inicio, que es donde se entra.
 const items = [
   { to: routes.cliente.lugares, label: "Lugares" },
   { to: routes.cliente.saldos, label: "Mis saldos" },
@@ -18,7 +18,7 @@ const bottomLink = ({ isActive }: { isActive: boolean }) =>
 
 export function LayoutCliente() {
   const { sesion } = useSesionCliente();
-  if (!sesion) return <Navigate to={routes.cliente.ingreso} replace />;
+  if (!sesion) return <Navigate to={routes.entrada} replace />;
 
   return (
     <div className="min-h-screen">

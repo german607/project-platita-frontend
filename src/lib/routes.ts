@@ -20,7 +20,6 @@ export const routes = {
   },
 
   cliente: {
-    ingreso: "/cliente/ingreso",
     lugares: "/cliente/lugares",
     lugar: (merchantId: string) => `/cliente/lugares/${merchantId}`,
     saldos: "/cliente/saldos",
