@@ -9,6 +9,7 @@ import type {
   Location,
   Merchant,
   MerchantTransaction,
+  Me,
   MerchantCategory,
   MovementResult,
   OpeningHours,
@@ -45,7 +46,7 @@ const idempotencyHeaders = ({ idempotencyKey }: MovementOptions) =>
 
 // ---------- Comercio ----------
 
-export const getMerchant = (merchantId: string) => api<Merchant>(`/merchants/${merchantId}`);
+export const getMerchant = (merchantId: string) => api<Merchant>(`/merchants/${merchantId}`, { auth: true });
 
 // Perfil público del comercio. Solo se manda lo que cambió. description y
 // photoUrl aceptan null para borrarlos; `openingHours` reemplaza la semana
@@ -58,21 +59,25 @@ export type MerchantProfileChanges = {
   openingHours?: OpeningHours;
 };
 
+// Crea la cuenta de un comercio: la persona de la sesión queda como dueña.
+export const createMerchant = (input: { name: string; phone?: string }) =>
+  api<Merchant>("/merchants", { method: "POST", body: input, auth: true });
+
 export const updateMerchant = (merchantId: string, changes: MerchantProfileChanges) =>
-  api<Merchant>(`/merchants/${merchantId}`, { method: "PATCH", body: changes });
+  api<Merchant>(`/merchants/${merchantId}`, { auth: true, method: "PATCH", body: changes });
 
 // ---------- Locales ----------
 
-export const listLocations = (merchantId: string) => api<{ data: Location[] }>(`/merchants/${merchantId}/locations`);
+export const listLocations = (merchantId: string) => api<{ data: Location[] }>(`/merchants/${merchantId}/locations`, { auth: true });
 
 export const createLocation = (merchantId: string, input: { label?: string; address: string }) =>
-  api<Location>(`/merchants/${merchantId}/locations`, { method: "POST", body: input });
+  api<Location>(`/merchants/${merchantId}/locations`, { auth: true, method: "POST", body: input });
 
 // No hay DELETE: un local se da de baja con active: false.
 export const updateLocation = (
   locationId: string,
   changes: { label?: string | null; address?: string; active?: boolean },
-) => api<Location>(`/locations/${locationId}`, { method: "PATCH", body: changes });
+) => api<Location>(`/locations/${locationId}`, { auth: true, method: "PATCH", body: changes });
 
 // ---------- Lugares (lo que ve el cliente; sin login, sin datos de clientes) ----------
 
@@ -97,7 +102,7 @@ export const verifyCode = (phone: string, code: string) =>
 export const logout = () => api<void>("/auth/logout", { method: "POST", auth: true });
 
 // Todo lo que sigue sale del usuario de la sesión (nunca de un id que mande el front).
-export const getMe = () => api<User>("/me", { auth: true });
+export const getMe = () => api<Me>("/me", { auth: true });
 
 export const updateMe = (input: { name: string | null }) =>
   api<User>("/me", { method: "PATCH", body: input, auth: true });
@@ -109,32 +114,32 @@ export const listMyBalances = () => api<{ data: UserBalance[] }>("/me/balances",
 
 // Buscar o crear (no sirve para solo mirar: crea si no existe).
 export const upsertCustomer = (merchantId: string, input: { phone: string; name?: string }) =>
-  api<CustomerWithBalance>(`/merchants/${merchantId}/customers`, { method: "POST", body: input });
+  api<CustomerWithBalance>(`/merchants/${merchantId}/customers`, { auth: true, method: "POST", body: input });
 
 // `search`: nombre o teléfono en cualquier formato (también parcial). `phone`:
 // teléfono exacto, sin crear nada.
 export const listCustomers = (merchantId: string, params: PageParams & { search?: string; phone?: string } = {}) =>
-  api<Page<CustomerWithBalance>>(`/merchants/${merchantId}/customers`, { query: params });
+  api<Page<CustomerWithBalance>>(`/merchants/${merchantId}/customers`, { auth: true, query: params });
 
-export const getCustomer = (customerId: string) => api<CustomerWithBalance>(`/customers/${customerId}`);
+export const getCustomer = (customerId: string) => api<CustomerWithBalance>(`/customers/${customerId}`, { auth: true });
 
 export const updateCustomer = (customerId: string, input: { name: string | null }) =>
-  api<CustomerWithBalance>(`/customers/${customerId}`, { method: "PATCH", body: input });
+  api<CustomerWithBalance>(`/customers/${customerId}`, { auth: true, method: "PATCH", body: input });
 
 export const listInactiveCustomers = (merchantId: string, params: PageParams & { days?: number } = {}) =>
-  api<InactivePage>(`/merchants/${merchantId}/inactive`, { query: params });
+  api<InactivePage>(`/merchants/${merchantId}/inactive`, { auth: true, query: params });
 
 // ---------- Saldo (libro mayor) ----------
 
 export const topUp = (customerId: string, input: { amount: number; paidWith?: string }, options: MovementOptions = {}) =>
-  api<TopUpResult>(`/customers/${customerId}/topups`, {
+  api<TopUpResult>(`/customers/${customerId}/topups`, { auth: true,
     method: "POST",
     body: input,
     headers: idempotencyHeaders(options),
   });
 
 export const charge = (customerId: string, input: { amount: number; note?: string }, options: MovementOptions = {}) =>
-  api<MovementResult>(`/customers/${customerId}/charges`, {
+  api<MovementResult>(`/customers/${customerId}/charges`, { auth: true,
     method: "POST",
     body: input,
     headers: idempotencyHeaders(options),
@@ -142,37 +147,37 @@ export const charge = (customerId: string, input: { amount: number; note?: strin
 
 // amount con signo: positivo suma saldo, negativo resta. La nota es obligatoria.
 export const adjust = (customerId: string, input: { amount: number; note: string }, options: MovementOptions = {}) =>
-  api<MovementResult>(`/customers/${customerId}/adjustments`, {
+  api<MovementResult>(`/customers/${customerId}/adjustments`, { auth: true,
     method: "POST",
     body: input,
     headers: idempotencyHeaders(options),
   });
 
 export const listTransactions = (customerId: string, params: PageParams & { type?: TransactionType } = {}) =>
-  api<Page<Transaction>>(`/customers/${customerId}/transactions`, { query: params });
+  api<Page<Transaction>>(`/customers/${customerId}/transactions`, { auth: true, query: params });
 
 // Movimientos de todo el comercio, del más nuevo al más viejo. `from` es
 // inclusivo y `to` exclusivo: fechas ISO con zona horaria (ver `todayRange`).
 export const listMerchantTransactions = (
   merchantId: string,
   params: PageParams & { from?: string; to?: string; type?: TransactionType } = {},
-) => api<Page<MerchantTransaction>>(`/merchants/${merchantId}/transactions`, { query: params });
+) => api<Page<MerchantTransaction>>(`/merchants/${merchantId}/transactions`, { auth: true, query: params });
 
 // ---------- Promos (reglas de bonificación) ----------
 
 export const listBonusRules = (merchantId: string) =>
-  api<{ data: BonusRule[] }>(`/merchants/${merchantId}/bonus-rules`);
+  api<{ data: BonusRule[] }>(`/merchants/${merchantId}/bonus-rules`, { auth: true });
 
 // Qué bono daría una carga de `amount` pesos (no registra nada). Lo calcula el
 // backend con la misma función que la carga real.
 export const getBonusPreview = (merchantId: string, amount: number) =>
-  api<BonusPreview>(`/merchants/${merchantId}/bonus-preview`, { query: { amount } });
+  api<BonusPreview>(`/merchants/${merchantId}/bonus-preview`, { auth: true, query: { amount } });
 
 export const createBonusRule = (
   merchantId: string,
   input: { minTopUp: number; bonusAmount: number; active?: boolean; name?: string; description?: string },
 ) =>
-  api<BonusRule>(`/merchants/${merchantId}/bonus-rules`, { method: "POST", body: input });
+  api<BonusRule>(`/merchants/${merchantId}/bonus-rules`, { auth: true, method: "POST", body: input });
 
 export const updateBonusRule = (
   ruleId: string,
@@ -184,4 +189,4 @@ export const updateBonusRule = (
     name?: string | null;
     description?: string | null;
   },
-) => api<BonusRule>(`/bonus-rules/${ruleId}`, { method: "PATCH", body: input });
+) => api<BonusRule>(`/bonus-rules/${ruleId}`, { auth: true, method: "PATCH", body: input });

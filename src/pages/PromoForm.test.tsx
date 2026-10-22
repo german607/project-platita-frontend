@@ -7,7 +7,7 @@ import { createBonusRule, listBonusRules, updateBonusRule } from "../lib/api/end
 import type { BonusRule } from "../lib/api/types";
 import { PromoForm } from "./PromoForm";
 
-vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
+vi.mock("../lib/merchant", () => ({ useMerchantId: () => "m1" }));
 vi.mock("../lib/api/endpoints", () => ({
   listBonusRules: vi.fn(),
   createBonusRule: vi.fn(),

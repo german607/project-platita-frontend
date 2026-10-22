@@ -1,16 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, Navigate } from "react-router-dom";
 import { FormularioIngreso } from "../components/FormularioIngreso";
 import { TarjetaLugar } from "../components/TarjetaLugar";
 import { listPlaces } from "../lib/api/endpoints";
 import { categoryPlural } from "../lib/categories";
-import { routes } from "../lib/routes";
-import { useSesionCliente } from "../lib/sesionCliente";
+import { useSesion } from "../lib/sesion";
+import { Destino } from "./Destino";
 
 // Pantalla de inicio, sin sesión: de un lado los lugares que están en Platita
 // (la lista pública, sin saldos) y del otro, entrar con el celular. Con sesión,
-// va directo al área de la persona. El comercio todavía no tiene cuenta: su
-// enlace lleva al área como hasta ahora (ver TODO.md §4, cuentas de comercio).
+// decide solo a qué área llevar (ver Destino): cliente, comercio o elegir.
 // Diseño de referencia: design/platita-cliente.codigo.html (Entrada).
 
 const PREVIEW = 6;
@@ -52,8 +50,8 @@ function LugaresEnPlatita() {
 }
 
 export function Entrada() {
-  const { sesion } = useSesionCliente();
-  if (sesion) return <Navigate to={routes.cliente.lugares} replace />;
+  const { sesion } = useSesion();
+  if (sesion) return <Destino />;
 
   return (
     <main className="mx-auto max-w-[1000px] px-5 py-8 lg:py-14">
@@ -67,9 +65,7 @@ export function Entrada() {
         <div className="order-first rounded-panel bg-tarjeta p-6 shadow-tarjeta lg:sticky lg:top-8 lg:order-last">
           <FormularioIngreso />
           <p className="mt-6 border-t border-linea pt-4 text-center text-sm text-suave">
-            <Link to={routes.comercio.mostrador} className="font-extrabold underline">
-              Soy un comercio
-            </Link>
+            ¿Tenés un comercio? Entrá con tu celular y sumalo desde ahí.
           </p>
         </div>
         <LugaresEnPlatita />

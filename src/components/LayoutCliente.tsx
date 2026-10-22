@@ -1,6 +1,6 @@
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import { routes } from "../lib/routes";
-import { useSesionCliente } from "../lib/sesionCliente";
+import { useSesion } from "../lib/sesion";
 
 // Navegación del cliente: menú inferior en el celular y menú arriba en la web
 // (contenido de hasta 900px). Sin sesión, se manda a la pantalla de inicio, que es donde se entra.
@@ -17,7 +17,7 @@ const bottomLink = ({ isActive }: { isActive: boolean }) =>
   `flex h-12 items-center justify-center text-[12.5px] font-extrabold ${isActive ? "text-accion" : "text-suave"}`;
 
 export function LayoutCliente() {
-  const { sesion } = useSesionCliente();
+  const { sesion } = useSesion();
   if (!sesion) return <Navigate to={routes.entrada} replace />;
 
   return (

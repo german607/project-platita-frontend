@@ -414,3 +414,22 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - El comercio entra por un enlace discreto "Soy un comercio" (sin cuenta, como
   hasta ahora). Pedido al backend de **cuentas de comercio** en TODO §4.
 - `tsc` limpio, **251 tests**, build bien. Sin ver en el navegador.
+
+## 2026-10-22 — Cuentas de comercio: la entrada decide el área
+
+- **Dueños y permisos del backend** (rama `jeronimo/duenos-de-comercio-y-modo-mixto`):
+  todo lo del comercio exige sesión y que la persona sea la dueña. El front manda
+  `Authorization: Bearer` en todos los pedidos de `/merchants`, `/customers`,
+  `/bonus-rules` y `/locations` (`auth: true` en `lib/api/endpoints.ts`); un 401
+  `INVALID_SESSION` cierra la sesión y un 403 `FORBIDDEN` dice "Este comercio no es tuyo".
+- **Una sola entrada.** Al verificar el código, `GET /me` trae `{ user, merchants }`
+  y `lib/destino.ts` decide: sin comercios → cliente; uno → su mostrador; varios →
+  `/elegir` (se recuerda lo último elegido, `platita.ultima`). `/elegir` también
+  permite **sumar un comercio** (`POST /merchants`: queda como dueña). Desde el
+  Perfil y desde el comercio hay un enlace "Cambiar de cuenta".
+- **`VITE_MERCHANT_ID` eliminada**: el comercio activo vive en la sesión (`comercioId`)
+  y `useMerchantId()` lo lee de ahí. `lib/sesionCliente.tsx` pasó a `lib/sesion.tsx`
+  (la sesión es de la persona, no solo del cliente); "Cerrar sesión" es la ruta `/salir`
+  y sirve para las dos áreas. Se sacó el enlace "Soy un comercio" del inicio.
+- ⚠ **Rompe el área del comercio hasta mergear backend y front juntos.** `tsc` limpio,
+  **266 tests**. Sin probar contra el backend.

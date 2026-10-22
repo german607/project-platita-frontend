@@ -16,7 +16,7 @@ export class ApiError extends Error {
 
 type Query = Record<string, string | number | boolean | undefined>;
 
-// La sesión del cliente se conecta acá (lib/sesionCliente.tsx) para que `api`
+// La sesión se conecta acá (lib/sesion.tsx) para que `api`
 // mande el token y reaccione a una sesión vencida sin conocer React.
 interface AuthHandlers {
   getToken: () => string | null;

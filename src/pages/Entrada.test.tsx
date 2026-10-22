@@ -3,26 +3,26 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "../lib/api/client";
-import { getAuthConfig, listPlaces } from "../lib/api/endpoints";
+import { getAuthConfig, getMe, listPlaces } from "../lib/api/endpoints";
 import { routes } from "../lib/routes";
-import { SesionClienteProvider } from "../lib/sesionCliente";
+import { SesionProvider } from "../lib/sesion";
 import { Entrada } from "./Entrada";
 
-vi.mock("../lib/api/endpoints", () => ({ listPlaces: vi.fn(), getAuthConfig: vi.fn(), requestCode: vi.fn(), verifyCode: vi.fn() }));
+vi.mock("../lib/api/endpoints", () => ({ getMe: vi.fn(), listPlaces: vi.fn(), getAuthConfig: vi.fn(), requestCode: vi.fn(), verifyCode: vi.fn() }));
 const mockPlaces = vi.mocked(listPlaces);
 
 function renderEntrada() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
-      <SesionClienteProvider>
+      <SesionProvider>
         <MemoryRouter>
           <Routes>
             <Route path="/" element={<Entrada />} />
             <Route path={routes.cliente.lugares} element={<p>área del cliente</p>} />
           </Routes>
         </MemoryRouter>
-      </SesionClienteProvider>
+      </SesionProvider>
     </QueryClientProvider>,
   );
 }
@@ -55,13 +55,14 @@ describe("Entrada (inicio)", () => {
     expect(screen.getByText("Si es tu primera vez, tu cuenta se crea sola.")).toBeInTheDocument();
   });
 
-  it("ya no pregunta si sos cliente o comercio; el comercio tiene un enlace discreto", async () => {
+  it("ya no pregunta si sos cliente o comercio: invita a entrar y avisa cómo sumar un comercio", async () => {
     mockPlaces.mockResolvedValue({ data: [], nextCursor: null });
     renderEntrada();
 
     expect(screen.queryByText("¿Cómo querés entrar?")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Soy cliente" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Soy un comercio" })).toHaveAttribute("href", routes.comercio.mostrador);
+    expect(screen.queryByRole("link", { name: "Soy un comercio" })).not.toBeInTheDocument();
+    expect(screen.getByText(/¿Tenés un comercio\?/)).toBeInTheDocument();
     expect(await screen.findByText("Pronto vas a ver acá los comercios de tu barrio.")).toBeInTheDocument();
   });
 
@@ -74,7 +75,11 @@ describe("Entrada (inicio)", () => {
   });
 
   it("con sesión abierta va directo al área del cliente", async () => {
-    localStorage.setItem("platita.cliente", JSON.stringify({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", userId: "u1", phone: "+59899123456", name: null }));
+    localStorage.setItem("platita.sesion", JSON.stringify({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", userId: "u1", phone: "+59899123456", name: null, comercioId: null }));
+    vi.mocked(getMe).mockResolvedValue({
+      user: { id: "u1", phone: "+59899123456", name: null, createdAt: "2026-10-01T10:00:00.000Z", phoneVerifiedAt: null },
+      merchants: [],
+    });
     mockPlaces.mockResolvedValue({ data: [], nextCursor: null });
     renderEntrada();
 

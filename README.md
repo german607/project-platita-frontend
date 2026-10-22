@@ -34,14 +34,13 @@ PORT=3001 npm run dev         # el servidor, en el puerto 3001
 Se usa el puerto 3001 porque el 3000 suele estar ocupado. Dejá esa terminal
 abierta.
 
-### 2. Crear un comercio y una promo (una sola vez)
+### 2. Dejar listo el ingreso (una sola vez)
 
-Abrí la consola de pruebas del backend: **http://localhost:3001/dev**.
-
-1. Usá `POST /merchants` para crear un comercio y **copiá el `id`** de la
-   respuesta.
-2. Usá `POST /merchants/:merchantId/bonus-rules` para crear una promo, por
-   ejemplo "cargando $1.000 te regalo $200" (`minTopUp` 1000, `bonusAmount` 200).
+El ingreso es con el celular y un código que llega por mensaje. Con el backend en
+modo de pruebas (`OTP_PROVIDER=dev`, que es lo normal en desarrollo) **cualquier
+celular entra con el código `000000`**; la pantalla de ingreso lo avisa. Para
+probar con un mensaje de verdad, ver "Ingreso real" en `docs/BACKEND.md` del
+backend (Twilio, con números verificados).
 
 ### 3. Levantar el frontend
 
@@ -53,13 +52,7 @@ npm install
 cp .env.example .env
 ```
 
-Abrí el archivo `.env` y pegá el id del comercio:
-
-```
-VITE_MERCHANT_ID=el-id-que-copiaste
-```
-
-(Las otras dos variables pueden quedar vacías: tienen valores por defecto.)
+Las dos variables del `.env` pueden quedar vacías: tienen valores por defecto.
 Después:
 
 ```bash
@@ -67,14 +60,15 @@ npm run dev
 ```
 
 Abrí **http://localhost:5173**. Es la pantalla de inicio: a un lado los lugares
-que están en Platita y al otro, entrar con tu celular (eso es el lado del
-cliente). Para el comercio, tocá **Soy un comercio** al pie del cuadro de
-entrada; arriba a la derecha tiene que aparecer el nombre de tu comercio. (Los
-comercios todavía no tienen cuenta: entran con el comercio de `VITE_MERCHANT_ID`.)
+que están en Platita y al otro, entrar con tu celular. Según tus cuentas, la
+entrada te lleva sola al lado del **cliente**, a tu **comercio**, o te pregunta a
+cuál si tenés varios. Si todavía no tenés un comercio, entrá, tocá **Cambiar de
+cuenta o sumar mi comercio** en tu Perfil y creá uno con su nombre: quedás como
+dueña.
 
 ### 4. Probarlo
 
-1. Después de tocar **Soy un comercio**, en **Mostrador** escribí un teléfono (por ejemplo `099 123 456`). Si no
+1. Con tu comercio elegido, en **Mostrador** escribí un teléfono (por ejemplo `099 123 456`). Si no
    existe, **Crear cliente**.
 2. **Cargar saldo** → elegí $1.000 → mirá el bono → **Listo, confirmar**.
 3. Volvé al Mostrador, buscá el mismo teléfono y probá **Cobrar**.
@@ -106,7 +100,6 @@ comercios todavía no tienen cuenta: entran con el comercio de `VITE_MERCHANT_ID
 
 | Variable | Para qué | Si está vacía |
 |---|---|---|
-| `VITE_MERCHANT_ID` | El comercio con el que se trabaja. **Es la única obligatoria** mientras no haya login | La app avisa "Falta elegir el comercio" |
 | `VITE_API_URL` | Dónde está el backend | Usa `/api` (el proxy de desarrollo) |
 | `VITE_API_PROXY_TARGET` | Solo desarrollo: a qué backend reenvía `/api` | Usa `http://localhost:3001` |
 
@@ -127,8 +120,9 @@ abrila en el celular. Hacelo solo en una red de confianza.
 
 | Pasa esto | Probablemente |
 |---|---|
-| "Falta elegir el comercio" | Falta `VITE_MERCHANT_ID` en el `.env`, o no reiniciaste `npm run dev` después de ponerlo |
-| No aparece el nombre del comercio arriba | El backend no está corriendo, o el id no existe en tu base |
+| Al entrar vuelve siempre al inicio | La sesión venció o el backend la cerró: pedí un código de nuevo |
+| "Este comercio no es tuyo" | El comercio es de otra persona, o es uno anterior a los dueños y todavía no tiene (el backend lo asigna con `npm run db:assign-merchant`) |
+| No aparece el nombre del comercio arriba | El backend no está corriendo o no es de tu cuenta |
 | "No hay conexión con el servidor" | El backend no está corriendo en el puerto 3001 |
 | El backend dice que el puerto 3000 está ocupado | Usá `PORT=3001 npm run dev` en el backend |
 | La búsqueda por teléfono o el bono fallan | El backend está desactualizado: traé su última versión, corré `npx prisma migrate deploy` y reinicialo |

@@ -4,6 +4,10 @@
 export const routes = {
   // Primera pantalla: elegir si se entra como cliente o como comercio.
   entrada: "/",
+  // A qué cuenta entrar (cliente o uno de sus comercios) y sumar un comercio.
+  elegir: "/elegir",
+  // Cierra la sesión y vuelve al inicio (sirve para el cliente y para el comercio).
+  salir: "/salir",
 
   comercio: {
     mostrador: "/comercio",
@@ -24,7 +28,5 @@ export const routes = {
     lugar: (merchantId: string) => `/cliente/lugares/${merchantId}`,
     saldos: "/cliente/saldos",
     perfil: "/cliente/perfil",
-    // Cierra la sesión y vuelve a la entrada (fuera de la zona con sesión).
-    salir: "/cliente/salir",
   },
 } as const;

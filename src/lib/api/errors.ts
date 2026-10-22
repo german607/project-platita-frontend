@@ -9,6 +9,8 @@ export function friendlyMessage(error: unknown): string {
         return "No hay conexión con el servidor. Revisá tu internet y probá de nuevo.";
       case "INSUFFICIENT_BALANCE":
         return "El cliente no tiene saldo suficiente.";
+      case "FORBIDDEN":
+        return "Este comercio no es tuyo.";
       case "NOT_FOUND":
         return "No lo encontramos.";
       case "VALIDATION_ERROR":

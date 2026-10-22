@@ -7,7 +7,7 @@ import { charge, getCustomer } from "../lib/api/endpoints";
 import type { CustomerWithBalance, MovementResult, Transaction } from "../lib/api/types";
 import { Cobrar } from "./Cobrar";
 
-vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
+vi.mock("../lib/merchant", () => ({ useMerchantId: () => "m1" }));
 vi.mock("../lib/api/endpoints", () => ({ getCustomer: vi.fn(), charge: vi.fn() }));
 
 const mockCustomer = vi.mocked(getCustomer);

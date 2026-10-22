@@ -1,13 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { ApiError } from "../lib/api/client";
 import { friendlyMessage } from "../lib/api/errors";
 import { getAuthConfig, requestCode, verifyCode } from "../lib/api/endpoints";
 import { formatUyPhone, normalizeUyPhone } from "../lib/phone";
-import { routes } from "../lib/routes";
-import { CODE_LENGTH, RESEND_SECONDS, useSesionCliente } from "../lib/sesionCliente";
+import { CODE_LENGTH, RESEND_SECONDS, useSesion } from "../lib/sesion";
 
 // Formulario de entrada (en la pantalla de inicio) en dos pasos: celular → código de 6 dígitos que le llega
 // por mensaje (POST /auth/request-code y /auth/verify-code). Los límites y el
@@ -51,8 +49,7 @@ function mensajeDeCodigo(error: unknown): string {
 }
 
 export function FormularioIngreso() {
-  const { entrar } = useSesionCliente();
-  const navigate = useNavigate();
+  const { entrar } = useSesion();
   const [raw, setRaw] = useState("");
   const [phone, setPhone] = useState<string | null>(null); // confirmado en el paso 1
   const [code, setCode] = useState("");
@@ -80,8 +77,7 @@ export function FormularioIngreso() {
   const verificar = useMutation({
     mutationFn: ({ e164, value }: { e164: string; value: string }) => verifyCode(e164, value),
     onSuccess: (auth) => {
-      entrar(auth);
-      navigate(routes.cliente.lugares, { replace: true });
+      entrar(auth); // con la sesión, la pantalla de inicio decide a dónde llevarla
     },
   });
 

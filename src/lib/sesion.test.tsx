@@ -1,18 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { api } from "./api/client";
-import { SesionClienteProvider, useSesionCliente } from "./sesionCliente";
+import { SesionProvider, useSesion } from "./sesion";
 
 // El token sale del almacenamiento: `api` lo manda solo en los pedidos con `auth`.
 describe("sesión del cliente y la API", () => {
   beforeEach(() => {
     localStorage.clear();
-    void SesionClienteProvider; // importa el módulo, que conecta la sesión con `api`
+    void SesionProvider; // importa el módulo, que conecta la sesión con `api`
   });
 
   const guardarSesion = (expiresAt: string) =>
     localStorage.setItem(
-      "platita.cliente",
+      "platita.sesion",
       JSON.stringify({ token: "tok123", expiresAt, userId: "u1", phone: "+59899123456", name: null }),
     );
 
@@ -44,13 +44,13 @@ describe("sesión del cliente y la API", () => {
         new Response(JSON.stringify({ error: "x", code }), { status: 401 })) as typeof fetch;
     };
     function Estado() {
-      const { sesion } = useSesionCliente();
+      const { sesion } = useSesion();
       return <p>{sesion ? "con sesión" : "sin sesión"}</p>;
     }
     render(
-      <SesionClienteProvider>
+      <SesionProvider>
         <Estado />
-      </SesionClienteProvider>,
+      </SesionProvider>,
     );
 
     responder("OTRO");
@@ -60,6 +60,6 @@ describe("sesión del cliente y la API", () => {
     responder("INVALID_SESSION");
     await api("/me", { auth: true }).catch(() => {});
     await waitFor(() => expect(screen.getByText("sin sesión")).toBeInTheDocument());
-    expect(localStorage.getItem("platita.cliente")).toBeNull();
+    expect(localStorage.getItem("platita.sesion")).toBeNull();
   });
 });

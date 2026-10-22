@@ -7,7 +7,7 @@ import { listInactiveCustomers } from "../lib/api/endpoints";
 import type { CustomerWithBalance } from "../lib/api/types";
 import { Reactivar } from "./Reactivar";
 
-vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
+vi.mock("../lib/merchant", () => ({ useMerchantId: () => "m1" }));
 vi.mock("../lib/api/endpoints", () => ({ listInactiveCustomers: vi.fn() }));
 
 const mockList = vi.mocked(listInactiveCustomers);

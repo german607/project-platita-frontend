@@ -2,11 +2,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { LayoutCliente } from "./components/LayoutCliente";
-import { SesionClienteProvider } from "./lib/sesionCliente";
+import { SesionProvider } from "./lib/sesion";
 import { Ajuste } from "./pages/Ajuste";
 import { CargarSaldo } from "./pages/CargarSaldo";
 import { Clientes } from "./pages/Clientes";
 import { Cobrar } from "./pages/Cobrar";
+import { Elegir } from "./pages/Elegir";
 import { Entrada } from "./pages/Entrada";
 import { Ficha } from "./pages/Ficha";
 import { MiComercio } from "./pages/MiComercio";
@@ -15,11 +16,11 @@ import { Placeholder } from "./pages/Placeholder";
 import { Lugar } from "./pages/cliente/Lugar";
 import { Lugares } from "./pages/cliente/Lugares";
 import { Perfil } from "./pages/cliente/Perfil";
-import { Salir } from "./pages/cliente/Salir";
 import { Saldos } from "./pages/cliente/Saldos";
 import { PromoForm } from "./pages/PromoForm";
 import { Promos } from "./pages/Promos";
 import { Reactivar } from "./pages/Reactivar";
+import { Salir } from "./pages/Salir";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,11 +34,14 @@ const queryClient = new QueryClient({
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SesionClienteProvider>
+      <SesionProvider>
         <BrowserRouter>
           <Routes>
             {/* Pantalla de inicio: los lugares y la entrada. */}
             <Route index element={<Entrada />} />
+
+            <Route path="elegir" element={<Elegir />} />
+            <Route path="salir" element={<Salir />} />
 
             {/* Área del comercio. */}
             <Route path="comercio" element={<Layout />}>
@@ -55,7 +59,6 @@ export function App() {
             </Route>
 
             {/* Área del cliente: pide sesión (se entra desde la pantalla de inicio). */}
-            <Route path="cliente/salir" element={<Salir />} />
             <Route path="cliente" element={<LayoutCliente />}>
               <Route index element={<Navigate to="lugares" replace />} />
               <Route path="lugares" element={<Lugares />} />
@@ -67,7 +70,7 @@ export function App() {
             <Route path="*" element={<Placeholder title="No encontrada" />} />
           </Routes>
         </BrowserRouter>
-      </SesionClienteProvider>
+      </SesionProvider>
     </QueryClientProvider>
   );
 }
