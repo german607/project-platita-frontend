@@ -34,12 +34,27 @@ PORT=3001 npm run dev         # el servidor, en el puerto 3001
 Se usa el puerto 3001 porque el 3000 suele estar ocupado. Dejá esa terminal
 abierta.
 
-### 2. Dejar listo el ingreso (una sola vez)
+### 2. Cargar los datos de ejemplo (una sola vez)
 
-El ingreso es con el celular y un código que llega por mensaje. Con el backend en
-modo de pruebas (`OTP_PROVIDER=dev`, que es lo normal en desarrollo) **cualquier
-celular entra con el código `000000`**; la pantalla de ingreso lo avisa. Para
-probar con un mensaje de verdad, ver "Ingreso real" en `docs/BACKEND.md` del
+Con Node 22 y la rama del backend con dueños (`nvm use` dentro del backend):
+
+```bash
+npm run db:seed          # carga los datos de ejemplo e imprime qué teléfono entra a qué cuenta
+```
+
+(`npm run db:reset-seed` vacía TODA la base de desarrollo y la vuelve a cargar.)
+El ingreso es con el celular y un código; con el backend en modo de pruebas
+(`OTP_PROVIDER=dev`) **los teléfonos del seed entran con el código `000000`**, y la
+pantalla de ingreso lo avisa. Cuentas de prueba:
+
+| Teléfono | Quién es | A dónde entra |
+|---|---|---|
+| `099 000 001` | Ana | Dueña de 2 comercios (Café de la Esquina, Barbería Don Pablo): **pregunta a cuál**; también clienta de la panadería |
+| `099 000 003` | Carla | Dueña de 3 (Panadería La Espiga, Lavadero Brillo, Estudio Pilates & Yoga Sol); también clienta del café |
+| `099 000 002` | Beto | Solo cliente, con saldo en 3 comercios (uno en $0): va al lado del cliente |
+| cualquier otro | — | Cliente sin saldo; no puede crear un comercio si su número no está habilitado (`ALLOWED_MERCHANT_PHONES` del backend) |
+
+Para probar un mensaje de verdad, ver "Ingreso real" en `docs/BACKEND.md` del
 backend (Twilio, con números verificados).
 
 ### 3. Levantar el frontend
@@ -62,17 +77,22 @@ npm run dev
 Abrí **http://localhost:5173**. Es la pantalla de inicio: a un lado los lugares
 que están en Platita y al otro, entrar con tu celular. Según tus cuentas, la
 entrada te lleva sola al lado del **cliente**, a tu **comercio**, o te pregunta a
-cuál si tenés varios. Si todavía no tenés un comercio, entrá, tocá **Cambiar de
-cuenta o sumar mi comercio** en tu Perfil y creá uno con su nombre: quedás como
-dueña.
+cuál si tenés varios. Crear un comercio nuevo (Perfil → **Cambiar de cuenta o ver
+mis comercios** → **Sumar mi comercio**) solo lo pueden hacer los teléfonos que
+habilita el backend; si el tuyo no está, la pantalla lo avisa.
 
 ### 4. Probarlo
 
-1. Con tu comercio elegido, en **Mostrador** escribí un teléfono (por ejemplo `099 123 456`). Si no
-   existe, **Crear cliente**.
-2. **Cargar saldo** → elegí $1.000 → mirá el bono → **Listo, confirmar**.
-3. Volvé al Mostrador, buscá el mismo teléfono y probá **Cobrar**.
-4. Mirá sus movimientos en **Clientes** → entrá a su ficha.
+1. Entrá con **`099 000 001`** (Ana) y elegí **Café de la Esquina**. En **Mostrador**
+   buscá un cliente del seed o escribí un teléfono nuevo y **Crear cliente**.
+2. **Cargar saldo** → elegí un monto → mirá el bono → **Listo, confirmar**. Probá
+   también **Cobrar**, **Ajuste**, y **Reactivar** (hay clientes que no vienen hace
+   más de 30 días, como Hugo en el Pilates de Carla).
+3. Mirá **Mi comercio** (descripción, local, horarios, "Aparecer en la app") y **Promos**.
+4. Para ver el otro lado, abrí **otra ventana de incógnito** (la sesión se guarda en
+   el navegador) y entrá con **`099 000 002`** (Beto): Lugares, Detalle, **Mis saldos**
+   y Perfil.
+5. Cambiá de cuenta con **Cambiar de cuenta** (arriba, en el área del comercio).
 
 ## Qué hace cada pantalla
 

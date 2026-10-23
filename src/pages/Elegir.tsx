@@ -9,7 +9,8 @@ import { routes } from "../lib/routes";
 import { recordarCuenta, useSesion } from "../lib/sesion";
 
 // A qué cuenta entrar: el área del cliente o uno de los comercios de la persona.
-// También es donde se suma un comercio nuevo (POST /merchants: queda como dueña).
+// También es donde se suma un comercio nuevo (POST /merchants: queda como dueña),
+// pero solo para los teléfonos que el backend habilitó (`canCreateMerchant`).
 
 const boton =
   "flex min-h-[64px] w-full items-center justify-between gap-3 rounded-boton bg-tarjeta px-5 text-left font-titulo text-xl font-extrabold shadow-tarjeta";
@@ -61,35 +62,43 @@ export function Elegir() {
             </button>
           </div>
 
-          <form
-            className="flex flex-col gap-3 rounded-panel border border-borde p-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (nombre.trim()) crear.mutate(nombre.trim());
-            }}
-          >
-            <p className="font-titulo text-xl font-extrabold">Sumar mi comercio</p>
-            <label className="flex flex-col gap-2 font-extrabold">
-              Nombre del comercio
-              <input
-                value={nombre}
-                maxLength={80}
-                onChange={(e) => {
-                  setNombre(e.target.value);
-                  crear.reset();
-                }}
-                className="h-12 w-full rounded-campo border-2 border-borde bg-tarjeta px-4 font-bold outline-none focus:border-accion"
-              />
-            </label>
-            {crear.isError && (
-              <p role="alert" className="font-extrabold text-accion">
-                {friendlyMessage(crear.error)}
-              </p>
-            )}
-            <Button type="submit" variant="mostaza" disabled={!nombre.trim() || crear.isPending}>
-              {crear.isPending ? "Creando…" : "Crear comercio"}
-            </Button>
-          </form>
+          {me.data.canCreateMerchant ? (
+            <form
+              className="flex flex-col gap-3 rounded-panel border border-borde p-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (nombre.trim()) crear.mutate(nombre.trim());
+              }}
+            >
+              <p className="font-titulo text-xl font-extrabold">Sumar mi comercio</p>
+              <label className="flex flex-col gap-2 font-extrabold">
+                Nombre del comercio
+                <input
+                  value={nombre}
+                  maxLength={80}
+                  onChange={(e) => {
+                    setNombre(e.target.value);
+                    crear.reset();
+                  }}
+                  className="h-12 w-full rounded-campo border-2 border-borde bg-tarjeta px-4 font-bold outline-none focus:border-accion"
+                />
+              </label>
+              {crear.isError && (
+                <p role="alert" className="font-extrabold text-accion">
+                  {friendlyMessage(crear.error)}
+                </p>
+              )}
+              <Button type="submit" variant="mostaza" disabled={!nombre.trim() || crear.isPending}>
+                {crear.isPending ? "Creando…" : "Crear comercio"}
+              </Button>
+            </form>
+          ) : (
+            <p className="rounded-panel border border-borde p-5 text-suave">
+              {me.data.merchants.length === 0
+                ? "Tu número todavía no está habilitado para crear un comercio: escribinos para habilitarlo."
+                : "Para sumar otro comercio, escribinos y lo habilitamos."}
+            </p>
+          )}
         </>
       )}
 

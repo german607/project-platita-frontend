@@ -25,7 +25,8 @@ vi.mock("../lib/api/endpoints", () => ({
 
 const mockMe = vi.mocked(getMe);
 
-const me = (merchants: { id: string; name: string }[]) => ({
+const me = (merchants: { id: string; name: string }[], canCreateMerchant = true) => ({
+  canCreateMerchant,
   user: { id: "u1", phone: "+59899123456", name: null, createdAt: "2026-10-01T10:00:00.000Z", phoneVerifiedAt: "2026-10-01T10:00:00.000Z" },
   merchants,
 });
@@ -127,6 +128,27 @@ describe("Sumar un comercio", () => {
     expect(await screen.findByText("mostrador")).toBeInTheDocument();
     expect(createMerchant).toHaveBeenCalledWith({ name: "Lavadero Burbujas" });
     expect(JSON.parse(localStorage.getItem("platita.sesion")!).comercioId).toBe("m9");
+  });
+
+  it("si el número no está habilitado, no ofrece crear y pide escribir", async () => {
+    sesion();
+    mockMe.mockResolvedValue(me([], false));
+    renderApp("/elegir");
+
+    expect(await screen.findByText(/todavía no está habilitado para crear un comercio/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Crear comercio" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Como cliente/ })).toBeInTheDocument();
+  });
+
+  it("si el backend rechaza la creación (403), muestra el aviso", async () => {
+    sesion();
+    mockMe.mockResolvedValue(me([]));
+    vi.mocked(createMerchant).mockRejectedValue(new ApiError(403, "MERCHANT_CREATION_NOT_ALLOWED", "x"));
+    renderApp("/elegir");
+
+    fireEvent.change(await screen.findByLabelText("Nombre del comercio"), { target: { value: "Mi local" } });
+    fireEvent.click(screen.getByRole("button", { name: "Crear comercio" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("escribinos para habilitarlo");
   });
 
   it("sin nombre no se puede crear", async () => {

@@ -433,3 +433,14 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   y sirve para las dos áreas. Se sacó el enlace "Soy un comercio" del inicio.
 - ⚠ **Rompe el área del comercio hasta mergear backend y front juntos.** `tsc` limpio,
   **266 tests**. Sin probar contra el backend.
+
+## 2026-10-23 — Crear comercio solo para teléfonos habilitados
+
+- `GET /me` trae `canCreateMerchant`: `/elegir` muestra "Sumar mi comercio" solo si
+  es `true`; si no, avisa "Tu número todavía no está habilitado para crear un
+  comercio: escribinos para habilitarlo". El 403 `MERCHANT_CREATION_NOT_ALLOWED`
+  se muestra igual por si cambia. Los textos del inicio y del Perfil dejan de
+  prometer que cualquiera puede sumar un comercio.
+- README: guía con el seed del backend (`npm run db:seed`) y las cuentas de prueba
+  (`099 000 001` Ana, `099 000 003` Carla, `099 000 002` Beto, código `000000`).
+- `tsc` limpio, **268 tests**. Sin probar contra el backend.

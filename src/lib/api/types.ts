@@ -184,4 +184,6 @@ export interface AuthConfig {
 export interface Me {
   user: User & { phoneVerifiedAt: string | null };
   merchants: { id: string; name: string }[];
+  // Si su teléfono está habilitado para crear un comercio (los habilita el backend).
+  canCreateMerchant: boolean;
 }

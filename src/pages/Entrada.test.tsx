@@ -79,6 +79,7 @@ describe("Entrada (inicio)", () => {
     vi.mocked(getMe).mockResolvedValue({
       user: { id: "u1", phone: "+59899123456", name: null, createdAt: "2026-10-01T10:00:00.000Z", phoneVerifiedAt: null },
       merchants: [],
+      canCreateMerchant: false,
     });
     mockPlaces.mockResolvedValue({ data: [], nextCursor: null });
     renderEntrada();

@@ -83,7 +83,7 @@ beforeEach(() => {
   mockBalances.mockResolvedValue({ data: [] });
   mockList.mockResolvedValue({ data: [], nextCursor: null });
   mockConfig.mockResolvedValue({ otpProvider: "dev", channel: "sms", devCode: "000000", realPhonesConfigured: false });
-  mockMe.mockResolvedValue({ user: { ...user(), phoneVerifiedAt: "2026-10-01T10:00:00.000Z" }, merchants: [] });
+  mockMe.mockResolvedValue({ user: { ...user(), phoneVerifiedAt: "2026-10-01T10:00:00.000Z" }, merchants: [], canCreateMerchant: false });
   mockRequest.mockResolvedValue(undefined);
   mockLogout.mockResolvedValue(undefined);
 });

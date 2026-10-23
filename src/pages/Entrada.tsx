@@ -65,7 +65,7 @@ export function Entrada() {
         <div className="order-first rounded-panel bg-tarjeta p-6 shadow-tarjeta lg:sticky lg:top-8 lg:order-last">
           <FormularioIngreso />
           <p className="mt-6 border-t border-linea pt-4 text-center text-sm text-suave">
-            ¿Tenés un comercio? Entrá con tu celular y sumalo desde ahí.
+            ¿Tenés un comercio? Entrá con tu celular: te llevamos a tu cuenta.
           </p>
         </div>
         <LugaresEnPlatita />

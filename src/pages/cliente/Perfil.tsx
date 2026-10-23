@@ -98,7 +98,7 @@ export function Perfil() {
       </div>
 
       <Link to={routes.elegir} className="self-start font-extrabold text-suave underline">
-        Cambiar de cuenta o sumar mi comercio
+        Cambiar de cuenta o ver mis comercios
       </Link>
 
       <Link to={routes.salir} replace className="flex h-12 items-center self-start rounded-tarjeta border-2 border-accion px-6 font-extrabold text-accion">
