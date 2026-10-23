@@ -7,7 +7,7 @@ import { listCustomers } from "../lib/api/endpoints";
 import type { CustomerWithBalance } from "../lib/api/types";
 import { Clientes } from "./Clientes";
 
-vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
+vi.mock("../lib/merchant", () => ({ useMerchantId: () => "m1" }));
 vi.mock("../lib/api/endpoints", () => ({ listCustomers: vi.fn() }));
 
 const mockList = vi.mocked(listCustomers);

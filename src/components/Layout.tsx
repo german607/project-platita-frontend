@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { NavLink, Outlet } from "react-router-dom";
-import { config } from "../config";
+import { Link, NavLink, Navigate, Outlet } from "react-router-dom";
 import { getMerchant } from "../lib/api/endpoints";
 import { routes } from "../lib/routes";
-import { EmptyState } from "./states";
+import { useSesion } from "../lib/sesion";
 
 // Navegación como en design/: menú oscuro lateral de 200px en pantallas
 // grandes, y menú inferior en el celular (donde se usa en el mostrador).
@@ -51,7 +50,11 @@ function MerchantChip({ merchantId }: { merchantId: string }) {
 }
 
 export function Layout() {
-  const merchantId = config.merchantId;
+  const { sesion } = useSesion();
+  const merchantId = sesion?.comercioId;
+  // Sin sesión o sin un comercio elegido no hay nada que mostrar: la pantalla de
+  // inicio decide a dónde llevar a la persona.
+  if (!merchantId) return <Navigate to={routes.entrada} replace />;
 
   return (
     <div className="min-h-screen">
@@ -74,22 +77,16 @@ export function Layout() {
       <div className="mx-auto max-w-[900px] px-5 pb-28 pt-[22px] lg:ml-[200px] lg:px-9 lg:pb-8 lg:pt-7">
         <header className="mb-5 flex items-center justify-between">
           <span className="font-titulo text-[22px] font-extrabold text-accion lg:hidden">platita</span>
-          {merchantId && (
-            <span className="lg:ml-auto">
-              <MerchantChip merchantId={merchantId} />
-            </span>
-          )}
+          <span className="flex items-center gap-3 lg:ml-auto">
+            <MerchantChip merchantId={merchantId} />
+            <Link to={routes.elegir} className="text-sm font-extrabold text-suave underline">
+              Cambiar de cuenta
+            </Link>
+          </span>
         </header>
 
         <main>
-          {merchantId ? (
-            <Outlet />
-          ) : (
-            <EmptyState
-              title="Falta elegir el comercio"
-              hint="Mientras no haya login, el comercio se configura en la variable VITE_MERCHANT_ID (ver docs/FRONTEND.md)."
-            />
-          )}
+          <Outlet />
         </main>
       </div>
 

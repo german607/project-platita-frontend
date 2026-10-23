@@ -16,7 +16,7 @@ import { formatLongDate } from "../lib/dates";
 import { emptyHours } from "../lib/hours";
 import { MiComercio } from "./MiComercio";
 
-vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
+vi.mock("../lib/merchant", () => ({ useMerchantId: () => "m1" }));
 vi.mock("../lib/api/endpoints", () => ({
   getMerchant: vi.fn(),
   listLocations: vi.fn(),

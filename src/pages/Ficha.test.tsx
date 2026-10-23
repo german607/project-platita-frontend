@@ -7,7 +7,7 @@ import { getCustomer, listBonusRules, listTransactions } from "../lib/api/endpoi
 import type { BonusRule, CustomerWithBalance, Transaction } from "../lib/api/types";
 import { Ficha } from "./Ficha";
 
-vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
+vi.mock("../lib/merchant", () => ({ useMerchantId: () => "m1" }));
 vi.mock("../lib/api/endpoints", () => ({ getCustomer: vi.fn(), listTransactions: vi.fn(), listBonusRules: vi.fn() }));
 
 const mockCustomer = vi.mocked(getCustomer);

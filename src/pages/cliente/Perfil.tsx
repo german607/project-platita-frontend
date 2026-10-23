@@ -5,7 +5,7 @@ import { updateMe } from "../../lib/api/endpoints";
 import { friendlyMessage } from "../../lib/api/errors";
 import { formatUyPhone } from "../../lib/phone";
 import { routes } from "../../lib/routes";
-import { useSesionCliente } from "../../lib/sesionCliente";
+import { useSesion } from "../../lib/sesion";
 
 // Perfil: nombre (editable), teléfono verificado, QR para más adelante y cerrar
 // sesión. El nombre es el de la persona (PATCH /me); el que anota cada
@@ -15,7 +15,7 @@ const card = "rounded-panel bg-tarjeta p-5 shadow-tarjeta";
 const MAX_NAME = 80;
 
 export function Perfil() {
-  const { sesion, cambiarNombre } = useSesionCliente();
+  const { sesion, cambiarNombre } = useSesion();
   const [editando, setEditando] = useState(false);
   const [borrador, setBorrador] = useState("");
 
@@ -97,7 +97,11 @@ export function Perfil() {
         <p className="mt-1 text-suave">Más adelante se lo mostrás al cajero.</p>
       </div>
 
-      <Link to={routes.cliente.salir} replace className="flex h-12 items-center self-start rounded-tarjeta border-2 border-accion px-6 font-extrabold text-accion">
+      <Link to={routes.elegir} className="self-start font-extrabold text-suave underline">
+        Cambiar de cuenta o ver mis comercios
+      </Link>
+
+      <Link to={routes.salir} replace className="flex h-12 items-center self-start rounded-tarjeta border-2 border-accion px-6 font-extrabold text-accion">
         Cerrar sesión
       </Link>
     </section>

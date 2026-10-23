@@ -7,7 +7,7 @@ import { listCustomers, listMerchantTransactions, upsertCustomer } from "../lib/
 import type { CustomerWithBalance, MerchantTransaction } from "../lib/api/types";
 import { Mostrador } from "./Mostrador";
 
-vi.mock("../config", () => ({ config: { apiUrl: "/api", merchantId: "m1" } }));
+vi.mock("../lib/merchant", () => ({ useMerchantId: () => "m1" }));
 vi.mock("../lib/api/endpoints", () => ({
   listCustomers: vi.fn(),
   upsertCustomer: vi.fn(),

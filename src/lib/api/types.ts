@@ -24,6 +24,7 @@ export interface TimeRange {
 export type OpeningHours = Record<Weekday, TimeRange[]>;
 
 export interface Merchant {
+  ownerId?: string | null; // la persona dueña (la respuesta de POST /merchants lo trae)
   id: string;
   name: string;
   phone: string | null;
@@ -176,4 +177,13 @@ export interface AuthConfig {
   channel: string;
   devCode: string | null;
   realPhonesConfigured: boolean;
+}
+
+// Lo que devuelve GET /me: la persona y los comercios de los que es dueña. Con eso
+// se decide a qué área llevarla (cliente, comercio, o preguntarle a cuál).
+export interface Me {
+  user: User & { phoneVerifiedAt: string | null };
+  merchants: { id: string; name: string }[];
+  // Si su teléfono está habilitado para crear un comercio (los habilita el backend).
+  canCreateMerchant: boolean;
 }

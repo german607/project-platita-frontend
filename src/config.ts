@@ -5,7 +5,6 @@ import { z } from "zod";
 // Las variables están documentadas en docs/FRONTEND.md.
 const schema = z.object({
   VITE_API_URL: z.string().optional(),
-  VITE_MERCHANT_ID: z.string().optional(),
 });
 
 // Una variable vacía (como queda al copiar .env.example) vale lo mismo que una
@@ -15,8 +14,6 @@ export function parseConfig(env: Record<string, unknown>) {
   return {
     // Por defecto /api: el proxy de Vite hacia el backend (ver vite.config.ts).
     apiUrl: (parsed.VITE_API_URL?.trim() || "/api").replace(/\/$/, ""),
-    // Mientras no haya login, el comercio se fija por configuración.
-    merchantId: parsed.VITE_MERCHANT_ID?.trim() || undefined,
   };
 }
 

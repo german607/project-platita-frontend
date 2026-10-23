@@ -70,14 +70,12 @@ Se leen solo en `src/config.ts`. Para trabajar en local, crear un `.env`
 VITE_API_URL=/api
 # Solo desarrollo: a qué backend reenvía Vite las llamadas a /api.
 VITE_API_PROXY_TARGET=http://localhost:3001
-# Mientras no haya login: el id de un comercio creado en el backend.
-VITE_MERCHANT_ID=
 ```
 
-El `.env.example` commiteado lista las tres variables sin valores; los
+El `.env.example` commiteado lista las variables sin valores; los
 valores por defecto y su explicación son los de este bloque. Una variable
-vacía vale lo mismo que no estar (usa el valor por defecto): solo
-`VITE_MERCHANT_ID` hace falta de verdad. (El entorno de
+vacía vale lo mismo que no estar (usa el valor por defecto): ninguna
+hace falta para arrancar. (El comercio ya no se configura: sale de la sesión, `GET /me`.) (El entorno de
 la IA no puede escribir archivos `.env*`: los edita una persona.)
 
 ## Comandos
@@ -95,10 +93,10 @@ la IA no puede escribir archivos `.env*`: los edita una persona.)
 1. Levantar el backend (ver su README): `PORT=3001 npm run dev` en
    `../project-platita-backend`. Se usa el 3001 porque el 3000 suele estar
    ocupado.
-2. Crear un comercio en la consola de pruebas del backend
-   (`http://localhost:3001/dev`) y copiar su `id`.
-3. Ponerlo en `VITE_MERCHANT_ID` del `.env` de este repo y levantar con
-   `npm run dev`.
+2. Levantar el front (`npm run dev`) y entrar con un celular: con el backend en
+   modo de pruebas el código es `000000`. El comercio se crea desde la propia app
+   (Perfil → "Cambiar de cuenta o sumar mi comercio") y queda a nombre de esa
+   persona; un comercio viejo sin dueño lo asigna el backend.
 
 **CORS:** el backend todavía no lo configura. En desarrollo Vite lo evita
 con un proxy: el navegador llama a `/api/...` (mismo origen) y Vite lo

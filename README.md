@@ -34,14 +34,28 @@ PORT=3001 npm run dev         # el servidor, en el puerto 3001
 Se usa el puerto 3001 porque el 3000 suele estar ocupado. Dejá esa terminal
 abierta.
 
-### 2. Crear un comercio y una promo (una sola vez)
+### 2. Cargar los datos de ejemplo (una sola vez)
 
-Abrí la consola de pruebas del backend: **http://localhost:3001/dev**.
+Con Node 22 y la rama del backend con dueños (`nvm use` dentro del backend):
 
-1. Usá `POST /merchants` para crear un comercio y **copiá el `id`** de la
-   respuesta.
-2. Usá `POST /merchants/:merchantId/bonus-rules` para crear una promo, por
-   ejemplo "cargando $1.000 te regalo $200" (`minTopUp` 1000, `bonusAmount` 200).
+```bash
+npm run db:seed          # carga los datos de ejemplo e imprime qué teléfono entra a qué cuenta
+```
+
+(`npm run db:reset-seed` vacía TODA la base de desarrollo y la vuelve a cargar.)
+El ingreso es con el celular y un código; con el backend en modo de pruebas
+(`OTP_PROVIDER=dev`) **los teléfonos del seed entran con el código `000000`**, y la
+pantalla de ingreso lo avisa. Cuentas de prueba:
+
+| Teléfono | Quién es | A dónde entra |
+|---|---|---|
+| `099 000 001` | Ana | Dueña de 2 comercios (Café de la Esquina, Barbería Don Pablo): **pregunta a cuál**; también clienta de la panadería |
+| `099 000 003` | Carla | Dueña de 3 (Panadería La Espiga, Lavadero Brillo, Estudio Pilates & Yoga Sol); también clienta del café |
+| `099 000 002` | Beto | Solo cliente, con saldo en 3 comercios (uno en $0): va al lado del cliente |
+| cualquier otro | — | Cliente sin saldo; no puede crear un comercio si su número no está habilitado (`ALLOWED_MERCHANT_PHONES` del backend) |
+
+Para probar un mensaje de verdad, ver "Ingreso real" en `docs/BACKEND.md` del
+backend (Twilio, con números verificados).
 
 ### 3. Levantar el frontend
 
@@ -53,30 +67,32 @@ npm install
 cp .env.example .env
 ```
 
-Abrí el archivo `.env` y pegá el id del comercio:
-
-```
-VITE_MERCHANT_ID=el-id-que-copiaste
-```
-
-(Las otras dos variables pueden quedar vacías: tienen valores por defecto.)
+Las dos variables del `.env` pueden quedar vacías: tienen valores por defecto.
 Después:
 
 ```bash
 npm run dev
 ```
 
-Abrí **http://localhost:5173** y elegí **Soy un comercio**. Arriba a la derecha
-tiene que aparecer el nombre de tu comercio. (La otra opción, **Soy cliente**,
-es el lado del cliente, que todavía se está armando.)
+Abrí **http://localhost:5173**. Es la pantalla de inicio: a un lado los lugares
+que están en Platita y al otro, entrar con tu celular. Según tus cuentas, la
+entrada te lleva sola al lado del **cliente**, a tu **comercio**, o te pregunta a
+cuál si tenés varios. Crear un comercio nuevo (Perfil → **Cambiar de cuenta o ver
+mis comercios** → **Sumar mi comercio**) solo lo pueden hacer los teléfonos que
+habilita el backend; si el tuyo no está, la pantalla lo avisa.
 
 ### 4. Probarlo
 
-1. Después de elegir **Soy un comercio**, en **Mostrador** escribí un teléfono (por ejemplo `099 123 456`). Si no
-   existe, **Crear cliente**.
-2. **Cargar saldo** → elegí $1.000 → mirá el bono → **Listo, confirmar**.
-3. Volvé al Mostrador, buscá el mismo teléfono y probá **Cobrar**.
-4. Mirá sus movimientos en **Clientes** → entrá a su ficha.
+1. Entrá con **`099 000 001`** (Ana) y elegí **Café de la Esquina**. En **Mostrador**
+   buscá un cliente del seed o escribí un teléfono nuevo y **Crear cliente**.
+2. **Cargar saldo** → elegí un monto → mirá el bono → **Listo, confirmar**. Probá
+   también **Cobrar**, **Ajuste**, y **Reactivar** (hay clientes que no vienen hace
+   más de 30 días, como Hugo en el Pilates de Carla).
+3. Mirá **Mi comercio** (descripción, local, horarios, "Aparecer en la app") y **Promos**.
+4. Para ver el otro lado, abrí **otra ventana de incógnito** (la sesión se guarda en
+   el navegador) y entrá con **`099 000 002`** (Beto): Lugares, Detalle, **Mis saldos**
+   y Perfil.
+5. Cambiá de cuenta con **Cambiar de cuenta** (arriba, en el área del comercio).
 
 ## Qué hace cada pantalla
 
@@ -104,7 +120,6 @@ es el lado del cliente, que todavía se está armando.)
 
 | Variable | Para qué | Si está vacía |
 |---|---|---|
-| `VITE_MERCHANT_ID` | El comercio con el que se trabaja. **Es la única obligatoria** mientras no haya login | La app avisa "Falta elegir el comercio" |
 | `VITE_API_URL` | Dónde está el backend | Usa `/api` (el proxy de desarrollo) |
 | `VITE_API_PROXY_TARGET` | Solo desarrollo: a qué backend reenvía `/api` | Usa `http://localhost:3001` |
 
@@ -125,8 +140,9 @@ abrila en el celular. Hacelo solo en una red de confianza.
 
 | Pasa esto | Probablemente |
 |---|---|
-| "Falta elegir el comercio" | Falta `VITE_MERCHANT_ID` en el `.env`, o no reiniciaste `npm run dev` después de ponerlo |
-| No aparece el nombre del comercio arriba | El backend no está corriendo, o el id no existe en tu base |
+| Al entrar vuelve siempre al inicio | La sesión venció o el backend la cerró: pedí un código de nuevo |
+| "Este comercio no es tuyo" | El comercio es de otra persona, o es uno anterior a los dueños y todavía no tiene (el backend lo asigna con `npm run db:assign-merchant`) |
+| No aparece el nombre del comercio arriba | El backend no está corriendo o no es de tu cuenta |
 | "No hay conexión con el servidor" | El backend no está corriendo en el puerto 3001 |
 | El backend dice que el puerto 3000 está ocupado | Usá `PORT=3001 npm run dev` en el backend |
 | La búsqueda por teléfono o el bono fallan | El backend está desactualizado: traé su última versión, corré `npx prisma migrate deploy` y reinicialo |

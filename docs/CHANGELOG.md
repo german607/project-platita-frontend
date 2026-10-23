@@ -401,3 +401,46 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 
 - Probado con un celular real: llegó el SMS (Twilio Verify, cuenta de prueba) y
   el ingreso funcionó de punta a punta.
+
+## 2026-10-22 — Pantalla de inicio nueva
+
+- La raíz ya no pregunta "¿Cómo querés entrar?". Sin sesión muestra, de un lado,
+  los **lugares que están en Platita** (`GET /places`, 6 tarjetas, sin saldos) y,
+  del otro, **entrar con el celular** (código por mensaje); en el celular primero
+  entrar y abajo los lugares. Un solo botón: la cuenta se crea sola la primera
+  vez, con una línea chica que lo aclara. Con sesión, va directo a Lugares.
+- El formulario de ingreso pasó a `components/FormularioIngreso.tsx` y se borró
+  la ruta `/cliente/ingreso`: sin sesión, el área del cliente manda al inicio.
+- El comercio entra por un enlace discreto "Soy un comercio" (sin cuenta, como
+  hasta ahora). Pedido al backend de **cuentas de comercio** en TODO §4.
+- `tsc` limpio, **251 tests**, build bien. Sin ver en el navegador.
+
+## 2026-10-22 — Cuentas de comercio: la entrada decide el área
+
+- **Dueños y permisos del backend** (rama `jeronimo/duenos-de-comercio-y-modo-mixto`):
+  todo lo del comercio exige sesión y que la persona sea la dueña. El front manda
+  `Authorization: Bearer` en todos los pedidos de `/merchants`, `/customers`,
+  `/bonus-rules` y `/locations` (`auth: true` en `lib/api/endpoints.ts`); un 401
+  `INVALID_SESSION` cierra la sesión y un 403 `FORBIDDEN` dice "Este comercio no es tuyo".
+- **Una sola entrada.** Al verificar el código, `GET /me` trae `{ user, merchants }`
+  y `lib/destino.ts` decide: sin comercios → cliente; uno → su mostrador; varios →
+  `/elegir` (se recuerda lo último elegido, `platita.ultima`). `/elegir` también
+  permite **sumar un comercio** (`POST /merchants`: queda como dueña). Desde el
+  Perfil y desde el comercio hay un enlace "Cambiar de cuenta".
+- **`VITE_MERCHANT_ID` eliminada**: el comercio activo vive en la sesión (`comercioId`)
+  y `useMerchantId()` lo lee de ahí. `lib/sesionCliente.tsx` pasó a `lib/sesion.tsx`
+  (la sesión es de la persona, no solo del cliente); "Cerrar sesión" es la ruta `/salir`
+  y sirve para las dos áreas. Se sacó el enlace "Soy un comercio" del inicio.
+- ⚠ **Rompe el área del comercio hasta mergear backend y front juntos.** `tsc` limpio,
+  **266 tests**. Sin probar contra el backend.
+
+## 2026-10-23 — Crear comercio solo para teléfonos habilitados
+
+- `GET /me` trae `canCreateMerchant`: `/elegir` muestra "Sumar mi comercio" solo si
+  es `true`; si no, avisa "Tu número todavía no está habilitado para crear un
+  comercio: escribinos para habilitarlo". El 403 `MERCHANT_CREATION_NOT_ALLOWED`
+  se muestra igual por si cambia. Los textos del inicio y del Perfil dejan de
+  prometer que cualquiera puede sumar un comercio.
+- README: guía con el seed del backend (`npm run db:seed`) y las cuentas de prueba
+  (`099 000 001` Ana, `099 000 003` Carla, `099 000 002` Beto, código `000000`).
+- `tsc` limpio, **268 tests**. Sin probar contra el backend.
