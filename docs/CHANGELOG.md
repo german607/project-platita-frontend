@@ -444,3 +444,13 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - README: guía con el seed del backend (`npm run db:seed`) y las cuentas de prueba
   (`099 000 001` Ana, `099 000 003` Carla, `099 000 002` Beto, código `000000`).
 - `tsc` limpio, **268 tests**. Sin probar contra el backend.
+
+## 2026-10-24 — Búsqueda de nombre
+
+- `docs/NOMBRE-DEL-PROYECTO.md`: resumen autocontenido del proyecto, de lo que gana
+  cada parte y de lo que tiene que cumplir el nombre, para pasarle a otras IAs (sin
+  candidatos propios, para no condicionar). `docs/NOMBRE-CANDIDATOS.md`: ocho
+  candidatos de Claude con sus riesgos (Yapa, Saldito, La Libreta, Sumá, Fiel,
+  Bonito, Barrio, Vecino), tres descartados por existir (Vuelve, Alcancía,
+  Chanchito), tabla para las ideas de otras IAs y lista de qué verificar
+  (dominio, redes, tiendas de apps, marca). Nada confirmado como libre.

@@ -105,6 +105,8 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** Hosting estático barato
 - [ ] **P2** Instalable en el celular (PWA)
 
+- [ ] **P1** **Elegir nombre definitivo** (Platita es provisional): resumen para otras IAs en [`docs/NOMBRE-DEL-PROYECTO.md`](docs/NOMBRE-DEL-PROYECTO.md), candidatos y qué verificar en [`docs/NOMBRE-CANDIDATOS.md`](docs/NOMBRE-CANDIDATOS.md). Después: una sola variable `VITE_APP_NAME` en el front (con valor por defecto) y lo mismo en el backend; renombrar repos/carpetas solo cuando esté decidido
+
 ## 7. Lado del cliente (web primero, mobile después)
 
 Decisiones del 2026-10-15 (resumen en `docs/STATE.md`). La web va a tener **dos áreas** que comparten la misma API, los helpers y el estilo: **comercio** (lo que ya existe) y **cliente**. Se arma primero en web para pulir flujos y estilo, y que la app mobile reutilice todo.
