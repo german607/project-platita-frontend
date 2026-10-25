@@ -105,7 +105,7 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** Hosting estático barato
 - [ ] **P2** Instalable en el celular (PWA)
 
-- [ ] **P1** **Elegir nombre definitivo** (Platita es provisional): resumen para otras IAs en [`docs/NOMBRE-DEL-PROYECTO.md`](docs/NOMBRE-DEL-PROYECTO.md), candidatos y qué verificar en [`docs/NOMBRE-CANDIDATOS.md`](docs/NOMBRE-CANDIDATOS.md). Después: una sola variable `VITE_APP_NAME` en el front (con valor por defecto) y lo mismo en el backend; renombrar repos/carpetas solo cuando esté decidido
+- [~] **P1** **Elegir nombre definitivo** (Platita era provisional). Mientras tanto la app se llama **Ombú** (nombre en clave: un árbol uruguayo) y sale de una sola variable, `VITE_APP_NAME` (por defecto `src/brand.ts`), 2026-10-24. Resumen para otras IAs en [`docs/NOMBRE-DEL-PROYECTO.md`](docs/NOMBRE-DEL-PROYECTO.md); ideas y cruce en [`docs/NOMBRE-CANDIDATOS.md`](docs/NOMBRE-CANDIDATOS.md) (a Jerónimo le suena bien *Queda/TeQueda*). Pendiente: verificar dominio, redes y marca de los finalistas; el backend también debería sacar el nombre de una variable (textos del SMS, consola `/dev`, base y contenedor); renombrar repos y carpetas (`project-platita-*`) y las claves técnicas (`platita.sesion`, `platita.ultima` del navegador: cambiarlas cierra las sesiones abiertas) solo cuando esté decidido
 
 ## 7. Lado del cliente (web primero, mobile después)
 
@@ -131,3 +131,8 @@ Reglas ya decididas: el cliente **solo mira** (no carga por su cuenta); un comer
 - **Varios locales:** un comercio puede tener más de uno y **lo único que cambia es la dirección** (se muestran varias ubicaciones). Hoy no es importante, pero el modelo y la pantalla quedan preparados para más de uno.
 - **Mapa:** un botón **"Cómo llegar"** que abre el mapa del celular con la dirección. Sin mapa propio ni coordenadas.
 - **Supuesto a confirmar:** los **horarios** son del comercio (uno solo), no de cada local; si más adelante cada local tiene los suyos, se mueven al local.
+
+## 8. Ideas para más adelante
+
+- [ ] **P2** **Promos que no dependan de la plata** (idea del 2026-10-24). Hoy una promo es "cargando $X te regalo $Y" y todo se mide en plata, con un sobrante de saldo. La idea es poder armar **paquetes por unidades o servicios**: por ejemplo, "pagás $1.000 y tenés **3 cortes**, y nada más" (no "el valor de tres cortes"), o "10 cafés", "4 clases". Implica un saldo en **unidades** (o varios saldos por comercio), canjearlas con "usar 1 corte" en lugar de cobrar un monto, y mostrar al cliente cuántas le quedan. Es un cambio de modelo en el backend (hoy todo es dinero en centésimos) y de las pantallas de Promos, Cargar, Cobrar y del cliente. Tenerlo presente al elegir el nombre: no atarlo a "plata" ni a "saldo"
+

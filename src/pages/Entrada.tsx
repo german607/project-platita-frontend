@@ -5,6 +5,7 @@ import { listPlaces } from "../lib/api/endpoints";
 import { categoryPlural } from "../lib/categories";
 import { useSesion } from "../lib/sesion";
 import { Destino } from "./Destino";
+import { config } from "../config";
 
 // Pantalla de inicio, sin sesión: de un lado los lugares que están en Platita
 // (la lista pública, sin saldos) y del otro, entrar con el celular. Con sesión,
@@ -13,14 +14,14 @@ import { Destino } from "./Destino";
 
 const PREVIEW = 6;
 
-function LugaresEnPlatita() {
+function LugaresDeLaApp() {
   const query = useQuery({ queryKey: ["places-home"], queryFn: () => listPlaces({ limit: PREVIEW }) });
   const places = query.data?.data ?? [];
 
   return (
     <section aria-labelledby="lugares-titulo" className="flex flex-col gap-4">
       <h2 id="lugares-titulo" className="font-titulo text-[24px] font-extrabold">
-        Lugares en Platita
+        {`Lugares en ${config.appName}`}
       </h2>
       {query.isPending ? (
         <p role="status" className="text-suave">
@@ -56,7 +57,7 @@ export function Entrada() {
   return (
     <main className="mx-auto max-w-[1000px] px-5 py-8 lg:py-14">
       <div className="mb-8 text-center lg:text-left">
-        <h1 className="font-titulo text-[40px] font-extrabold leading-none text-accion">platita</h1>
+        <h1 className="font-titulo text-[40px] font-extrabold leading-none text-accion">{config.appName}</h1>
         <p className="mt-2 text-suave">Saldo y promos en los comercios de tu barrio.</p>
       </div>
 
@@ -68,7 +69,7 @@ export function Entrada() {
             ¿Tenés un comercio? Entrá con tu celular: te llevamos a tu cuenta.
           </p>
         </div>
-        <LugaresEnPlatita />
+        <LugaresDeLaApp />
       </div>
     </main>
   );

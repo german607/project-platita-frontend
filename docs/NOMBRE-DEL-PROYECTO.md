@@ -42,6 +42,7 @@ extra** si carga (una "promo": por ejemplo, "cargando $1.000 te regalo $200").
   Nunca se suma un total entre comercios.
 - Hoy el cliente **solo mira** (saldos, promos, lugares). Más adelante podrá cargar
   saldo transfiriéndole directamente al comercio que elija.
+- **A futuro, las promos no van a depender solo de la plata**: además de "cargás $1.000 y te regalamos $200", habrá paquetes por unidades o servicios ("pagás $1.000 y tenés 3 cortes"). **El nombre no debería atarse a "plata", "saldo" ni a "extra de dinero"**: tiene que servir para "lo que te queda" en cualquier forma.
 - Se entra con el **número de celular** y un código que llega por mensaje: sin usuario
   ni contraseña.
 - Es un **mercado chico y de barrio**: la gente se conoce, el trato es cercano.

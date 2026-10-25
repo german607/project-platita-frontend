@@ -30,6 +30,17 @@ redes y marca antes de elegir.
 la cercanía con Yape), 2) **Saldito** (el más claro), 3) **La Libreta** (el más cálido,
 pero hay que cuidar el tema del fiado).
 
+## Nota de Jerónimo (2026-10-24)
+
+- Ningún nombre lo convenció del todo; **le suena bien *Queda / TeQueda*** ("¿cuánto te queda?").
+- Las listas se enfocaron mucho en el **sobrante de plata** ("de más", "yapa", "saldo a favor").
+  Más adelante habrá **promos por unidades o servicios** (por ejemplo, "pagás $1.000 y tenés
+  3 cortes", no el valor de tres cortes; ver `TODO.md` §8). **Un nombre atado a "plata", "saldo"
+  o "extra de dinero" se quedaría chico**: conviene uno que sirva para "lo que te queda" en
+  cualquier forma (plata, cortes, cafés, clases).
+- Por ahora la app se llama **Ombú** (nombre en clave, un árbol uruguayo) y se cambia con
+  `VITE_APP_NAME`. Esta información queda para cuando se retome la decisión.
+
 ## Cruce de las cuatro listas (2026-10-24)
 
 Se le pasó el mismo resumen a Grok, GPT y Gemini (no se anotó qué modelo exacto

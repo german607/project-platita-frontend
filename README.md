@@ -122,6 +122,7 @@ habilita el backend; si el tuyo no está, la pantalla lo avisa.
 |---|---|---|
 | `VITE_API_URL` | Dónde está el backend | Usa `/api` (el proxy de desarrollo) |
 | `VITE_API_PROXY_TARGET` | Solo desarrollo: a qué backend reenvía `/api` | Usa `http://localhost:3001` |
+| `VITE_APP_NAME` | El nombre de la app que se ve en pantalla y en la pestaña (provisional) | Usa `Ombú` |
 
 Vite lee el `.env` **solo al arrancar**: si lo cambiás, reiniciá `npm run dev`.
 

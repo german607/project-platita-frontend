@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { config } from "../config";
 import { ApiError } from "../lib/api/client";
 import { getAuthConfig, getMe, listPlaces } from "../lib/api/endpoints";
 import { routes } from "../lib/routes";
@@ -43,16 +44,25 @@ beforeEach(() => {
 });
 
 describe("Entrada (inicio)", () => {
-  it("muestra los lugares que están en Platita y el formulario para entrar", async () => {
+  it("muestra los lugares que están en la app y el formulario para entrar", async () => {
     mockPlaces.mockResolvedValue({ data: [place("m1", "Café Don Pedro"), place("m2", "Panadería La Espiga")], nextCursor: null });
     renderEntrada();
 
     expect(await screen.findByText("Café Don Pedro")).toBeInTheDocument();
     expect(screen.getByText("Panadería La Espiga")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Lugares en Platita" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: `Lugares en ${config.appName}` })).toBeInTheDocument();
     expect(screen.getByLabelText("Tu celular")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mandame el código" })).toBeInTheDocument();
     expect(screen.getByText("Si es tu primera vez, tu cuenta se crea sola.")).toBeInTheDocument();
+  });
+
+  it("el nombre que se muestra sale de la configuración, no está escrito a mano", async () => {
+    mockPlaces.mockResolvedValue({ data: [], nextCursor: null });
+    renderEntrada();
+
+    expect(screen.getByRole("heading", { level: 1, name: config.appName })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: `Entrá a ${config.appName}` })).toBeInTheDocument();
+    await screen.findByText("Pronto vas a ver acá los comercios de tu barrio.");
   });
 
   it("ya no pregunta si sos cliente o comercio: invita a entrar y avisa cómo sumar un comercio", async () => {

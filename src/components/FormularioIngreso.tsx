@@ -6,6 +6,7 @@ import { friendlyMessage } from "../lib/api/errors";
 import { getAuthConfig, requestCode, verifyCode } from "../lib/api/endpoints";
 import { formatUyPhone, normalizeUyPhone } from "../lib/phone";
 import { CODE_LENGTH, RESEND_SECONDS, useSesion } from "../lib/sesion";
+import { config } from "../config";
 
 // Formulario de entrada (en la pantalla de inicio) en dos pasos: celular → código de 6 dígitos que le llega
 // por mensaje (POST /auth/request-code y /auth/verify-code). Los límites y el
@@ -58,8 +59,8 @@ export function FormularioIngreso() {
   const codeRef = useRef<HTMLInputElement>(null);
 
   // El aviso "el código es 000000" solo aparece si el backend usa el proveedor de pruebas.
-  const config = useQuery({ queryKey: ["auth-config"], queryFn: getAuthConfig, retry: false, staleTime: Infinity });
-  const devCode = config.data?.devCode ?? null;
+  const authConfig = useQuery({ queryKey: ["auth-config"], queryFn: getAuthConfig, retry: false, staleTime: Infinity });
+  const devCode = authConfig.data?.devCode ?? null;
 
   const pedir = useMutation({
     mutationFn: (e164: string) => requestCode(e164),
@@ -118,7 +119,7 @@ export function FormularioIngreso() {
       {!phone ? (
         <form onSubmit={paso1} className="flex flex-col gap-5" noValidate>
           <div>
-            <h2 className="font-titulo text-[28px] font-extrabold">Entrá a Platita</h2>
+            <h2 className="font-titulo text-[28px] font-extrabold">Entrá a {config.appName}</h2>
             <p className="mt-1 text-suave">Ingresá tu celular y te mandamos un código para confirmar que sos vos.</p>
           </div>
           <label className="flex flex-col gap-2 font-extrabold">
@@ -199,7 +200,7 @@ export function FormularioIngreso() {
           {devCode && (
             <p className="text-center text-sm text-suave">
               {`Ingreso de prueba: el código es ${devCode}`}
-              {config.data?.realPhonesConfigured ? " (salvo números con verificación real)" : ""}.
+              {authConfig.data?.realPhonesConfigured ? " (salvo números con verificación real)" : ""}.
             </p>
           )}
         </form>

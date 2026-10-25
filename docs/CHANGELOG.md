@@ -462,3 +462,15 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   después **De Siempre**, **Queda**, **DeMás**, **Anotá** y **Saldito**. GPT avisa de
   competidores (Vuelvo, PuntosPro, Gastuki, Bargly) que no se pudieron confirmar.
   Nada verificado como libre todavía.
+
+## 2026-10-24 — Nombre provisional "Ombú" en una sola variable
+
+- El nombre de la app se muestra desde `config.appName` (`VITE_APP_NAME`, por defecto
+  `Ombú` en `src/brand.ts`): logo de los menús, inicio, "Entrá a …", "Lugares en …",
+  pantalla de elegir cuenta y título de la pestaña (`index.html` lo toma de la misma
+  variable al compilar). Cambiar el nombre es tocar un valor. Siguen igual, a propósito,
+  las claves técnicas del navegador (`platita.sesion`, `platita.ultima`) y los nombres de
+  repos y carpetas.
+- Idea registrada: **promos por unidades o servicios** (TODO §8), y se anotó en los
+  documentos de nombre para que no se ate a "plata". Jerónimo: le suena bien *Queda/TeQueda*.
+- `tsc` limpio, **270 tests**, build bien (con y sin `VITE_APP_NAME`).
