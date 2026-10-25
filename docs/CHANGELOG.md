@@ -454,3 +454,11 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   Bonito, Barrio, Vecino), tres descartados por existir (Vuelve, Alcancía,
   Chanchito), tabla para las ideas de otras IAs y lista de qué verificar
   (dominio, redes, tiendas de apps, marca). Nada confirmado como libre.
+
+## 2026-10-24 — Nombre: respuestas de otras IAs
+
+- `docs/NOMBRE-CANDIDATOS.md`: se guardaron las listas de Grok, GPT y Gemini y se
+  sumó un cruce. La familia **Yapa/Yapita/La Yapa** la propusieron las cuatro IAs;
+  después **De Siempre**, **Queda**, **DeMás**, **Anotá** y **Saldito**. GPT avisa de
+  competidores (Vuelvo, PuntosPro, Gastuki, Bargly) que no se pudieron confirmar.
+  Nada verificado como libre todavía.
