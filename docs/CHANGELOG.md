@@ -485,3 +485,11 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   (no puede abrir puertos locales): revisar a ojo.
 - La rama de trabajo pasó a llamarse `jeronimo/ombu-logo-y-despliegue` (la anterior se
   borró en GitHub tras el merge). `tsc` limpio, 270 tests, build bien.
+
+## 2026-10-25 — Plan de despliegue
+
+- `docs/DEPLOY.md`: Neon (base nueva, cadena directa) + Render (backend, Node 22, build con
+  `prisma migrate deploy`, `/health`, `TRUST_PROXY`) + Cloudflare Pages (front, `dist`,
+  `VITE_API_URL` dentro del build). Tabla de variables, prueba de punta a punta, demo vs.
+  real con Twilio, qué esperar del plan gratis y texto de pedidos al backend (confirmar
+  comandos, `render.yaml`, freno de seguridad en el seed, `APP_NAME`). Nada desplegado todavía.

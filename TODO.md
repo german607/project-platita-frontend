@@ -95,6 +95,8 @@ en el frontend: se piden y se registran acá hasta que existan.
 
 ## 6. Despliegue
 
+- [ ] **P1** **Primer despliegue gratis** (Neon + Render + Cloudflare Pages, como iwant): plan paso a paso, variables y pedidos al backend en [`docs/DEPLOY.md`](docs/DEPLOY.md). Antes: mergear front y backend juntos, y decidir si es demo (código de prueba, datos de mentira) o real (Twilio fuera de la cuenta de prueba)
+
 - [ ] **P1** Vulnerabilidades de `npm audit` (analizadas el 2026-10-13: 15 en total, 2 críticas y 6 altas; el 2026-10-18 bajaron a 7, todas de desarrollo y de la cadena de `tailwindcss`, pero **solo 2 moderadas llegan a producción**). Plan, en este orden:
   - [x] `react-router-dom` 6.30 → 7.18.4 (2026-10-18). Cambió una cosa: cerrar sesión ahora es la ruta `/cliente/salir` (con router 7, borrar la sesión y navegar a la vez mandaba al ingreso en vez de a la entrada)
   - [x] `vite` 5 → 6.4.4 (2026-10-18): apaga la alta de `vite` y las de `esbuild`. `vitest` 2 → 3.2 (por ahora)
