@@ -1,7 +1,7 @@
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import { routes } from "../lib/routes";
 import { useSesion } from "../lib/sesion";
-import { config } from "../config";
+import { Marca } from "./Logo";
 
 // Navegación del cliente: menú inferior en el celular y menú arriba en la web
 // (contenido de hasta 900px). Sin sesión, se manda a la pantalla de inicio, que es donde se entra.
@@ -25,7 +25,8 @@ export function LayoutCliente() {
     <div className="min-h-screen">
       <header className="hidden bg-tinta lg:block">
         <div className="mx-auto flex max-w-[900px] items-center gap-6 px-9 py-3.5">
-          <span className="font-titulo text-[24px] font-extrabold text-rosa">{config.appName}</span>
+          <span className="font-titulo text-[24px] font-extrabold text-rosa">
+            <Marca /></span>
           <nav aria-label="Principal" className="flex gap-2">
             {items.map((item) => (
               <NavLink key={item.to} to={item.to} className={topLink}>
@@ -37,7 +38,8 @@ export function LayoutCliente() {
       </header>
 
       <div className="mx-auto max-w-[900px] px-5 pb-28 pt-[22px] lg:px-9 lg:pb-10 lg:pt-8">
-        <span className="mb-4 block font-titulo text-[22px] font-extrabold text-accion lg:hidden">{config.appName}</span>
+        <span className="mb-4 block font-titulo text-[22px] font-extrabold text-accion lg:hidden">
+          <Marca /></span>
         <main>
           <Outlet />
         </main>

@@ -3,7 +3,7 @@ import { Link, NavLink, Navigate, Outlet } from "react-router-dom";
 import { getMerchant } from "../lib/api/endpoints";
 import { routes } from "../lib/routes";
 import { useSesion } from "../lib/sesion";
-import { config } from "../config";
+import { Marca } from "./Logo";
 
 // Navegación como en design/: menú oscuro lateral de 200px en pantallas
 // grandes, y menú inferior en el celular (donde se usa en el mostrador).
@@ -60,7 +60,9 @@ export function Layout() {
   return (
     <div className="min-h-screen">
       <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[200px] lg:flex-col lg:gap-1.5 lg:bg-tinta lg:px-3.5 lg:py-[22px]">
-        <p className="px-2.5 pb-[18px] font-titulo text-[26px] font-extrabold text-rosa">{config.appName}</p>
+        <p className="px-2.5 pb-[18px] font-titulo text-[26px] font-extrabold text-rosa">
+          <Marca />
+        </p>
         <nav className="flex flex-col gap-1.5" aria-label="Principal">
           {items.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end} className={sideLink}>
@@ -77,7 +79,9 @@ export function Layout() {
 
       <div className="mx-auto max-w-[900px] px-5 pb-28 pt-[22px] lg:ml-[200px] lg:px-9 lg:pb-8 lg:pt-7">
         <header className="mb-5 flex items-center justify-between">
-          <span className="font-titulo text-[22px] font-extrabold text-accion lg:hidden">{config.appName}</span>
+          <span className="font-titulo text-[22px] font-extrabold text-accion lg:hidden">
+            <Marca />
+          </span>
           <span className="flex items-center gap-3 lg:ml-auto">
             <MerchantChip merchantId={merchantId} />
             <Link to={routes.elegir} className="text-sm font-extrabold text-suave underline">

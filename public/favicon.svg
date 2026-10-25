@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Logo provisional">
+  <circle cx="24" cy="24" r="22" fill="#F6ECD9" stroke="#2F6B4A" stroke-width="2.5"/>
+  <g fill="#2F6B4A">
+    <ellipse cx="24" cy="20" rx="14" ry="8"/>
+    <circle cx="14.5" cy="21" r="5"/>
+    <circle cx="33.5" cy="21" r="5"/>
+    <circle cx="19" cy="14.5" r="6"/>
+    <circle cx="29" cy="14.5" r="6"/>
+    <circle cx="24" cy="12.5" r="6"/>
+    <path d="M21 25 C21 30 20 33 16.5 36.5 L31.5 36.5 C28 33 27 30 27 25 Z"/>
+  </g>
+</svg>

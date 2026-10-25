@@ -474,3 +474,14 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - Idea registrada: **promos por unidades o servicios** (TODO §8), y se anotó en los
   documentos de nombre para que no se ate a "plata". Jerónimo: le suena bien *Queda/TeQueda*.
 - `tsc` limpio, **270 tests**, build bien (con y sin `VITE_APP_NAME`).
+
+## 2026-10-25 — Logo provisional
+
+- `components/Logo.tsx`: un círculo con un árbol (copa ancha, como un ombú) adentro, en
+  SVG que toma el color del texto. `Marca` junta el logo con el nombre de la app y se usa
+  en el inicio, los dos menús y la pantalla de elegir cuenta; `public/favicon.svg` es el
+  ícono de la pestaña. Es solo para marcar dónde va el logo: cuando haya uno de verdad,
+  se cambian esos dos archivos. No se pudo ver en pantalla desde el entorno de la IA
+  (no puede abrir puertos locales): revisar a ojo.
+- La rama de trabajo pasó a llamarse `jeronimo/ombu-logo-y-despliegue` (la anterior se
+  borró en GitHub tras el merge). `tsc` limpio, 270 tests, build bien.

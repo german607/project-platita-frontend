@@ -6,6 +6,7 @@ import { categoryPlural } from "../lib/categories";
 import { useSesion } from "../lib/sesion";
 import { Destino } from "./Destino";
 import { config } from "../config";
+import { Marca } from "../components/Logo";
 
 // Pantalla de inicio, sin sesión: de un lado los lugares que están en Platita
 // (la lista pública, sin saldos) y del otro, entrar con el celular. Con sesión,
@@ -57,7 +58,9 @@ export function Entrada() {
   return (
     <main className="mx-auto max-w-[1000px] px-5 py-8 lg:py-14">
       <div className="mb-8 text-center lg:text-left">
-        <h1 className="font-titulo text-[40px] font-extrabold leading-none text-accion">{config.appName}</h1>
+        <h1 className="font-titulo text-[40px] font-extrabold leading-none text-accion">
+          <Marca />
+        </h1>
         <p className="mt-2 text-suave">Saldo y promos en los comercios de tu barrio.</p>
       </div>
 
