@@ -177,6 +177,9 @@ export interface AuthConfig {
   channel: string;
   devCode: string | null;
   realPhonesConfigured: boolean;
+  // Nombre configurado en el backend (APP_NAME). El front muestra el suyo
+  // (VITE_APP_NAME); este no se usa porque el valor por defecto del backend es otro.
+  appName?: string;
 }
 
 // Lo que devuelve GET /me: la persona y los comercios de los que es dueña. Con eso

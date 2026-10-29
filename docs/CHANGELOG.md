@@ -444,3 +444,72 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
 - README: guía con el seed del backend (`npm run db:seed`) y las cuentas de prueba
   (`099 000 001` Ana, `099 000 003` Carla, `099 000 002` Beto, código `000000`).
 - `tsc` limpio, **268 tests**. Sin probar contra el backend.
+
+## 2026-10-24 — Búsqueda de nombre
+
+- `docs/NOMBRE-DEL-PROYECTO.md`: resumen autocontenido del proyecto, de lo que gana
+  cada parte y de lo que tiene que cumplir el nombre, para pasarle a otras IAs (sin
+  candidatos propios, para no condicionar). `docs/NOMBRE-CANDIDATOS.md`: ocho
+  candidatos de Claude con sus riesgos (Yapa, Saldito, La Libreta, Sumá, Fiel,
+  Bonito, Barrio, Vecino), tres descartados por existir (Vuelve, Alcancía,
+  Chanchito), tabla para las ideas de otras IAs y lista de qué verificar
+  (dominio, redes, tiendas de apps, marca). Nada confirmado como libre.
+
+## 2026-10-24 — Nombre: respuestas de otras IAs
+
+- `docs/NOMBRE-CANDIDATOS.md`: se guardaron las listas de Grok, GPT y Gemini y se
+  sumó un cruce. La familia **Yapa/Yapita/La Yapa** la propusieron las cuatro IAs;
+  después **De Siempre**, **Queda**, **DeMás**, **Anotá** y **Saldito**. GPT avisa de
+  competidores (Vuelvo, PuntosPro, Gastuki, Bargly) que no se pudieron confirmar.
+  Nada verificado como libre todavía.
+
+## 2026-10-24 — Nombre provisional "Ombú" en una sola variable
+
+- El nombre de la app se muestra desde `config.appName` (`VITE_APP_NAME`, por defecto
+  `Ombú` en `src/brand.ts`): logo de los menús, inicio, "Entrá a …", "Lugares en …",
+  pantalla de elegir cuenta y título de la pestaña (`index.html` lo toma de la misma
+  variable al compilar). Cambiar el nombre es tocar un valor. Siguen igual, a propósito,
+  las claves técnicas del navegador (`platita.sesion`, `platita.ultima`) y los nombres de
+  repos y carpetas.
+- Idea registrada: **promos por unidades o servicios** (TODO §8), y se anotó en los
+  documentos de nombre para que no se ate a "plata". Jerónimo: le suena bien *Queda/TeQueda*.
+- `tsc` limpio, **270 tests**, build bien (con y sin `VITE_APP_NAME`).
+
+## 2026-10-25 — Logo provisional
+
+- `components/Logo.tsx`: un círculo con un árbol (copa ancha, como un ombú) adentro, en
+  SVG que toma el color del texto. `Marca` junta el logo con el nombre de la app y se usa
+  en el inicio, los dos menús y la pantalla de elegir cuenta; `public/favicon.svg` es el
+  ícono de la pestaña. Es solo para marcar dónde va el logo: cuando haya uno de verdad,
+  se cambian esos dos archivos. No se pudo ver en pantalla desde el entorno de la IA
+  (no puede abrir puertos locales): revisar a ojo.
+- La rama de trabajo pasó a llamarse `jeronimo/ombu-logo-y-despliegue` (la anterior se
+  borró en GitHub tras el merge). `tsc` limpio, 270 tests, build bien.
+
+## 2026-10-25 — Plan de despliegue
+
+- `docs/DEPLOY.md`: Neon (base nueva, cadena directa) + Render (backend, Node 22, build con
+  `prisma migrate deploy`, `/health`, `TRUST_PROXY`) + Cloudflare Pages (front, `dist`,
+  `VITE_API_URL` dentro del build). Tabla de variables, prueba de punta a punta, demo vs.
+  real con Twilio, qué esperar del plan gratis y texto de pedidos al backend (confirmar
+  comandos, `render.yaml`, freno de seguridad en el seed, `APP_NAME`). Nada desplegado todavía.
+
+## 2026-10-29 — Servidor que despierta, y Neon creado
+
+- Respuesta del backend a los pedidos de `DEPLOY.md`: comandos de Render correctos
+  (build con `scripts/render-build.sh`, que reintenta la migración; start `npm start`,
+  `NODE_VERSION=22`), `render.yaml` (free, Ohio, `/health`), `db:seed` y `db:reset-seed`
+  se niegan con `NODE_ENV=production` y piden `--yes` sobre una base remota, variable
+  `APP_NAME` (hasta 30 caracteres, por defecto `Platita`; `GET /auth/config` devuelve
+  `appName`), y con Neon dormido responde `503` `DATABASE_UNAVAILABLE` con `Retry-After: 2`.
+- Front, a pedido del backend: timeout de 60 s en cada pedido (`TIMEOUT`), hasta 2
+  reintentos de un GET sin respuesta o de cualquier `503` (un POST sin respuesta no se
+  repite: podría duplicar una carga), y aviso "Despertando el servidor…" cuando un pedido
+  pasa los 4 s (`src/lib/api/client.ts`, `servidor.ts`, `components/AvisoServidor.tsx`).
+  React Query ya no reintenta lo que `api` reintentó. `AuthConfig` acepta `appName` pero
+  no se usa: el front muestra `VITE_APP_NAME` (el backend trae `Platita` por defecto).
+  `tsc` limpio, 276 tests (6 nuevos en `resiliencia.test.tsx`).
+- Neon: proyecto `ombu` creado (AWS US East 2 Ohio, solo Postgres). La cadena de conexión
+  quedó escrita en una conversación, así que se decidió resetear la contraseña del rol y
+  usar la nueva solo en Render; se usa sin `channel_binding=require` (no confirmado que
+  Prisma lo soporte).

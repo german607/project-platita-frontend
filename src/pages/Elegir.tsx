@@ -7,6 +7,7 @@ import { createMerchant, getMe } from "../lib/api/endpoints";
 import { friendlyMessage } from "../lib/api/errors";
 import { routes } from "../lib/routes";
 import { recordarCuenta, useSesion } from "../lib/sesion";
+import { Marca } from "../components/Logo";
 
 // A qué cuenta entrar: el área del cliente o uno de los comercios de la persona.
 // También es donde se suma un comercio nuevo (POST /merchants: queda como dueña),
@@ -40,7 +41,9 @@ export function Elegir() {
 
   return (
     <main className="mx-auto flex max-w-md flex-col gap-6 px-5 py-10">
-      <h1 className="font-titulo text-[32px] font-extrabold text-accion">platita</h1>
+      <h1 className="font-titulo text-[32px] font-extrabold text-accion">
+        <Marca />
+      </h1>
       <h2 className="font-titulo text-[26px] font-extrabold">¿A dónde querés entrar?</h2>
 
       {me.isPending ? (

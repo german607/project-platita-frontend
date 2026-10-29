@@ -70,6 +70,8 @@ Se leen solo en `src/config.ts`. Para trabajar en local, crear un `.env`
 VITE_API_URL=/api
 # Solo desarrollo: a qué backend reenvía Vite las llamadas a /api.
 VITE_API_PROXY_TARGET=http://localhost:3001
+# Nombre provisional que se muestra en pantalla (logo, título, textos). Por defecto: Ombú.
+VITE_APP_NAME=
 ```
 
 El `.env.example` commiteado lista las variables sin valores; los

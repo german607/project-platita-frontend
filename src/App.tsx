@@ -1,7 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AvisoServidor } from "./components/AvisoServidor";
 import { Layout } from "./components/Layout";
 import { LayoutCliente } from "./components/LayoutCliente";
+import { ApiError } from "./lib/api/client";
 import { SesionProvider } from "./lib/sesion";
 import { Ajuste } from "./pages/Ajuste";
 import { CargarSaldo } from "./pages/CargarSaldo";
@@ -24,8 +26,8 @@ import { Salir } from "./pages/Salir";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    // Un reintento alcanza: si falla dos veces, se le muestra el error a la persona.
-    queries: { retry: 1 },
+    // Un reintento alcanza. Sin respuesta o con 503 ya reintentó `api` (servidor despertando).
+    queries: { retry: (n, e) => n < 1 && !(e instanceof ApiError && (e.status === 0 || e.status === 503)) },
     // Una carga o un cobro nunca se reintenta solo (podría duplicar un movimiento).
     mutations: { retry: false },
   },
@@ -35,6 +37,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <SesionProvider>
+        <AvisoServidor />
         <BrowserRouter>
           <Routes>
             {/* Pantalla de inicio: los lugares y la entrada. */}

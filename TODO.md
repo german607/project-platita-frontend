@@ -95,6 +95,14 @@ en el frontend: se piden y se registran acá hasta que existan.
 
 ## 6. Despliegue
 
+- [ ] **P1** **Primer despliegue gratis** (Neon + Render + Cloudflare Pages, como iwant): plan paso a paso, variables y pedidos al backend en [`docs/DEPLOY.md`](docs/DEPLOY.md). Antes: mergear front y backend juntos, y decidir si es demo (código de prueba, datos de mentira) o real (Twilio fuera de la cuenta de prueba)
+  - [x] Front preparado para el servidor que duerme: timeout 60 s, reintentos y aviso "Despertando el servidor…" (2026-10-29)
+  - [x] Neon: proyecto `ombu` creado (2026-10-29); falta resetear la contraseña del rol (la cadena se pegó en un chat) y guardar la nueva
+  - [ ] Render: **New → Blueprint** con el repo del backend (`render.yaml`), completar las variables vacías
+  - [ ] Cloudflare Pages con `VITE_API_URL`; después `CORS_ORIGINS` en Render
+  - [ ] Prueba de punta a punta (lista en `docs/DEPLOY.md`)
+  - [ ] Decidir si el nombre sale del backend (`APP_NAME=Ombú` + usar `appName` de `/auth/config`) o solo del front
+
 - [ ] **P1** Vulnerabilidades de `npm audit` (analizadas el 2026-10-13: 15 en total, 2 críticas y 6 altas; el 2026-10-18 bajaron a 7, todas de desarrollo y de la cadena de `tailwindcss`, pero **solo 2 moderadas llegan a producción**). Plan, en este orden:
   - [x] `react-router-dom` 6.30 → 7.18.4 (2026-10-18). Cambió una cosa: cerrar sesión ahora es la ruta `/cliente/salir` (con router 7, borrar la sesión y navegar a la vez mandaba al ingreso en vez de a la entrada)
   - [x] `vite` 5 → 6.4.4 (2026-10-18): apaga la alta de `vite` y las de `esbuild`. `vitest` 2 → 3.2 (por ahora)
@@ -104,6 +112,8 @@ en el frontend: se piden y se registran acá hasta que existan.
 - [ ] **P1** CI: lint, typecheck y tests
 - [ ] **P1** Hosting estático barato
 - [ ] **P2** Instalable en el celular (PWA)
+
+- [~] **P1** **Elegir nombre definitivo** (Platita era provisional). Mientras tanto la app se llama **Ombú** (nombre en clave: un árbol uruguayo) y sale de una sola variable, `VITE_APP_NAME` (por defecto `src/brand.ts`), 2026-10-24. Resumen para otras IAs en [`docs/NOMBRE-DEL-PROYECTO.md`](docs/NOMBRE-DEL-PROYECTO.md); ideas y cruce en [`docs/NOMBRE-CANDIDATOS.md`](docs/NOMBRE-CANDIDATOS.md) (a Jerónimo le suena bien *Queda/TeQueda*). Pendiente: verificar dominio, redes y marca de los finalistas; el backend también debería sacar el nombre de una variable (textos del SMS, consola `/dev`, base y contenedor); renombrar repos y carpetas (`project-platita-*`) y las claves técnicas (`platita.sesion`, `platita.ultima` del navegador: cambiarlas cierra las sesiones abiertas) solo cuando esté decidido
 
 ## 7. Lado del cliente (web primero, mobile después)
 
@@ -129,3 +139,8 @@ Reglas ya decididas: el cliente **solo mira** (no carga por su cuenta); un comer
 - **Varios locales:** un comercio puede tener más de uno y **lo único que cambia es la dirección** (se muestran varias ubicaciones). Hoy no es importante, pero el modelo y la pantalla quedan preparados para más de uno.
 - **Mapa:** un botón **"Cómo llegar"** que abre el mapa del celular con la dirección. Sin mapa propio ni coordenadas.
 - **Supuesto a confirmar:** los **horarios** son del comercio (uno solo), no de cada local; si más adelante cada local tiene los suyos, se mueven al local.
+
+## 8. Ideas para más adelante
+
+- [ ] **P2** **Promos que no dependan de la plata** (idea del 2026-10-24). Hoy una promo es "cargando $X te regalo $Y" y todo se mide en plata, con un sobrante de saldo. La idea es poder armar **paquetes por unidades o servicios**: por ejemplo, "pagás $1.000 y tenés **3 cortes**, y nada más" (no "el valor de tres cortes"), o "10 cafés", "4 clases". Implica un saldo en **unidades** (o varios saldos por comercio), canjearlas con "usar 1 corte" en lugar de cobrar un monto, y mostrar al cliente cuántas le quedan. Es un cambio de modelo en el backend (hoy todo es dinero en centésimos) y de las pantallas de Promos, Cargar, Cobrar y del cliente. Tenerlo presente al elegir el nombre: no atarlo a "plata" ni a "saldo"
+
