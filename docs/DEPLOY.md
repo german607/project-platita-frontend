@@ -4,16 +4,16 @@ Plan para tener la app corriendo en internet **sin costo**, con el mismo esquema
 usó iwant (ver `../iwant/docs/DEPLOYMENT.md`). Escrito el 2026-10-25. Los pasos en
 los paneles los hace una persona; acá queda qué clickear y qué valores poner.
 
-> **Estado:** todavía **no hay nada desplegado**. Este documento es el plan. Cuando se
+> **Estado:** Neon creado; el resto sin desplegar (ver "Estado actual"). Cuando se
 > haga, hay que dejar acá las URLs reales y actualizar "Estado actual" al final.
 
 ## Qué va a dónde
 
-| Pieza | Servicio | Plan | Para qué |
-|---|---|---|---|
-| Base de datos | **Neon** (Postgres) | Free | Un **proyecto nuevo**, aparte de iwant |
+| Pieza         | Servicio                 | Plan | Para qué                                         |
+| ------------- | ------------------------ | ---- | ------------------------------------------------ |
+| Base de datos | **Neon** (Postgres)      | Free | Un **proyecto nuevo**, aparte de iwant           |
 | Backend (API) | **Render** (Web Service) | Free | Corre `node dist/server.js` del repo del backend |
-| Frontend | **Cloudflare Pages** | Free | Sirve los archivos estáticos de `dist/` |
+| Frontend      | **Cloudflare Pages**     | Free | Sirve los archivos estáticos de `dist/`          |
 
 Cada pieza es un proyecto **propio**: no se pisa con iwant. Lo único compartido son los
 topes de la cuenta (ver "Límites").
@@ -34,62 +34,69 @@ topes de la cuenta (ver "Límites").
 ## Orden de trabajo
 
 ### 0. Antes de empezar
+
 - Mergear a la rama principal los cambios del front **y** del backend juntos (el front ya
   manda el token y el backend ya exige dueños). Render y Pages despliegan de una rama:
   usar la que se decida como "estable" (`main`).
 - Decidir si es **demo con datos de mentira** o **uso real** (ver "Códigos de ingreso").
 
 ### 1. Neon: la base
+
 1. Entrar a Neon → **New project**. Nombre: el que sea (por ejemplo `ombu`). Región: la
    misma que se use en Render (recomendado: **AWS US East 2 (Ohio)** y en Render **Ohio**,
    para que backend y base queden cerca; confirmar que existen en los paneles).
 2. En **Connection details**, copiar la cadena **directa** (la que **no** tiene
    `-pooler` en el host) y comprobar que termina en `?sslmode=require`. Esa es la
-   `DATABASE_URL`. (Prisma migra mejor sin el *pooler*; con la carga de una prueba no hace
+   `DATABASE_URL`. Sin `&channel_binding=require` (no está confirmado que Prisma lo
+   soporte; si trae eso, sacarlo). (Prisma migra mejor sin el _pooler_; con la carga de una prueba no hace
    falta.)
 3. **No** pegarla en ningún archivo del repo: va solo en el panel de Render.
 
 ### 2. Render: el backend
-1. Render → **New → Web Service** → conectar el repo `project-platita-backend`, rama estable.
-2. Configuración:
-   - **Runtime:** Node. **Root Directory:** (vacío, el backend está en la raíz de su repo).
-   - **Build Command:** `npm ci --include=dev && npx prisma generate && npm run build && npx prisma migrate deploy`
-     (`--include=dev` porque Render pone `NODE_ENV=production` y sin eso no instala
-     `tsc` ni `prisma`; `migrate deploy` aplica las migraciones pendientes en cada deploy).
-   - **Start Command:** `npm start`
-   - **Health Check Path:** `/health`
-   - **Plan:** Free. **Node:** 22 (variable `NODE_VERSION=22`, o un archivo `.nvmrc`; el repo
-     ya tiene `.nvmrc` con 22).
-3. **Variables de entorno** (panel *Environment*; nunca en el repo):
 
-   | Variable | Valor |
-   |---|---|
-   | `NODE_ENV` | `production` |
-   | `DATABASE_URL` | la cadena directa de Neon |
-   | `TRUST_PROXY` | `true` (Render va delante: sin esto los límites por IP no sirven) |
-   | `CORS_ORIGINS` | la URL de Cloudflare Pages, **sin barra final** (se completa en el paso 4) |
-   | `OTP_PROVIDER` | `twilio` (uso real) o `dev` (demo con datos de mentira; ver más abajo) |
-   | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VERIFY_SID` | las de Twilio (con `twilio`, o para `OTP_REAL_PHONES`) |
-   | `ALLOWED_MERCHANT_PHONES` | los teléfonos que pueden crear comercios, separados por coma |
-   | `ALLOW_INSECURE_AUTH` | `true` **solo** si `OTP_PROVIDER=dev` (demo) |
-   | `OTP_REAL_PHONES` | (opcional, modo mixto con `dev`) tus teléfonos que se verifican de verdad |
+1. Render → **New → Blueprint** → conectar el repo `project-platita-backend`, rama estable.
+   Lee el `render.yaml` de la raíz (servicio free, Ohio, `healthCheckPath: /health`, build
+   `bash scripts/render-build.sh`, start `npm start`, `NODE_VERSION=22`). Si se prefiere
+   crear el servicio a mano, usar esos mismos comandos.
+2. El Blueprint pide las variables que están sin valor en el yaml: completarlas en el panel.
+3. **Variables de entorno** (panel _Environment_; nunca en el repo):
+
+   | Variable                                                       | Valor                                                                      |
+   | -------------------------------------------------------------- | -------------------------------------------------------------------------- |
+   | `NODE_ENV`                                                     | `production`                                                               |
+   | `DATABASE_URL`                                                 | la cadena directa de Neon                                                  |
+   | `TRUST_PROXY`                                                  | `true` (Render va delante: sin esto los límites por IP no sirven)          |
+   | `CORS_ORIGINS`                                                 | la URL de Cloudflare Pages, **sin barra final** (se completa en el paso 4) |
+   | `OTP_PROVIDER`                                                 | `twilio` (uso real) o `dev` (demo con datos de mentira; ver más abajo)     |
+   | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VERIFY_SID` | las de Twilio (con `twilio`, o para `OTP_REAL_PHONES`)                     |
+   | `ALLOWED_MERCHANT_PHONES`                                      | los teléfonos que pueden crear comercios, separados por coma               |
+   | `ALLOW_INSECURE_AUTH`                                          | `true` **solo** si `OTP_PROVIDER=dev` (demo)                               |
+   | `APP_NAME`                                                     | (opcional) nombre de la app, hasta 30 caracteres (por defecto `Platita`)    |
+   | `OTP_REAL_PHONES`                                              | (opcional, modo mixto con `dev`) tus teléfonos que se verifican de verdad  |
 
    `PORT` la pone Render sola.
+
 4. **Create Web Service.** El primer deploy tarda unos minutos. Al terminar, probar
    `https://<servicio>.onrender.com/health` → `{"ok":true}`.
 
 ### 3. Datos de ejemplo (opcional, solo para demo)
+
 Desde **tu computadora**, con el backend clonado y la cadena de Neon (no la subas a ningún lado):
 
 ```bash
-DATABASE_URL="postgresql://…neon…?sslmode=require" npm run db:seed
+DATABASE_URL="postgresql://…neon…?sslmode=require" npm run db:seed -- --yes
 ```
+
+(`--yes` lo pide el backend sobre una base que no es local; el seed se niega siempre si
+`NODE_ENV=production`, así que correrlo **sin** esa variable en tu terminal. Confirmar el
+comando exacto en `docs/DESPLIEGUE.md` del backend.)
 
 Esto carga los comercios y personas del seed (cuentas de prueba en el README del front).
 **Cuidado:** `npm run db:reset-seed` vacía toda la base; no usarlo en una base con datos
 reales.
 
 ### 4. Cloudflare Pages: el front
+
 1. Cloudflare → **Workers & Pages → Create → Pages → Connect to Git** → repo `project-platita-frontend`, rama de producción (`main`).
 2. Configuración de build:
    - **Framework preset:** None (o Vite).
@@ -106,6 +113,7 @@ reales.
    devuelve `index.html` para rutas desconocidas (modo SPA) mientras no exista un `404.html`.
 
 ### 5. Probar de punta a punta
+
 - [ ] `…/health` del backend responde `{"ok":true}`.
 - [ ] La pantalla de inicio carga y muestra los lugares (con seed) o "Pronto vas a ver…".
 - [ ] Entrar con un celular y su código; con el seed, `099 000 002` (Beto) y `000000` si es demo.
@@ -128,10 +136,11 @@ reales.
 ## Qué esperar del plan gratis
 
 - **Render duerme el backend a los 15 minutos** sin uso: el primer pedido tarda unos
-  30 a 50 segundos. Neon además duerme a los 5 minutos (despierta en menos de un segundo).
-  Es normal en las pruebas; la app muestra "Buscando lugares…" / "Mandando…" mientras espera.
+  30 a 50 segundos. Neon además duerme a los 5 minutos (despierta en menos de un segundo,
+  pero la primera consulta puede fallar: el backend responde `503` y reintenta).
+  El front espera hasta 60 s, reintenta y, pasados 4 s, muestra "Despertando el servidor…".
 - **Cada `git push` a la rama de producción redespliega** solo, en Render y en Pages. Pages
-  gasta un *build* de los gratis en cada push (también en las ramas de PR: tiene *previews*).
+  gasta un _build_ de los gratis en cada push (también en las ramas de PR: tiene _previews_).
 - **Límites (confirmar en los paneles):** Neon free, 100 proyectos, 1 GB cada uno y 20 GB en
   total; Pages, unos 500 builds por mes; Render free comparte las horas mensuales entre
   los servicios gratuitos de la cuenta.
@@ -141,9 +150,10 @@ reales.
 > Hola. Vamos a desplegar el backend en **Render (free) + Neon**, y el front en Cloudflare
 > Pages. Revisé el repo y casi todo está: `build`, `start`, `/health`, `TRUST_PROXY`,
 > `CORS_ORIGINS`, `prisma migrate deploy`. Pedidos chicos:
-> 1. **Confirmar o corregir** el *Build Command* que voy a usar en Render:
+>
+> 1. **Confirmar o corregir** el _Build Command_ que voy a usar en Render:
 >    `npm ci --include=dev && npx prisma generate && npm run build && npx prisma migrate deploy`
->    y el *Start Command* `npm start` (con Node 22 y `NODE_ENV=production`).
+>    y el _Start Command_ `npm start` (con Node 22 y `NODE_ENV=production`).
 > 2. **Un `render.yaml`** (Blueprint) en la raíz con el servicio web gratis, esos comandos,
 >    `healthCheckPath: /health` y las variables de entorno **sin valores** (para completar en
 >    el panel), así se crea con un clic y queda documentado.
@@ -151,12 +161,19 @@ reales.
 >    `NODE_ENV=production` (que no se pueda vaciar una base real por error) y que pidan una
 >    confirmación explícita (por ejemplo `--yes`) si la `DATABASE_URL` no es de `localhost`.
 > 4. **El nombre de la app en una variable** (`APP_NAME`, hoy el proyecto se llama "Ombú"
->    en clave): para el texto del mensaje si es posible, la consola `/dev`, el nombre de la
+>    en clave, no es que se vaya a llamar asi): para el texto del mensaje si es posible, la consola `/dev`, el nombre de la
 >    base y del contenedor.
 > 5. **Contar qué pasa con la conexión de Neon** al despertar (primer pedido tras dormir):
 >    si Prisma necesita reintentos o un `connect_timeout` en la `DATABASE_URL`, decir cuáles.
-> Si algo no coincide con esto, avisame con lo exacto.
+>    Si algo no coincide con esto, avisame con lo exacto.
 
 ## Estado actual
 
-- Nada desplegado. URLs (completar cuando existan): front `…`, backend `…`, Neon `…`.
+- Neon: proyecto `ombu` creado el 2026-10-29 (AWS US East 2 Ohio, solo Postgres). Falta
+  resetear la contraseña del rol (la cadena se pegó en un chat).
+- Backend listo para Render (`render.yaml`, `scripts/render-build.sh`, freno del seed,
+  `APP_NAME`, `503` con `Retry-After` al despertar Neon); detalle en `docs/DESPLIEGUE.md`
+  del backend.
+- Front listo para el servidor que duerme (timeout 60 s, reintentos, aviso).
+- Render y Cloudflare Pages: sin crear. URLs (completar cuando existan): front `…`,
+  backend `…`.

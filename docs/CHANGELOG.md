@@ -493,3 +493,23 @@ regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
   `VITE_API_URL` dentro del build). Tabla de variables, prueba de punta a punta, demo vs.
   real con Twilio, qué esperar del plan gratis y texto de pedidos al backend (confirmar
   comandos, `render.yaml`, freno de seguridad en el seed, `APP_NAME`). Nada desplegado todavía.
+
+## 2026-10-29 — Servidor que despierta, y Neon creado
+
+- Respuesta del backend a los pedidos de `DEPLOY.md`: comandos de Render correctos
+  (build con `scripts/render-build.sh`, que reintenta la migración; start `npm start`,
+  `NODE_VERSION=22`), `render.yaml` (free, Ohio, `/health`), `db:seed` y `db:reset-seed`
+  se niegan con `NODE_ENV=production` y piden `--yes` sobre una base remota, variable
+  `APP_NAME` (hasta 30 caracteres, por defecto `Platita`; `GET /auth/config` devuelve
+  `appName`), y con Neon dormido responde `503` `DATABASE_UNAVAILABLE` con `Retry-After: 2`.
+- Front, a pedido del backend: timeout de 60 s en cada pedido (`TIMEOUT`), hasta 2
+  reintentos de un GET sin respuesta o de cualquier `503` (un POST sin respuesta no se
+  repite: podría duplicar una carga), y aviso "Despertando el servidor…" cuando un pedido
+  pasa los 4 s (`src/lib/api/client.ts`, `servidor.ts`, `components/AvisoServidor.tsx`).
+  React Query ya no reintenta lo que `api` reintentó. `AuthConfig` acepta `appName` pero
+  no se usa: el front muestra `VITE_APP_NAME` (el backend trae `Platita` por defecto).
+  `tsc` limpio, 276 tests (6 nuevos en `resiliencia.test.tsx`).
+- Neon: proyecto `ombu` creado (AWS US East 2 Ohio, solo Postgres). La cadena de conexión
+  quedó escrita en una conversación, así que se decidió resetear la contraseña del rol y
+  usar la nueva solo en Render; se usa sin `channel_binding=require` (no confirmado que
+  Prisma lo soporte).

@@ -56,7 +56,8 @@ describe("api", () => {
 
   it("distingue la falta de conexión", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
-    const error = await api("/health").catch((e) => e);
+    // Una escritura no se repite sin respuesta (podría duplicarse): falla de una.
+    const error = await api("/customers/c1/charges", { method: "POST", body: { amount: 400 } }).catch((e) => e);
     expect(error).toMatchObject({ status: 0, code: "NETWORK_ERROR" });
   });
 });

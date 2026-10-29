@@ -1,6 +1,6 @@
 # Estado actual — Platita frontend
 
-> Última actualización: 2026-10-13. Esto es una foto del presente, se
+> Última actualización: 2026-10-29. Esto es una foto del presente, se
 > reescribe cuando deja de ser cierto — no es historial (eso es
 > [`CHANGELOG.md`](CHANGELOG.md)). Ver también [`../TODO.md`](../TODO.md)
 > y la regla de mantenimiento en [`AGENTS.md`](AGENTS.md).
@@ -53,6 +53,21 @@ Trabajo en la rama `jeronimo/base-frontend`; sin commits todavía.
   días. Faltan piezas del diseño que dependen del backend (ver "Pedidos al
   backend" en el [`TODO`](../TODO.md)). Ver [`../TODO.md`](../TODO.md) §2 y
   §3.
+
+## Despliegue (en curso, 2026-10-29)
+
+Plan en [`DEPLOY.md`](DEPLOY.md). **Todavía no hay nada publicado.** Hecho: proyecto
+`ombu` creado en Neon (Ohio, solo Postgres; la cadena de conexión está guardada fuera
+del repo). El backend dejó listo `render.yaml`, `scripts/render-build.sh`, el freno del
+seed y `APP_NAME` en su rama de despliegue (ya mergeada, según el backend).
+Falta: crear el servicio en Render (Blueprint), el proyecto en Cloudflare Pages, poner
+`CORS_ORIGINS` y la prueba de punta a punta.
+
+En el front, para el servidor gratis que duerme (hecho el 2026-10-29, `tsc` limpio y 276
+tests): `api()` corta a los 60 s (`TIMEOUT`), reintenta hasta 2 veces un GET sin respuesta
+y cualquier pedido con `503` (respeta `Retry-After`), y no repite una escritura sin
+respuesta. Si un pedido tarda más de 4 s aparece "Despertando el servidor…"
+(`AvisoServidor`). No probado todavía contra Render de verdad.
 
 ## Próximo hito: el lado del cliente (decidido el 2026-10-15)
 

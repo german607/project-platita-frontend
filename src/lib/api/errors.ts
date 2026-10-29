@@ -7,6 +7,10 @@ export function friendlyMessage(error: unknown): string {
     switch (error.code) {
       case "NETWORK_ERROR":
         return "No hay conexión con el servidor. Revisá tu internet y probá de nuevo.";
+      case "TIMEOUT":
+        return "El servidor tardó demasiado. Probá de nuevo en un momento.";
+      case "DATABASE_UNAVAILABLE":
+        return "El servidor se está despertando. Probá de nuevo en unos segundos.";
       case "INSUFFICIENT_BALANCE":
         return "El cliente no tiene saldo suficiente.";
       case "FORBIDDEN":
